@@ -12,7 +12,6 @@ import ScrollToTop from "./components/ScrollToTop";
 import Checkout from "./pages/Checkout";
 import { Routes, Route, Navigate } from "react-router-dom";
 
-import { Routes, Route } from "react-router-dom";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
