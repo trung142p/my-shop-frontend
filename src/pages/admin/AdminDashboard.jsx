@@ -5,71 +5,129 @@ import { useNavigate } from "react-router-dom";
 
 function AdminDashboard() {
     const [refresh, setRefresh] = useState(false);
+    const [activeTab, setActiveTab] = useState("products"); // Điều hướng nội bộ
     const navigate = useNavigate();
 
     const reloadProducts = () => {
         setRefresh(!refresh);
     };
 
-    // Hàm Đăng xuất
     const handleLogout = () => {
-        localStorage.removeItem("adminToken"); // Xóa "chốt bảo vệ"
-        navigate("/admin/login"); // Đá về trang login
+        localStorage.removeItem("adminToken");
+        navigate("/admin/login");
     };
 
-    return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Header của Dashboard */}
-            <div className="bg-white shadow-sm mb-8">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="text-pink-600">⚙️</span> Quản lý hệ thống
-                    </h1>
+    // Thẻ thống kê nhanh (Stats)
+    const StatCard = ({ title, value, icon, color }) => (
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            <div>
+                <p className="text-gray-500 text-sm font-medium">{title}</p>
+                <p className="text-2xl font-bold mt-1">{value}</p>
+            </div>
+            <div className={`p-3 rounded-lg ${color} text-white text-xl`}>
+                {icon}
+            </div>
+        </div>
+    );
 
-                    <div className="flex gap-4">
-                        <button
-                            onClick={() => navigate("/")}
-                            className="text-gray-600 hover:text-pink-600 transition-colors"
-                        >
-                            Xem trang chủ
-                        </button>
-                        <button
-                            onClick={handleLogout}
-                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-all shadow-md"
-                        >
-                            Đăng xuất
-                        </button>
-                    </div>
+    return (
+        <div className="min-h-screen bg-[#f8f9fa] flex">
+
+            {/* --- SIDEBAR TRÁI --- */}
+            <div className="w-64 bg-slate-900 text-white hidden md:flex flex-col sticky top-0 h-screen">
+                <div className="p-6 border-b border-slate-800">
+                    <h2 className="text-xl font-bold tracking-tighter flex items-center gap-2">
+                        <span className="bg-pink-600 p-1 rounded">🛒</span> MY SHOP CMS
+                    </h2>
+                </div>
+
+                <nav className="flex-1 p-4 space-y-2 mt-4">
+                    <button
+                        onClick={() => setActiveTab("products")}
+                        className={`w-full text-left px-4 py-3 rounded-lg transition-all flex items-center gap-3 ${activeTab === 'products' ? 'bg-pink-600 text-white' : 'hover:bg-slate-800 text-gray-400'}`}
+                    >
+                        📦 Sản phẩm
+                    </button>
+                    <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 text-gray-400 flex items-center gap-3">
+                        📑 Đơn hàng (Soon)
+                    </button>
+                    <button className="w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 text-gray-400 flex items-center gap-3">
+                        👥 Khách hàng
+                    </button>
+                </nav>
+
+                <div className="p-4 border-t border-slate-800">
+                    <button
+                        onClick={handleLogout}
+                        className="w-full px-4 py-2 bg-slate-800 hover:bg-red-600 transition-colors rounded-lg text-sm font-medium"
+                    >
+                        Đăng xuất
+                    </button>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 pb-20">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* --- NỘI DUNG CHÍNH --- */}
+            <div className="flex-1 flex flex-col">
 
-                    {/* Cột trái: Form thêm sản phẩm */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white p-6 rounded-xl shadow-md sticky top-24">
-                            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-                                Thêm sản phẩm mới
-                            </h2>
-                            <ProductEditor onCreated={reloadProducts} />
-                        </div>
+                {/* Topbar */}
+                <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 sticky top-0 z-10">
+                    <div className="flex items-center gap-4">
+                        <span className="text-gray-400">Trang quản trị</span>
+                        <span className="text-gray-300">/</span>
+                        <span className="font-medium text-gray-800">Quản lý sản phẩm</span>
+                    </div>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="text-sm font-medium text-pink-600 hover:bg-pink-50 px-4 py-2 rounded-full transition-all border border-pink-100"
+                    >
+                        👁️ Xem website
+                    </button>
+                </header>
+
+                <main className="p-8">
+                    {/* Stats Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <StatCard title="Tổng sản phẩm" value="24" icon="📦" color="bg-blue-500" />
+                        <StatCard title="Đơn hàng mới" value="12" icon="🔥" color="bg-orange-500" />
+                        <StatCard title="Doanh thu (Ước tính)" value="15.2M" icon="💰" color="bg-green-500" />
                     </div>
 
-                    {/* Cột phải: Danh sách sản phẩm hiện có */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white p-6 rounded-xl shadow-md">
-                            <h2 className="text-xl font-semibold mb-4 border-b pb-2">
-                                Danh sách sản phẩm đang bán
-                            </h2>
-                            <div className="overflow-hidden">
-                                {/* Truyền key để khi reloadProducts chạy, ProductList sẽ tải lại dữ liệu */}
-                                <ProductList key={refresh} admin={true} />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Form thêm sản phẩm */}
+                        <div className="lg:col-span-4">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-6 border-b border-gray-50">
+                                    <h3 className="font-bold text-gray-800">Tạo sản phẩm mới</h3>
+                                    <p className="text-xs text-gray-400 mt-1">Điền thông tin chi tiết cho sản phẩm</p>
+                                </div>
+                                <div className="p-6">
+                                    <ProductEditor onCreated={reloadProducts} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Danh sách sản phẩm */}
+                        <div className="lg:col-span-8">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                                <div className="p-6 border-b border-gray-50 flex justify-between items-center">
+                                    <div>
+                                        <h3 className="font-bold text-gray-800">Danh mục kho hàng</h3>
+                                        <p className="text-xs text-gray-400 mt-1">Quản lý và chỉnh sửa sản phẩm hiện có</p>
+                                    </div>
+                                    <button
+                                        onClick={reloadProducts}
+                                        className="text-gray-400 hover:text-pink-600 transition-all"
+                                    >
+                                        🔄 Làm mới
+                                    </button>
+                                </div>
+                                <div className="p-6">
+                                    <ProductList key={refresh} admin={true} />
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                </div>
+                </main>
             </div>
         </div>
     );
