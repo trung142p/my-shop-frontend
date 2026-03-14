@@ -87,9 +87,9 @@ function AdminDashboard() {
                 <main className="p-8">
                     {/* Stats Section */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                        <StatCard title="Tổng sản phẩm" value="24" icon="📦" color="bg-blue-500" />
-                        <StatCard title="Đơn hàng mới" value="12" icon="🔥" color="bg-orange-500" />
-                        <StatCard title="Doanh thu (Ước tính)" value="15.2M" icon="💰" color="bg-green-500" />
+                        <StatCard title="Tổng sản phẩm" value="" icon="📦" color="bg-blue-500" />
+                        <StatCard title="Đơn hàng mới" value="" icon="🔥" color="bg-orange-500" />
+                        <StatCard title="Doanh thu (Ước tính)" value="0" icon="💰" color="bg-green-500" />
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
