@@ -94,7 +94,12 @@ function Checkout() {
                 <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
                     {selectedItems.map(item => (
                         <div key={item.id} className="flex gap-4 items-center border-b pb-3">
-                            <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded-lg border" />
+                            <img
+                                src={item.coverImage || item.image}
+                                alt={item.name}
+                                className="w-16 h-16 object-cover rounded-lg border bg-gray-50"
+                                onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
+                            />
                             <div className="flex-1">
                                 <p className="text-sm font-medium line-clamp-1">{item.name}</p>
                                 <p className="text-xs text-gray-400">Số lượng: {item.quantity}</p>
