@@ -3,6 +3,16 @@ import ProductList from "../../components/ProductList";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const [orders, setOrders] = useState([]);
+
+useEffect(() => {
+    const fetchOrders = async () => {
+        const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/orders");
+        setOrders(res.data);
+    };
+    if (activeTab === "orders") fetchOrders();
+}, [activeTab]);
+
 function AdminDashboard() {
     const [refresh, setRefresh] = useState(false);
     const [activeTab, setActiveTab] = useState("products"); // Điều hướng nội bộ
@@ -68,6 +78,40 @@ function AdminDashboard() {
 
             {/* --- NỘI DUNG CHÍNH --- */}
             <div className="flex-1 flex flex-col">
+                {activeTab === "orders" && (
+                    <div className="bg-white rounded-xl shadow overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 border-b">
+                                <tr>
+                                    <th className="p-4">STT</th>
+                                    <th className="p-4">Mã đơn</th>
+                                    <th className="p-4">Địa chỉ</th>
+                                    <th className="p-4">Tổng giá</th>
+                                    <th className="p-4">Phương thức</th>
+                                    <th className="p-4">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {orders.map((order, index) => (
+                                    <tr key={order.id} className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setSelectedOrder(order)}>
+                                        <td className="p-4">{index + 1}</td>
+                                        <td className="p-4 font-bold">{order.order_code}</td>
+                                        <td className="p-4 text-sm">{order.customer_info.province}</td>
+                                        <td className="p-4 font-bold text-pink-600">{order.total_price.toLocaleString()}₫</td>
+                                        <td className="p-4">
+                                            <span className={`font-bold ${order.payment_method === 'COD' ? 'text-yellow-600' : 'text-blue-600'}`}>
+                                                {order.payment_method}
+                                            </span>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className="bg-gray-100 px-2 py-1 rounded text-xs">{order.status}</span>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
                 {/* Topbar */}
                 <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 sticky top-0 z-10">

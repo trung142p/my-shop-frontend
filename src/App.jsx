@@ -11,7 +11,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ScrollToTop from "./components/ScrollToTop";
 import Checkout from "./pages/Checkout";
 import { Routes, Route, Navigate } from "react-router-dom";
-
+import Checkout from "./pages/OrderComplete";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
@@ -51,6 +51,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/complete" element={<OrderComplete />} />
 
           {/* --- BƯỚC 2: BAO BỌC DASHBOARD BẰNG PROTECTED ROUTE --- */}
           <Route
