@@ -41,18 +41,30 @@ function AdminDashboard() {
     return (
         <div className="min-h-screen bg-[#f8f9fa] flex">
             {/* SIDEBAR */}
-            <div className="w-64 bg-slate-900 text-white hidden md:flex flex-col sticky top-0 h-screen">
-                <div className="p-6 border-b border-slate-800">
-                    <h2 className="text-xl font-bold tracking-tighter flex items-center gap-2">🛒 MY SHOP CMS</h2>
+            <aside className="w-64 bg-slate-900 min-h-screen flex flex-col shadow-xl">
+                <div className="p-6 text-white text-2xl font-black italic tracking-widest border-b border-slate-800">
+                    ADMIN<span className="text-pink-500">CP</span>
                 </div>
                 <nav className="flex-1 p-4 space-y-2 mt-4">
-                    <button onClick={() => setActiveTab("products")} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 ${activeTab === 'products' ? 'bg-pink-600 text-white' : 'text-gray-400'}`}>📦 Sản phẩm</button>
-                    <button onClick={() => setActiveTab("orders")} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 ${activeTab === 'orders' ? 'bg-pink-600 text-white' : 'text-gray-400'}`}>📑 Đơn hàng</button>
+                    <button
+                        onClick={() => setActiveTab("products")}
+                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${activeTab === 'products' ? 'bg-pink-600 text-white shadow-lg shadow-pink-900/20' : 'text-gray-400 hover:bg-slate-800'}`}
+                    >
+                        📦 Sản phẩm
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("orders")}
+                        className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${activeTab === 'orders' ? 'bg-pink-600 text-white shadow-lg shadow-pink-900/20' : 'text-gray-400 hover:bg-slate-800'}`}
+                    >
+                        📑 Đơn hàng
+                    </button>
+                    <div className="pt-10">
+                        <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition">
+                            🚪 Đăng xuất
+                        </button>
+                    </div>
                 </nav>
-                <div className="p-4 border-t border-slate-800">
-                    <button onClick={handleLogout} className="w-full px-4 py-2 bg-slate-800 hover:bg-red-600 rounded-lg text-sm">Đăng xuất</button>
-                </div>
-            </div>
+            </aside>
 
             {/* MAIN CONTENT */}
             <div className="flex-1 flex flex-col">
