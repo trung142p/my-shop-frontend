@@ -1,26 +1,22 @@
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import Categories from "./components/Categories"; // Mới thêm
+import Categories from "./components/Categories";
 import ProductList from "./components/ProductList";
-import Footer from "./components/Footer"; // Bạn nhớ tạo file Footer từ code trước tôi gửi nhé
-import FloatingContact from "./components/FloatingContact"; // Mới thêm
+import Footer from "./components/Footer";
+import FloatingContact from "./components/FloatingContact";
 import Cart from "./pages/Cart";
 import ProductDetail from "./pages/ProductDetail";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ScrollToTop from "./components/ScrollToTop";
 import Checkout from "./pages/Checkout";
+import OrderComplete from "./pages/OrderComplete"; // ĐỔI TÊN Ở ĐÂY
+import BankTransfer from "./pages/BankTransfer"; // Thêm trang chuyển khoản
 import { Routes, Route, Navigate } from "react-router-dom";
-import Checkout from "./pages/OrderComplete";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
-
-  if (!token) {
-    // Nếu không có token, chuyển hướng về trang login ngay
-    return <Navigate to="/admin/login" replace />;
-  }
-
+  if (!token) return <Navigate to="/admin/login" replace />;
   return children;
 };
 
@@ -30,11 +26,8 @@ function App() {
       <ScrollToTop />
       <Navbar />
       <FloatingContact />
-
       <div className="pt-16">
         <Routes>
-          <Route path="/checkout" element={<Checkout />} />
-
           <Route path="/" element={
             <>
               <Hero />
@@ -47,13 +40,12 @@ function App() {
               </div>
             </>
           } />
-
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/complete" element={<OrderComplete />} />
-
-          {/* --- BƯỚC 2: BAO BỌC DASHBOARD BẰNG PROTECTED ROUTE --- */}
+          <Route path="/bank-transfer" element={<BankTransfer />} />
           <Route
             path="/admin/dashboard"
             element={
@@ -64,7 +56,6 @@ function App() {
           />
         </Routes>
       </div>
-
       <Footer />
     </div>
   );
