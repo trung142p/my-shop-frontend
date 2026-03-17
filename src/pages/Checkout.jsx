@@ -29,26 +29,39 @@ function Checkout() {
 
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
+        if (!info.district) {
+            alert("Vui lòng chọn Quận/Huyện!");
+            return;
+        }
+
+        const finalPrice = info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice;
+
+        // Cấu trúc dữ liệu phải khớp chính xác với Backend và Database
         const orderData = {
-            order_code: orderCode,
-            customer_info: info,
+            order_code: `ORD-${Math.floor(100000 + Math.random() * 900000)}`, // Tạo mã đơn ngẫu nhiên
+            customer_info: {
+                name: info.name,
+                phone: info.phone,
+                email: info.email,
+                province: info.province,
+                district: info.district,
+                addressDetail: info.addressDetail
+            },
             items: selectedItems,
-            total_price: info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice,
+            total_price: finalPrice,
             payment_method: info.paymentMethod
         };
 
         try {
-            // Gửi dữ liệu lên Server
-            await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
-            clearCart();
-            if (info.paymentMethod === "COD") {
-                navigate("/complete", { state: { orderCode, items: selectedItems } });
-            } else {
-                navigate("/bank-transfer", { state: { orderData } });
+            const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
+            if (res.data.success) {
+                alert("🎉 Đặt hàng thành công!");
+                clearCart();
+                navigate("/");
             }
         } catch (err) {
             console.error(err);
-            alert("Lỗi kết nối server! Vui lòng kiểm tra lại Backend.");
+            alert("Lỗi kết nối server! " + (err.response?.data?.error || ""));
         }
     };
 
