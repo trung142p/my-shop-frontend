@@ -29,16 +29,9 @@ function Checkout() {
 
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
-        if (!info.district) {
-            alert("Vui lòng chọn Quận/Huyện!");
-            return;
-        }
 
-        const finalPrice = info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice;
-
-        // Cấu trúc dữ liệu phải khớp chính xác với Backend và Database
         const orderData = {
-            order_code: `ORD-${Math.floor(100000 + Math.random() * 900000)}`, // Tạo mã đơn ngẫu nhiên
+            order_code: `ORD-${Date.now()}`, // Dùng thời gian để không bao giờ trùng mã
             customer_info: {
                 name: info.name,
                 phone: info.phone,
@@ -48,20 +41,19 @@ function Checkout() {
                 addressDetail: info.addressDetail
             },
             items: selectedItems,
-            total_price: finalPrice,
+            total_price: info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice,
             payment_method: info.paymentMethod
         };
 
         try {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
             if (res.data.success) {
-                alert("🎉 Đặt hàng thành công!");
+                alert("Đặt hàng thành công!");
                 clearCart();
                 navigate("/");
             }
         } catch (err) {
-            console.error(err);
-            alert("Lỗi kết nối server! " + (err.response?.data?.error || ""));
+            alert("Lỗi: " + (err.response?.data?.message || "Kết nối thất bại"));
         }
     };
 
@@ -111,7 +103,7 @@ function Checkout() {
                                 src={item.coverImage || item.image}
                                 alt={item.name}
                                 className="w-16 h-16 object-cover rounded-lg border bg-gray-50"
-                                onError={(e) => { e.target.src = "https://via.placeholder.com/150"; }}
+                                onError={(e) => { e.target.src = "https://placehold.co/150"; }}
                             />
                             <div className="flex-1">
                                 <p className="text-sm font-medium line-clamp-1">{item.name}</p>
