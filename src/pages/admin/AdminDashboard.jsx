@@ -10,9 +10,15 @@ function AdminDashboard() {
     const [activeTab, setActiveTab] = useState("products");
     const [orders, setOrders] = useState([]);
     const [selectedOrder, setSelectedOrder] = useState(null);
+    const [editProduct, setEditProduct] = useState(null); // Quản lý sản phẩm đang được chọn để sửa
+
     const navigate = useNavigate();
 
-    const reloadData = () => setRefresh(!refresh);
+    // Hàm làm mới dữ liệu và reset form
+    const reloadData = () => {
+        setRefresh(!refresh);
+        setEditProduct(null);
+    };
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -66,8 +72,26 @@ function AdminDashboard() {
 
                     {activeTab === "products" ? (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            <div className="lg:col-span-4"><ProductEditor onCreated={reloadData} /></div>
-                            <div className="lg:col-span-8"><ProductList key={refresh} admin={true} /></div>
+                            {/* CỘT TRÁI: Form thêm/sửa sản phẩm */}
+                            <div className="lg:col-span-4">
+                                <ProductEditor
+                                    onCreated={reloadData}
+                                    editProduct={editProduct}
+                                    setEditProduct={setEditProduct}
+                                />
+                            </div>
+                            {/* CỘT PHẢI: Danh sách sản phẩm */}
+                            <div className="lg:col-span-8">
+                                <ProductList
+                                    key={refresh}
+                                    admin={true}
+                                    onEdit={(product) => {
+                                        setEditProduct(product);
+                                        // Cuộn lên đầu trang để admin thấy form sửa
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
+                                />
+                            </div>
                         </div>
                     ) : (
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
