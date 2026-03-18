@@ -8,21 +8,17 @@ function OrderDetail({ order, onClose, onUpdate }) {
     if (!order) return null;
 
     const handleUpdateStatus = async (field, value) => {
-        if (isUpdating) return; // Nếu đang chạy thì không cho bấm tiếp
+        const targetUrl = `https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`;
+        console.log("Đang gọi tới:", targetUrl);
 
-        setIsUpdating(true); // Bắt đầu loading
         try {
-            await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`, {
-                [field]: value
-            });
-
+            const res = await axios.patch(targetUrl, { [field]: value });
+            console.log("Kết quả Server trả về:", res.data);
             onUpdate();
-            alert("Cập nhật thành công!");
+            alert("Thành công!");
         } catch (err) {
-            console.error(err);
-            alert("Lỗi khi cập nhật: " + (err.response?.data?.message || err.message));
-        } finally {
-            setIsUpdating(false); // Kết thúc loading dù thành công hay thất bại
+            console.error("LỖI CHI TIẾT:", err.response); // Xem cái này ở Console trình duyệt
+            alert("Lỗi 404: Kiểm tra lại URL trong Console!");
         }
     };
 
