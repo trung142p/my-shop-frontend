@@ -12,16 +12,7 @@ function AdminDashboard() {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const navigate = useNavigate();
 
-    const reloadData = () => {
-        setRefresh(!refresh);
-        setEditingProduct(null); // Reset form sau khi sửa xong
-    };
-
-    // Hàm khi bấm vào sản phẩm trong ProductList
-    const handleEditProduct = (product) => {
-        setEditingProduct(product);
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn lên đầu để sửa
-    };
+    const reloadData = () => setRefresh(!refresh);
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -38,13 +29,6 @@ function AdminDashboard() {
     const handleLogout = () => {
         localStorage.removeItem("adminToken");
         navigate("/admin/login");
-    };
-
-    // Thống kê Pro hơn
-    const stats = {
-        total: orders.length,
-        revenue: orders.filter(o => o.payment_status === "Đã thanh toán").reduce((sum, o) => sum + (o.total_price || 0), 0),
-        pending: orders.filter(o => o.status === "Chờ xác nhận").length
     };
 
     return (
