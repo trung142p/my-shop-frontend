@@ -30,8 +30,14 @@ function Checkout() {
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
 
+        // Ràng buộc chọn tỉnh thành
+        if (!info.province || !info.district) {
+            alert("Vui lòng chọn đầy đủ Tỉnh/Thành và Quận/Huyện!");
+            return;
+        }
+
         const orderData = {
-            order_code: `ORD-${Date.now()}`, // Dùng thời gian để không bao giờ trùng mã
+            order_code: `ORD-${Date.now()}`,
             customer_info: {
                 name: info.name,
                 phone: info.phone,
@@ -46,14 +52,19 @@ function Checkout() {
         };
 
         try {
+            // Gửi tới link Render chính xác
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
+
             if (res.data.success) {
-                alert("Đặt hàng thành công!");
+                alert("🎉 Đặt hàng thành công!");
                 clearCart();
                 navigate("/");
             }
         } catch (err) {
-            alert("Lỗi: " + (err.response?.data?.message || "Kết nối thất bại"));
+            console.error("Lỗi:", err);
+            // Hiển thị chi tiết lỗi từ server trả về
+            const msg = err.response?.data?.message || "Kết nối server thất bại!";
+            alert("Lỗi đặt hàng: " + msg);
         }
     };
 
