@@ -1,42 +1,72 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Gel bôi trơn"];
+const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lot sexy", "Gel bôi trơn"];
 
 function ProductEditor({ onCreated, editProduct, setEditProduct }) {
-    const [formData, setFormData] = useState({ name: "", price: "", category: categories[0], image: "", images: [], description: "" });
+    const [formData, setFormData] = useState({ name: "", price: "", category: categories[0], brand: "", material: "", function: "", size: "", description: "" });
+    const [mainImage, setMainImage] = useState(null);
+    const [subImages, setSubImages] = useState([]);
 
     useEffect(() => {
-        if (editProduct) setFormData({ ...editProduct, images: Array.isArray(editProduct.images) ? editProduct.images : [] });
-        else setFormData({ name: "", price: "", category: categories[0], image: "", images: [], description: "" });
-    }, [editProduct]);
+        if (editData) {
+            setFormData({
+                ...editData,
+                images: Array.isArray(editData.images) ? editData.images : []
+            });
+        } else {
+            setFormData({ name: "", price: "", description: "", category: "", image: "", images: [] });
+        }
+    }, [editData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const url = editProduct
-                ? `https://my-shop-api-p7kz.onrender.com/api/products/${editProduct.id}`
-                : "https://my-shop-api-p7kz.onrender.com/api/products";
-
-            await (editProduct ? axios.put(url, formData) : axios.post(url, formData));
-            alert("Thành công!");
-            setEditProduct(null);
+            if (editData) {
+                // Gọi API PUT/PATCH để cập nhật
+                await axios.put(`https://my-shop-api-p7kz.onrender.com/api/products/${editData.id}`, formData);
+                alert("Cập nhật thành công!");
+            } else {
+                // Gọi API POST để thêm mới
+                await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", formData);
+                alert("Đăng sản phẩm thành công!");
+            }
             onCreated();
         } catch (err) { alert("Lỗi xử lý!"); }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow-md space-y-4">
-            <h3 className="font-bold border-b pb-2">{editProduct ? "SỬA SẢN PHẨM" : "THÊM MỚI"}</h3>
-            <input className="w-full border p-2 rounded" placeholder="Tên SP" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} required />
-            <input className="w-full border p-2 rounded" type="number" placeholder="Giá" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} required />
-            <select className="w-full border p-2 rounded" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                {categories.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <input className="w-full border p-2 rounded" placeholder="URL Ảnh chính" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
-            <textarea className="w-full border p-2 rounded" placeholder="Mô tả" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
-            <button type="submit" className="w-full bg-slate-900 text-white p-3 rounded font-bold uppercase tracking-wider">Lưu lại</button>
-            {editProduct && <button onClick={() => setEditProduct(null)} className="w-full text-gray-500 text-sm">Hủy bỏ</button>}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input className="border p-2 rounded" placeholder="Tên sản phẩm" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+            <input className="border p-2 rounded" placeholder="Giá" type="number" value={formData.price} onChange={e => setFormData({ ...formData, price: e.target.value })} />
+
+            {/* MỤC ẢNH ĐẠI DIỆN */}
+            <div className="col-span-1">
+                <label className="text-xs font-bold">Ảnh đại diện (Single):</label>
+                <input className="w-full border p-2 rounded" placeholder="URL Image" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+            </div>
+
+            {/* MỤC ẢNH CHI TIẾT */}
+            <div className="col-span-1">
+                <label className="text-xs font-bold">Ảnh chi tiết (Nhiều ảnh - cách nhau bởi dấu phẩy):</label>
+                <input
+                    className="w-full border p-2 rounded"
+                    placeholder="URL1, URL2, URL3..."
+                    value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
+                    onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })}
+                />
+            </div>
+
+            <textarea className="col-span-2 border p-2 rounded" placeholder="Mô tả" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
+
+            <div className="col-span-2 flex gap-2">
+                <button type="submit" className="flex-1 bg-slate-900 text-white p-3 rounded-xl font-bold uppercase">
+                    {editData ? "💾 Lưu sản phẩm" : "🚀 Đăng sản phẩm"}
+                </button>
+                {editData && (
+                    <button type="button" onClick={onCancel} className="bg-gray-200 p-3 rounded-xl font-bold">Hủy</button>
+                )}
+            </div>
         </form>
     );
 }
