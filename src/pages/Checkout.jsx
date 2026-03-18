@@ -52,7 +52,7 @@ function Checkout() {
         }
 
         const orderData = {
-            order_code: `ORD-${Date.now()}`,
+            order_code: orderCode, // Dùng mã đơn đã tạo ở State cho đồng bộ
             customer_info: {
                 name: info.name.trim(),
                 phone: info.phone.trim(),
@@ -67,13 +67,22 @@ function Checkout() {
         };
 
         try {
-            // Gửi tới API đã cấu hình trên Render
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
-                alert("🎉 Đặt hàng thành công! Đơn hàng đang được chờ xác nhận.");
+                alert("🎉 Đặt hàng thành công!");
                 clearCart();
-                navigate("/");
+
+                // LOGIC ĐIỀU HƯỚNG MỚI:
+                if (info.paymentMethod === 'PREPAY') {
+                    // Nếu trả trước, chuyển đến trang ngân hàng và gửi kèm orderData
+                    navigate("/bank-transfer", {
+                        state: { orderData: orderData }
+                    });
+                } else {
+                    // Nếu COD, về trang chủ
+                    navigate("/");
+                }
             }
         } catch (err) {
             console.error("Lỗi đặt hàng:", err);
