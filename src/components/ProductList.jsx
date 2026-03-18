@@ -2,49 +2,84 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-function ProductList() {
+// Thêm props admin và onEdit để nhận từ AdminDashboard
+function ProductList({ admin = false, onEdit }) {
   const [products, setProducts] = useState([]);
 
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Lỗi kết nối Backend:", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Gọi API lấy danh sách sản phẩm
-        const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-        setProducts(res.data);
-      } catch (err) {
-        console.error("Lỗi kết nối Backend:", err);
-      }
-    };
     fetchProducts();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Trung có chắc muốn xóa sản phẩm này không?")) {
+      try {
+        await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/products/${id}`);
+        alert("Đã xóa xong!");
+        fetchProducts(); // Load lại danh sách sau khi xóa
+      } catch (err) {
+        alert("Lỗi khi xóa sản phẩm!");
+      }
+    }
+  };
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 md:grid-cols-4"} gap-6`}>
       {products.map((product) => (
-        /* Quan trọng: Sử dụng product.id (có dấu gạch dưới) theo chuẩn MongoDB */
-        <Link
-          to={`/product/${product.id}`}
+        <div
           key={product.id}
-          className="bg-white p-3 rounded-lg shadow-md hover:shadow-xl transition group"
+          className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group relative"
         >
-          <div className="overflow-hidden rounded-md h-48 mb-3">
+          <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50">
             <img
-              /* Kiểm tra: Nếu có images[0] thì lấy, không thì mới lấy image, cuối cùng là ảnh mặc định */
               src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </div>
-          <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 h-10">
+
+          <h3 className="text-sm font-bold text-gray-800 line-clamp-2 h-10 mb-1">
             {product.name}
           </h3>
-          <div className="mt-2 flex justify-between items-center">
-            <span className="text-pink-600 font-bold">
-              {product.price.toLocaleString()} ₫
-            </span>
-            <span className="text-xs text-gray-400">Đã bán 0</span>
-          </div>
-        </Link>
+
+          <p className="text-pink-600 font-black text-base">
+            {Number(product.price).toLocaleString()}₫
+          </p>
+
+          {/* HIỂN THỊ NÚT ĐIỀU KHIỂN NẾU LÀ ADMIN */}
+          {admin ? (
+            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
+              <button
+                onClick={() => onEdit(product)}
+                className="bg-slate-100 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
+              >
+                🛠️ Sửa
+              </button>
+              <button
+                onClick={() => handleDelete(product.id)}
+                className="bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
+              >
+                🗑️ Xóa
+              </button>
+            </div>
+          ) : (
+            /* HIỂN THỊ LINK CHI TIẾT NẾU LÀ KHÁCH HÀNG */
+            <Link
+              to={`/product/${product.id}`}
+              className="mt-3 block text-center bg-gray-900 text-white py-2 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              Xem chi tiết
+            </Link>
+          )}
+        </div>
       ))}
     </div>
   );
