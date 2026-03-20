@@ -6,7 +6,6 @@ function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const { cart } = useContext(CartContext);
 
-    // Tính tổng số lượng sản phẩm trong giỏ
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
@@ -14,7 +13,7 @@ function Navbar() {
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between h-16 items-center gap-4">
 
-                    {/* Logo Shop - Thiên đường sung sướng (cải tiến) */}
+                    {/* Logo Shop */}
                     <Link to="/" className="group">
                         <div className="flex items-baseline gap-1">
                             <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent hover:from-pink-300 hover:to-pink-500 transition-all duration-300">
@@ -32,14 +31,7 @@ function Navbar() {
                         </div>
                     </Link>
 
-                    {/* Thanh tìm kiếm (chỉ hiện trên màn hình máy tính) */}
-                    <div className="hidden md:flex flex-1 max-w-xl mx-auto">
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm sản phẩm (vd: bao cao su, trứng rung...)"
-                            className="w-full px-4 py-2 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500"
-                        />
-                    </div>
+                    {/* ĐÃ XÓA THANH TÌM KIẾM Ở ĐÂY */}
 
                     {/* Menu Desktop */}
                     <div className="hidden md:flex space-x-6 items-center min-w-max">
@@ -79,11 +71,7 @@ function Navbar() {
             {/* Menu thả xuống cho Mobile */}
             {menuOpen && (
                 <div className="md:hidden bg-black px-4 pb-4 pt-2 border-t border-gray-800">
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm sản phẩm..."
-                        className="w-full px-4 py-2 mb-4 text-black rounded-lg focus:outline-none"
-                    />
+                    {/* ĐÃ XÓA Ô TÌM KIẾM TRONG MENU MOBILE */}
                     <Link to="/" className="block py-3 border-b border-gray-800 hover:text-pink-500">
                         Trang chủ
                     </Link>
