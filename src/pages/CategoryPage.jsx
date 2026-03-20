@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { useCart } from "../context/CartContext";
+import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import ProductSkeleton from "../components/ProductSkeleton";
 
 function CategoryPage() {
-    const { categoryName } = useParams(); // Lấy tên danh mục từ URL
+    const { categoryName } = useParams();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { addToCart } = useCart();
+    const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
 
     // Map tên danh mục URL sang tên hiển thị
@@ -39,7 +39,6 @@ function CategoryPage() {
             setLoading(true);
             try {
                 const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-                // Lọc sản phẩm theo category (so sánh với tên hiển thị)
                 const filtered = res.data.filter(
                     (product) => product.category === displayName
                 );
