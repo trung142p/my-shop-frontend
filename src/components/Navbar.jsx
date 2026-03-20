@@ -10,14 +10,20 @@ function Navbar() {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-        // Thêm các class: fixed, top-0, w-full, z-50 để Header luôn lơ lửng trên cùng
         <nav className="bg-black text-white shadow-lg fixed top-0 w-full z-50">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between h-16 items-center gap-4">
 
-                    {/* Logo Shop */}
-                    <Link to="/" className="text-2xl font-bold text-pink-500 min-w-max">
-                        SEXSHOP
+                    {/* Logo Shop - Thiên đường sung sướng */}
+                    <Link to="/" className="min-w-max">
+                        <div className="flex flex-col leading-tight">
+                            <span className="text-2xl font-bold text-pink-500">
+                                Thiên đường
+                            </span>
+                            <span className="text-lg font-medium text-white tracking-wide">
+                                sung sướng
+                            </span>
+                        </div>
                     </Link>
 
                     {/* Thanh tìm kiếm (chỉ hiện trên màn hình máy tính) */}
@@ -53,7 +59,7 @@ function Navbar() {
                         </Link>
                     </div>
 
-                    {/* Nút Hamburger cho Mobile (hiển thị khi màn hình nhỏ) */}
+                    {/* Nút Hamburger cho Mobile */}
                     <button
                         className="md:hidden text-2xl focus:outline-none"
                         onClick={() => setMenuOpen(!menuOpen)}
