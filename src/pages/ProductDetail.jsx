@@ -88,17 +88,19 @@ function ProductDetail() {
                     </div>
 
                     {/* THÔNG SỐ KỸ THUẬT */}
-                    <div className="border border-dashed border-pink-200 bg-pink-50/30 p-4 rounded-md mb-6">
-                        <h3 className="text-sm font-bold mb-3 uppercase">📋 Thông số kỹ thuật</h3>
-                        <div className="grid grid-cols-2 gap-y-2 text-sm">
-                            {product.specs?.map((item, index) => (
-                                <React.Fragment key={index}>
-                                    <div className="text-gray-500">{item.label}:</div>
-                                    <div className="font-medium text-gray-800">{item.value}</div>
-                                </React.Fragment>
-                            ))}
+                    {product.specs && product.specs.length > 0 && (
+                        <div className="border border-dashed border-pink-200 bg-pink-50/30 p-4 rounded-md mb-6">
+                            <h3 className="text-sm font-bold mb-3 uppercase">📋 Thông số kỹ thuật</h3>
+                            <div className="grid grid-cols-2 gap-y-3 text-sm">
+                                {product.specs.map((spec, index) => (
+                                    <React.Fragment key={index}>
+                                        <div className="text-gray-500 font-medium">{spec.label}:</div>
+                                        <div className="font-medium text-gray-800">{spec.value}</div>
+                                    </React.Fragment>
+                                ))}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* NÚT MUA */}
                     <div className="flex items-center gap-6 mb-8">

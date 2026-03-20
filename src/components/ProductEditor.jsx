@@ -6,43 +6,122 @@ const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm
 
 function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false }) {
     const [formData, setFormData] = useState({
-        name: "", price: "", category: categories[0],
-        brand: "", material: "", function: "",
-        size: "", description: "", image: "", images: []
+        name: "",
+        price: "",
+        category: categories[0],
+        image: "",
+        images: [],
+        description: "",
+        // 4 thông số kỹ thuật cố định
+        brand: "",
+        material: "",
+        function: "",
+        size: ""
     });
 
     const { showToast } = useToast();
 
+    // Đồng bộ khi sửa sản phẩm
     useEffect(() => {
         if (editProduct) {
+            // Chuyển đổi từ specs array sang các trường riêng
+            const specsMap = {};
+            if (Array.isArray(editProduct.specs)) {
+                editProduct.specs.forEach(spec => {
+                    const label = spec.label?.toLowerCase();
+                    if (label === "thương hiệu") specsMap.brand = spec.value;
+                    else if (label === "chất liệu") specsMap.material = spec.value;
+                    else if (label === "chức năng") specsMap.function = spec.value;
+                    else if (label === "kích thước") specsMap.size = spec.value;
+                });
+            }
+
             setFormData({
-                ...editProduct,
-                images: Array.isArray(editProduct.images) ? editProduct.images : []
+                name: editProduct.name || "",
+                price: editProduct.price || "",
+                category: editProduct.category || categories[0],
+                image: editProduct.image || "",
+                images: Array.isArray(editProduct.images) ? editProduct.images : [],
+                description: editProduct.description || "",
+                brand: specsMap.brand || "",
+                material: specsMap.material || "",
+                function: specsMap.function || "",
+                size: specsMap.size || ""
             });
         } else {
-            setFormData({ name: "", price: "", category: categories[0], brand: "", material: "", function: "", size: "", description: "", image: "", images: [] });
+            setFormData({
+                name: "",
+                price: "",
+                category: categories[0],
+                image: "",
+                images: [],
+                description: "",
+                brand: "",
+                material: "",
+                function: "",
+                size: ""
+            });
         }
     }, [editProduct]);
 
+    // Chuyển đổi từ 4 trường sang mảng specs trước khi gửi
+    const buildSpecsArray = () => {
+        const specs = [];
+        if (formData.brand) specs.push({ label: "Thương hiệu", value: formData.brand });
+        if (formData.material) specs.push({ label: "Chất liệu", value: formData.material });
+        if (formData.function) specs.push({ label: "Chức năng", value: formData.function });
+        if (formData.size) specs.push({ label: "Kích thước", value: formData.size });
+        return specs;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!formData.name || !formData.price) {
+            showToast("Vui lòng nhập tên và giá sản phẩm!", "warning");
+            return;
+        }
+
+        const productData = {
+            name: formData.name,
+            price: Number(formData.price),
+            category: formData.category,
+            image: formData.image,
+            images: formData.images,
+            description: formData.description,
+            specs: buildSpecsArray() // Chuyển thành mảng specs
+        };
+
         try {
             if (editProduct) {
-                await axios.put(`https://my-shop-api-p7kz.onrender.com/api/products/${editProduct.id}`, formData);
+                await axios.put(`https://my-shop-api-p7kz.onrender.com/api/products/${editProduct.id}`, productData);
                 showToast("Cập nhật thành công!", "success");
                 setEditProduct(null);
             } else {
-                await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", formData);
+                await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", productData);
                 showToast("Đăng sản phẩm thành công!", "success");
             }
             onCreated();
+            // Reset form
+            setFormData({
+                name: "",
+                price: "",
+                category: categories[0],
+                image: "",
+                images: [],
+                description: "",
+                brand: "",
+                material: "",
+                function: "",
+                size: ""
+            });
         } catch (err) {
             console.error(err);
             showToast("Lỗi xử lý!", "error");
         }
     };
 
-    // Nếu compact = true (dùng trong sidebar cũ), giữ giao diện cũ
+    // ===== COMPACT MODE (cho sidebar cũ) =====
     if (compact) {
         return (
             <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
@@ -55,12 +134,17 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <select className="border p-2 rounded-lg text-sm" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
                         {categories.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Ảnh đại diện URL" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
+                </div>
+
+                {/* 4 thông số kỹ thuật cố định */}
+                <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Thương hiệu" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Chất liệu" value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Chức năng" value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} />
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Kích thước" value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
                 </div>
-                <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh đại diện (URL):</label>
-                    <input className="w-full border p-2 rounded-lg text-sm" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
-                </div>
+
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh chi tiết (cách nhau bởi dấu phẩy):</label>
                     <input className="w-full border p-2 rounded-lg text-sm" placeholder="URL1, URL2..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
@@ -78,7 +162,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         );
     }
 
-    // Giao diện mới: rộng rãi, form 2 cột
+    // ===== FULL MODE (cho admin dashboard mới) =====
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -97,19 +181,38 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     </select>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Thương hiệu</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="Nhập thương hiệu" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
-                </div>
-                <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-gray-700 mb-1">Ảnh đại diện (URL)</label>
                     <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="https://..." value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                 </div>
-                <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Ảnh chi tiết (cách nhau bởi dấu phẩy)</label>
+            </div>
+
+            {/* 4 thông số kỹ thuật cố định - hiển thị 2 cột */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label>
+                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: FleshLight, Manmiao, Leten..." value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">🧪 Chất liệu</label>
+                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Silicone, TPE, SuperSkin..." value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">⚡ Chức năng</label>
+                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Rung, Xoay, Sưởi ấm..." value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">📏 Kích thước</label>
+                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: 90 x 250 mm, 15cm..." value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">🖼️ Ảnh chi tiết (cách nhau bởi dấu phẩy)</label>
                     <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="URL1, URL2, URL3..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
                 </div>
-                <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả sản phẩm</label>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">📝 Mô tả sản phẩm</label>
                     <textarea className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" rows="5" placeholder="Mô tả chi tiết sản phẩm..." value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                 </div>
             </div>
