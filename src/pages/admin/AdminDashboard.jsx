@@ -22,9 +22,9 @@ function AdminDashboard() {
     const [orderCurrentPage, setOrderCurrentPage] = useState(1);
     const ordersPerPage = 5;
 
-    // Phân trang cho sản phẩm (dùng trong ProductList sẽ xử lý riêng)
+    // Phân trang cho sản phẩm
     const [productCurrentPage, setProductCurrentPage] = useState(1);
-    const productsPerPage = 6;
+    const productsPerPage = 8; // 8 sản phẩm mỗi trang (4x2)
 
     const navigate = useNavigate();
 
@@ -101,14 +101,12 @@ function AdminDashboard() {
         return filtered;
     }, [orders, filterStatus, searchTerm]);
 
-    // Tính số trang cho đơn hàng
     const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage);
     const paginatedOrders = filteredOrders.slice(
         (orderCurrentPage - 1) * ordersPerPage,
         orderCurrentPage * ordersPerPage
     );
 
-    // Reset về trang 1 khi lọc thay đổi
     useEffect(() => {
         setOrderCurrentPage(1);
     }, [filterStatus, searchTerm]);
@@ -138,7 +136,6 @@ function AdminDashboard() {
         ],
     };
 
-    // Hàm format thời gian
     const formatDateTime = (dateString) => {
         if (!dateString) return "N/A";
         const date = new Date(dateString);
@@ -175,13 +172,13 @@ function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-h-screen">
                 <header className="bg-white border-b h-16 flex items-center justify-between px-8 sticky top-0 z-10">
                     <h1 className="font-bold text-gray-800 uppercase tracking-tight">Hệ thống quản trị</h1>
                     <button onClick={() => navigate("/")} className="text-pink-600 border border-pink-200 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pink-50 transition">👁️ Xem Web</button>
                 </header>
 
-                <main className="p-8">
+                <main className="p-8 flex-1">
                     {activeTab === "stats" ? (
                         <div>
                             <h2 className="text-xl font-bold mb-6">📊 Thống kê</h2>
@@ -221,15 +218,33 @@ function AdminDashboard() {
                             </div>
                         </div>
                     ) : activeTab === "products" ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                            <div className="lg:col-span-4">
-                                <ProductEditor onCreated={reloadData} editProduct={editProduct} setEditProduct={setEditProduct} />
+                        <div className="space-y-8">
+                            {/* Form thêm/sửa sản phẩm - Full width */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                                <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
+                                    {editProduct ? "✏️ Chỉnh sửa sản phẩm" : "➕ Thêm sản phẩm mới"}
+                                </h2>
+                                <ProductEditor
+                                    onCreated={reloadData}
+                                    editProduct={editProduct}
+                                    setEditProduct={setEditProduct}
+                                    compact={false}
+                                />
                             </div>
-                            <div className="lg:col-span-8">
+
+                            {/* Danh sách sản phẩm - 4 cột */}
+                            <div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-xl font-bold text-gray-800">📋 Danh sách sản phẩm</h2>
+                                    <p className="text-sm text-gray-500">Hiển thị {productsPerPage} sản phẩm/trang</p>
+                                </div>
                                 <ProductList
                                     key={refresh}
                                     admin={true}
-                                    onEdit={(product) => { setEditProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    onEdit={(product) => {
+                                        setEditProduct(product);
+                                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                                    }}
                                     itemsPerPage={productsPerPage}
                                     currentPage={productCurrentPage}
                                     onPageChange={setProductCurrentPage}

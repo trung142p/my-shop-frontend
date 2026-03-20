@@ -66,7 +66,7 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
   if (admin) {
     return (
       <div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {paginatedProducts.map((product) => (
             <div
               key={product.id}
