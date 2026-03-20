@@ -14,15 +14,21 @@ function Navbar() {
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex justify-between h-16 items-center gap-4">
 
-                    {/* Logo Shop - Thiên đường sung sướng */}
-                    <Link to="/" className="min-w-max">
-                        <div className="flex flex-col leading-tight">
-                            <span className="text-2xl font-bold text-pink-500">
+                    {/* Logo Shop - Thiên đường sung sướng (cải tiến) */}
+                    <Link to="/" className="group">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent hover:from-pink-300 hover:to-pink-500 transition-all duration-300">
                                 Thiên đường
                             </span>
-                            <span className="text-lg font-medium text-white tracking-wide">
+                            <span className="text-xl font-light text-white/80 group-hover:text-white transition-colors duration-300">
+                                ·
+                            </span>
+                            <span className="text-xl font-medium text-white/90 group-hover:text-white transition-colors duration-300">
                                 sung sướng
                             </span>
+                        </div>
+                        <div className="text-[10px] text-gray-500 tracking-wider mt-0.5 hidden sm:block">
+                            LUXURY PLEASURE
                         </div>
                     </Link>
 
@@ -37,13 +43,13 @@ function Navbar() {
 
                     {/* Menu Desktop */}
                     <div className="hidden md:flex space-x-6 items-center min-w-max">
-                        <Link to="/" className="hover:text-pink-400 font-semibold">
+                        <Link to="/" className="hover:text-pink-400 font-semibold transition">
                             Trang chủ
                         </Link>
-                        <Link to="/products" className="hover:text-pink-400 font-semibold">
+                        <Link to="/products" className="hover:text-pink-400 font-semibold transition">
                             Sản phẩm
                         </Link>
-                        <Link to="/contact" className="hover:text-pink-400 font-semibold">
+                        <Link to="/contact" className="hover:text-pink-400 font-semibold transition">
                             Liên hệ
                         </Link>
                     </div>
