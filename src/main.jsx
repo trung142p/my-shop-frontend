@@ -8,12 +8,12 @@ import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <CartProvider>
-      <ToastProvider>
+    <ToastProvider>         {/* ĐẢO THỨ TỰ: ToastProvider bọc ngoài CartProvider */}
+      <CartProvider>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </ToastProvider>
-    </CartProvider>
+      </CartProvider>
+    </ToastProvider>
   </React.StrictMode>
 );

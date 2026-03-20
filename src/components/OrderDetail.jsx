@@ -5,13 +5,12 @@ import { useToast } from "../context/ToastContext";
 function OrderDetail({ order, onClose, onUpdate }) {
     // 1. Tạo state quản lý loading
     const [isUpdating, setIsUpdating] = useState(false);
+    const { showToast } = useToast();
 
     if (!order) return null;
 
     const handleUpdateStatus = async (field, value) => {
         const targetUrl = `https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`;
-
-        const { showToast } = useToast();
 
         console.log("Đang gọi tới:", targetUrl);
 
@@ -27,7 +26,7 @@ function OrderDetail({ order, onClose, onUpdate }) {
     };
 
     const handleDeleteOrder = async () => {
-        if (window.confirm("Trung có chắc chắn muốn xóa đơn hàng này không? Không thể hoàn tác!")) {
+        if (window.confirm("Bạn có chắc chắn muốn xóa đơn hàng này không? Không thể hoàn tác!")) {
             try {
                 await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`);
                 showToast("Đã xóa!", "success");
