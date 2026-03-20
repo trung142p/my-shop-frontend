@@ -33,10 +33,16 @@ function App() {
             <>
               <Hero />
               <Categories />
-              <div className="max-w-7xl mx-auto px-4 py-8">
-                <h2 className="text-2xl font-bold mb-6 uppercase tracking-widest text-center">
-                  Sản phẩm <span className="text-pink-500">Đặc sắc</span>
-                </h2>
+              <div id="featured-products" className="max-w-7xl mx-auto px-4 py-12">
+                <div className="text-center mb-10">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-3">
+                    Sản phẩm <span className="text-pink-500">Đặc sắc</span>
+                  </h2>
+                  <div className="w-24 h-1 bg-pink-500 mx-auto rounded-full"></div>
+                  <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
+                    Những sản phẩm bán chạy nhất, được nhiều khách hàng tin tưởng lựa chọn
+                  </p>
+                </div>
                 <ProductList />
               </div>
             </>
