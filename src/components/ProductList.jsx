@@ -4,13 +4,11 @@ import { Link } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import ProductSkeleton from "./ProductSkeleton";
 
-// Thêm props admin và onEdit để nhận từ AdminDashboard
-function ProductList({ admin = false, onEdit }) {
+function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1, onPageChange }) {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const { showToast } = useToast();
-
-  const [loading, setLoading] = useState(true);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -28,6 +26,13 @@ function ProductList({ admin = false, onEdit }) {
     fetchProducts();
   }, []);
 
+  // Phân trang sản phẩm
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   if (loading) {
     const skeletonCount = admin ? 6 : 8;
     return (
@@ -44,7 +49,7 @@ function ProductList({ admin = false, onEdit }) {
       try {
         await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/products/${id}`);
         showToast("Đã xóa xong!", "success");
-        fetchProducts(); // Load lại danh sách sau khi xóa
+        fetchProducts();
       } catch (err) {
         showToast("Lỗi khi xóa sản phẩm!", "error");
       }
@@ -52,55 +57,78 @@ function ProductList({ admin = false, onEdit }) {
   };
 
   return (
-    <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 md:grid-cols-4"} gap-6`}>
-      {products.map((product) => (
-        <div
-          key={product.id}
-          className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group relative"
-        >
-          <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50">
-            <img
-              src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-          </div>
-
-          <h3 className="text-sm font-bold text-gray-800 line-clamp-2 h-10 mb-1">
-            {product.name}
-          </h3>
-
-          <p className="text-pink-600 font-black text-base">
-            {Number(product.price).toLocaleString()}₫
-          </p>
-
-          {/* HIỂN THỊ NÚT ĐIỀU KHIỂN NẾU LÀ ADMIN */}
-          {admin ? (
-            <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
-              <button
-                onClick={() => onEdit(product)}
-                className="bg-slate-100 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
-              >
-                🛠️ Sửa
-              </button>
-              <button
-                onClick={() => handleDelete(product.id)}
-                className="bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
-              >
-                🗑️ Xóa
-              </button>
+    <div>
+      <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 md:grid-cols-4"} gap-6`}>
+        {paginatedProducts.map((product) => (
+          <div
+            key={product.id}
+            className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group relative"
+          >
+            <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50">
+              <img
+                src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
+                alt={product.name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
             </div>
-          ) : (
-            /* HIỂN THỊ LINK CHI TIẾT NẾU LÀ KHÁCH HÀNG */
-            <Link
-              to={`/product/${product.id}`}
-              className="mt-3 block text-center bg-gray-900 text-white py-2 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
-            >
-              Xem chi tiết
-            </Link>
-          )}
+
+            <h3 className="text-sm font-bold text-gray-800 line-clamp-2 h-10 mb-1">
+              {product.name}
+            </h3>
+
+            <p className="text-pink-600 font-black text-base">
+              {Number(product.price).toLocaleString()}₫
+            </p>
+
+            {admin ? (
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
+                <button
+                  onClick={() => onEdit(product)}
+                  className="bg-slate-100 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
+                >
+                  🛠️ Sửa
+                </button>
+                <button
+                  onClick={() => handleDelete(product.id)}
+                  className="bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
+                >
+                  🗑️ Xóa
+                </button>
+              </div>
+            ) : (
+              <Link
+                to={`/product/${product.id}`}
+                className="mt-3 block text-center bg-gray-900 text-white py-2 rounded-lg text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                Xem chi tiết
+              </Link>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Phân trang sản phẩm */}
+      {totalPages > 1 && admin && (
+        <div className="flex justify-center gap-2 mt-8">
+          <button
+            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ←
+          </button>
+          <span className="px-4 py-1 text-sm">
+            Trang {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            →
+          </button>
         </div>
-      ))}
+      )}
     </div>
   );
 }

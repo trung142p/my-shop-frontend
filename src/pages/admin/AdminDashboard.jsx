@@ -18,6 +18,14 @@ function AdminDashboard() {
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
 
+    // Phân trang cho đơn hàng
+    const [orderCurrentPage, setOrderCurrentPage] = useState(1);
+    const ordersPerPage = 5;
+
+    // Phân trang cho sản phẩm (dùng trong ProductList sẽ xử lý riêng)
+    const [productCurrentPage, setProductCurrentPage] = useState(1);
+    const productsPerPage = 6;
+
     const navigate = useNavigate();
 
     const reloadData = () => {
@@ -49,7 +57,6 @@ function AdminDashboard() {
         const pendingOrders = orders.filter(o => o.status === "Chờ xác nhận").length;
         const shippingOrders = orders.filter(o => o.status === "Đang vận chuyển").length;
 
-        // Thống kê theo ngày (7 ngày gần nhất)
         const last7Days = [...Array(7)].map((_, i) => {
             const d = new Date();
             d.setDate(d.getDate() - i);
@@ -62,7 +69,6 @@ function AdminDashboard() {
                 .reduce((sum, o) => sum + (o.total_price || 0), 0);
         });
 
-        // Thống kê theo phương thức thanh toán
         const codCount = orders.filter(o => o.payment_method === "COD").length;
         const prepayCount = orders.filter(o => o.payment_method === "PREPAY").length;
 
@@ -79,7 +85,7 @@ function AdminDashboard() {
         };
     }, [orders]);
 
-    // Lọc đơn hàng
+    // Lọc và phân trang đơn hàng
     const filteredOrders = useMemo(() => {
         let filtered = orders;
         if (filterStatus !== "all") {
@@ -94,6 +100,18 @@ function AdminDashboard() {
         }
         return filtered;
     }, [orders, filterStatus, searchTerm]);
+
+    // Tính số trang cho đơn hàng
+    const totalOrderPages = Math.ceil(filteredOrders.length / ordersPerPage);
+    const paginatedOrders = filteredOrders.slice(
+        (orderCurrentPage - 1) * ordersPerPage,
+        orderCurrentPage * ordersPerPage
+    );
+
+    // Reset về trang 1 khi lọc thay đổi
+    useEffect(() => {
+        setOrderCurrentPage(1);
+    }, [filterStatus, searchTerm]);
 
     // Chart data
     const revenueChartData = {
@@ -120,9 +138,22 @@ function AdminDashboard() {
         ],
     };
 
+    // Hàm format thời gian
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleString("vi-VN", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
+
     return (
         <div className="min-h-screen bg-[#f8f9fa] flex">
-            {/* Sidebar giữ nguyên */}
+            {/* Sidebar */}
             <aside className="w-64 bg-slate-900 min-h-screen flex flex-col shadow-xl fixed lg:relative z-20">
                 <div className="p-6 text-white text-2xl font-black italic tracking-widest border-b border-slate-800">
                     ADMIN<span className="text-pink-500">CP</span>
@@ -154,8 +185,6 @@ function AdminDashboard() {
                     {activeTab === "stats" ? (
                         <div>
                             <h2 className="text-xl font-bold mb-6">📊 Thống kê</h2>
-
-                            {/* 4 thẻ thông số */}
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                                 <div className="bg-white p-5 rounded-xl shadow-sm border-l-4 border-pink-500">
                                     <p className="text-gray-500 text-sm">Tổng đơn hàng</p>
@@ -174,8 +203,6 @@ function AdminDashboard() {
                                     <p className="text-2xl font-bold text-blue-600">{stats.shippingOrders}</p>
                                 </div>
                             </div>
-
-                            {/* Biểu đồ */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <div className="bg-white p-6 rounded-xl shadow-sm">
                                     <h3 className="font-bold mb-4">📈 Doanh thu 7 ngày qua</h3>
@@ -199,7 +226,14 @@ function AdminDashboard() {
                                 <ProductEditor onCreated={reloadData} editProduct={editProduct} setEditProduct={setEditProduct} />
                             </div>
                             <div className="lg:col-span-8">
-                                <ProductList key={refresh} admin={true} onEdit={(product) => { setEditProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+                                <ProductList
+                                    key={refresh}
+                                    admin={true}
+                                    onEdit={(product) => { setEditProduct(product); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    itemsPerPage={productsPerPage}
+                                    currentPage={productCurrentPage}
+                                    onPageChange={setProductCurrentPage}
+                                />
                             </div>
                         </div>
                     ) : (
@@ -237,11 +271,12 @@ function AdminDashboard() {
                                             <th className="p-4">Khu vực</th>
                                             <th className="p-4">Sản phẩm</th>
                                             <th className="p-4">Tổng tiền</th>
+                                            <th className="p-4">Thời gian</th>
                                             <th className="p-4 text-center">Trạng thái</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
-                                        {filteredOrders.map((order) => (
+                                        {paginatedOrders.map((order) => (
                                             <tr key={order.id} onClick={() => setSelectedOrder(order)} className="hover:bg-pink-50 cursor-pointer transition">
                                                 <td className="p-4 font-mono text-xs">{order.order_code}</td>
                                                 <td className="p-4">
@@ -251,6 +286,7 @@ function AdminDashboard() {
                                                 <td className="p-4 text-xs">{order.customer_info?.district}, {order.customer_info?.province}</td>
                                                 <td className="p-4 text-xs">{order.items?.length} món</td>
                                                 <td className="p-4 font-bold text-pink-600">{order.total_price?.toLocaleString()}₫</td>
+                                                <td className="p-4 text-xs">{formatDateTime(order.created_at)}</td>
                                                 <td className="p-4 text-center">
                                                     <span className={`px-2 py-1 rounded text-[10px] font-bold ${order.status === "Thành công" ? "bg-green-100 text-green-700" :
                                                             order.status === "Hủy" ? "bg-red-100 text-red-700" :
@@ -264,8 +300,32 @@ function AdminDashboard() {
                                         ))}
                                     </tbody>
                                 </table>
+
                                 {filteredOrders.length === 0 && (
                                     <div className="text-center py-10 text-gray-500">Không tìm thấy đơn hàng</div>
+                                )}
+
+                                {/* Phân trang đơn hàng */}
+                                {totalOrderPages > 1 && (
+                                    <div className="flex justify-center gap-2 py-4 border-t">
+                                        <button
+                                            onClick={() => setOrderCurrentPage(p => Math.max(1, p - 1))}
+                                            disabled={orderCurrentPage === 1}
+                                            className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            ←
+                                        </button>
+                                        <span className="px-4 py-1 text-sm">
+                                            Trang {orderCurrentPage} / {totalOrderPages}
+                                        </span>
+                                        <button
+                                            onClick={() => setOrderCurrentPage(p => Math.min(totalOrderPages, p + 1))}
+                                            disabled={orderCurrentPage === totalOrderPages}
+                                            className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            →
+                                        </button>
+                                    </div>
                                 )}
                             </div>
                         </div>
