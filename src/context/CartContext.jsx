@@ -41,7 +41,7 @@ const CartProvider = ({ children }) => {
             }
             return [...prevCart, { ...product, quantity, checked: true }];
         });
-        showToast("Đã thêm vào giỏ hàng!", "success");
+        //showToast("Đã thêm vào giỏ hàng!", "success");
     };
 
     const updateQuantity = (productId, newQty) => {

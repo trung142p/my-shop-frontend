@@ -83,7 +83,7 @@ function ProductList({
       return;
     }
     addToCart(product, 1);
-    showToast("Đã thêm vào giỏ hàng!", "success");
+    //showToast("Đã thêm vào giỏ hàng!", "success");
   };
 
   if (loading) {
@@ -265,8 +265,8 @@ function ProductList({
                 onClick={() => handleAddToCart(product)}
                 disabled={(product.stock || 0) <= 0}
                 className={`mt-3 w-full py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-gray-900 hover:bg-pink-600 text-white"
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-gray-900 hover:bg-pink-600 text-white"
                   }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

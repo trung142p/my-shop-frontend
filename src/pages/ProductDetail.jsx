@@ -53,18 +53,16 @@ function ProductDetail() {
 
     const handleAddToCart = () => {
         if (!product) return;
-
         if (product.stock <= 0) {
             showToast("Sản phẩm này đã hết hàng!", "error");
             return;
         }
-
         if (quantity > product.stock) {
             showToast(`Chỉ còn ${product.stock} sản phẩm trong kho!`, "warning");
             return;
         }
-
         addToCart(product, quantity);
+        // showToast("Đã thêm vào giỏ hàng!", "success"); // XÓA DÒNG NÀY
     };
 
     if (loading) return <div className="text-center py-20 font-bold">Đang tải dữ liệu...</div>;
