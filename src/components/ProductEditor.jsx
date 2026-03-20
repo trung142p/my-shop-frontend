@@ -12,7 +12,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         image: "",
         images: [],
         description: "",
-        // 4 thông số kỹ thuật cố định
         brand: "",
         material: "",
         function: "",
@@ -21,20 +20,42 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
 
     const { showToast } = useToast();
 
+    // Hàm chuyển đổi từ specs array sang các trường riêng
+    const convertSpecsToFields = (specs) => {
+        const fields = {
+            brand: "",
+            material: "",
+            function: "",
+            size: ""
+        };
+
+        if (Array.isArray(specs)) {
+            specs.forEach(spec => {
+                const label = spec.label?.toLowerCase().trim();
+                const value = spec.value || "";
+
+                if (label === "thương hiệu" || label === "thuong hieu") {
+                    fields.brand = value;
+                } else if (label === "chất liệu" || label === "chat lieu") {
+                    fields.material = value;
+                } else if (label === "chức năng" || label === "chuc nang") {
+                    fields.function = value;
+                } else if (label === "kích thước" || label === "kich thuoc") {
+                    fields.size = value;
+                }
+            });
+        }
+
+        return fields;
+    };
+
     // Đồng bộ khi sửa sản phẩm
     useEffect(() => {
         if (editProduct) {
-            // Chuyển đổi từ specs array sang các trường riêng
-            const specsMap = {};
-            if (Array.isArray(editProduct.specs)) {
-                editProduct.specs.forEach(spec => {
-                    const label = spec.label?.toLowerCase();
-                    if (label === "thương hiệu") specsMap.brand = spec.value;
-                    else if (label === "chất liệu") specsMap.material = spec.value;
-                    else if (label === "chức năng") specsMap.function = spec.value;
-                    else if (label === "kích thước") specsMap.size = spec.value;
-                });
-            }
+            console.log("Đang sửa sản phẩm:", editProduct);
+
+            // Chuyển đổi specs sang các trường
+            const specsFields = convertSpecsToFields(editProduct.specs);
 
             setFormData({
                 name: editProduct.name || "",
@@ -43,10 +64,10 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 image: editProduct.image || "",
                 images: Array.isArray(editProduct.images) ? editProduct.images : [],
                 description: editProduct.description || "",
-                brand: specsMap.brand || "",
-                material: specsMap.material || "",
-                function: specsMap.function || "",
-                size: specsMap.size || ""
+                brand: specsFields.brand,
+                material: specsFields.material,
+                function: specsFields.function,
+                size: specsFields.size
             });
         } else {
             setFormData({
@@ -67,10 +88,18 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
     // Chuyển đổi từ 4 trường sang mảng specs trước khi gửi
     const buildSpecsArray = () => {
         const specs = [];
-        if (formData.brand) specs.push({ label: "Thương hiệu", value: formData.brand });
-        if (formData.material) specs.push({ label: "Chất liệu", value: formData.material });
-        if (formData.function) specs.push({ label: "Chức năng", value: formData.function });
-        if (formData.size) specs.push({ label: "Kích thước", value: formData.size });
+        if (formData.brand && formData.brand.trim()) {
+            specs.push({ label: "Thương hiệu", value: formData.brand.trim() });
+        }
+        if (formData.material && formData.material.trim()) {
+            specs.push({ label: "Chất liệu", value: formData.material.trim() });
+        }
+        if (formData.function && formData.function.trim()) {
+            specs.push({ label: "Chức năng", value: formData.function.trim() });
+        }
+        if (formData.size && formData.size.trim()) {
+            specs.push({ label: "Kích thước", value: formData.size.trim() });
+        }
         return specs;
     };
 
@@ -89,8 +118,10 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             image: formData.image,
             images: formData.images,
             description: formData.description,
-            specs: buildSpecsArray() // Chuyển thành mảng specs
+            specs: buildSpecsArray()
         };
+
+        console.log("Dữ liệu gửi đi:", productData);
 
         try {
             if (editProduct) {
@@ -186,7 +217,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* 4 thông số kỹ thuật cố định - hiển thị 2 cột */}
+            {/* 4 thông số kỹ thuật cố định */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label>
