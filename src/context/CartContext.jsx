@@ -32,22 +32,27 @@ const CartProvider = ({ children }) => {
                 return prevCart;
             }
 
+            let newCart;
             if (existingItem) {
-                return prevCart.map((item) =>
+                newCart = prevCart.map((item) =>
                     item.id === product.id
                         ? { ...item, quantity: newQuantity }
                         : item
                 );
+            } else {
+                newCart = [...prevCart, { ...product, quantity, checked: true }];
             }
-            return [...prevCart, { ...product, quantity, checked: true }];
+
+            // CHỈ HIỂN THỊ 1 TOAST DUY NHẤT TẠI ĐÂY
+            showToast("Đã thêm vào giỏ hàng!", "success");
+
+            return newCart;
         });
-        //showToast("Đã thêm vào giỏ hàng!", "success");
     };
 
     const updateQuantity = (productId, newQty) => {
         if (newQty < 1) return;
 
-        // Tìm sản phẩm trong giỏ để kiểm tra tồn kho
         const item = cart.find(item => item.id === productId);
         if (item && newQty > (item.stock || 0)) {
             showToast(`Chỉ còn ${item.stock} sản phẩm trong kho!`, "warning");
@@ -67,6 +72,7 @@ const CartProvider = ({ children }) => {
 
     const removeFromCart = (productId) => {
         setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+        showToast("Đã xóa khỏi giỏ hàng!", "info");
     };
 
     const clearCart = () => {

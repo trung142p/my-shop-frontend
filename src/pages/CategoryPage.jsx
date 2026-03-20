@@ -57,7 +57,7 @@ function CategoryPage() {
 
     const handleAddToCart = (product) => {
         addToCart(product, 1);
-        showToast("Đã thêm vào giỏ hàng!", "success");
+        //showToast("Đã thêm vào giỏ hàng!", "success");
     };
 
     if (loading) {
