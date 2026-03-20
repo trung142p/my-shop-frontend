@@ -358,8 +358,8 @@ function AdminDashboard() {
                                             }
                                         }}
                                         className={`px-4 py-2 rounded-lg border transition-all duration-200 flex items-center gap-2 ${sortAlpha === "az" || sortAlpha === "za"
-                                                ? "bg-pink-600 text-white border-pink-600"
-                                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                            ? "bg-pink-600 text-white border-pink-600"
+                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                             }`}
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -383,8 +383,8 @@ function AdminDashboard() {
                                                 }
                                             }}
                                             className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "asc"
-                                                    ? "bg-pink-600 text-white border-pink-600"
-                                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                ? "bg-pink-600 text-white border-pink-600"
+                                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                                 }`}
                                             title="Giá tăng dần"
                                         >
@@ -405,8 +405,8 @@ function AdminDashboard() {
                                                 }
                                             }}
                                             className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "desc"
-                                                    ? "bg-pink-600 text-white border-pink-600"
-                                                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                                                ? "bg-pink-600 text-white border-pink-600"
+                                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
                                                 }`}
                                             title="Giá giảm dần"
                                         >
@@ -483,6 +483,7 @@ function AdminDashboard() {
                                         <tr>
                                             <th className="p-4">Mã đơn</th>
                                             <th className="p-4">Khách hàng</th>
+                                            <th className="p-4">Email</th>  {/* Thêm dòng này */}
                                             <th className="p-4">Khu vực</th>
                                             <th className="p-4">Sản phẩm</th>
                                             <th className="p-4">Tổng tiền</th>
@@ -498,6 +499,20 @@ function AdminDashboard() {
                                                     <p className="font-bold">{order.customer_info?.name || "N/A"}</p>
                                                     <p className="text-xs text-gray-500">{order.customer_info?.phone}</p>
                                                 </td>
+                                                {/* THÊM CỘT EMAIL VÀO ĐÂY */}
+                                                <td className="p-4 text-xs">
+                                                    {order.customer_info?.email ? (
+                                                        <div>
+                                                            <span className="text-xs">{order.customer_info.email}</span>
+                                                            {order.customer_info.receive_updates && (
+                                                                <span className="ml-1 text-[10px] text-green-500" title="Nhận thông báo qua email">📧</span>
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-400">—</span>
+                                                    )}
+                                                </td>
+                                                {/* KẾT THÚC THÊM CỘT EMAIL */}
                                                 <td className="p-4 text-xs">{order.customer_info?.district}, {order.customer_info?.province}</td>
                                                 <td className="p-4 text-xs">{order.items?.length} món</td>
                                                 <td className="p-4 font-bold text-pink-600">{order.total_price?.toLocaleString()}₫</td>

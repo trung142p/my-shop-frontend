@@ -54,6 +54,14 @@ function OrderDetail({ order, onClose, onUpdate }) {
                             <h3 className="text-[10px] font-black text-gray-400 uppercase mb-3 tracking-widest">Người nhận</h3>
                             <p className="font-bold text-lg text-slate-800">{order.customer_info?.name}</p>
                             <p className="text-pink-600 font-bold">{order.customer_info?.phone}</p>
+                            {order.customer_info?.email && (
+                                <p className="text-gray-500 text-sm mt-1">
+                                    📧 {order.customer_info.email}
+                                    {order.customer_info.receive_updates && (
+                                        <span className="ml-1 text-green-500 text-xs">(nhận thông báo)</span>
+                                    )}
+                                </p>
+                            )}
                             <p className="text-gray-600 text-sm mt-2">
                                 {order.customer_info?.addressDetail}, {order.customer_info?.district}, {order.customer_info?.province}
                             </p>

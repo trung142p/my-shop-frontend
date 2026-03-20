@@ -9,19 +9,20 @@ function Checkout() {
     const { cart, clearCart } = useContext(CartContext);
     const navigate = useNavigate();
 
-    // Lấy danh sách sản phẩm đã được tích chọn trong giỏ hàng
     const selectedItems = cart.filter(item => item.checked);
     const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [emailValid, setEmailValid] = useState(false);
     const { showToast } = useToast();
 
     const [info, setInfo] = useState({
         name: "",
         phone: "",
         email: "",
+        receiveUpdates: false,
         province: "",
         district: "",
         addressDetail: "",
@@ -31,6 +32,19 @@ function Checkout() {
     useEffect(() => {
         setProvinces(getProvinces());
     }, []);
+
+    // Validate email
+    const validateEmail = (email) => {
+        const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleEmailChange = (e) => {
+        const email = e.target.value;
+        const isValid = validateEmail(email);
+        setEmailValid(isValid);
+        setInfo({ ...info, email, receiveUpdates: isValid ? info.receiveUpdates : false });
+    };
 
     const handleProvinceChange = (e) => {
         const pName = e.target.value;
@@ -42,14 +56,16 @@ function Checkout() {
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
 
-        // Chống spam
-        if (isSubmitting) {
+        if (isSubmitting) return;
+
+        if (!info.name || !info.phone || !info.province || !info.district || !info.addressDetail) {
+            showToast("Vui lòng điền đầy đủ thông tin giao hàng!", "warning");
             return;
         }
 
-        // Kiểm tra ràng buộc dữ liệu
-        if (!info.name || !info.phone || !info.province || !info.district || !info.addressDetail) {
-            showToast("Vui lòng điền đầy đủ thông tin giao hàng!", "warning");
+        // Nếu có email nhưng không hợp lệ
+        if (info.email && !emailValid) {
+            showToast("Email không hợp lệ! Vui lòng nhập đúng định dạng.", "warning");
             return;
         }
 
@@ -65,6 +81,7 @@ function Checkout() {
                 name: info.name.trim(),
                 phone: info.phone.trim(),
                 email: info.email.trim(),
+                receiveUpdates: info.receiveUpdates,
                 province: info.province,
                 district: info.district,
                 addressDetail: info.addressDetail.trim()
@@ -78,7 +95,7 @@ function Checkout() {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
-                // Cập nhật stock và sold cho từng sản phẩm trong giỏ hàng
+                // Cập nhật stock và sold
                 for (const item of selectedItems) {
                     try {
                         await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${item.id}`, {
@@ -87,7 +104,6 @@ function Checkout() {
                         });
                     } catch (err) {
                         console.error("Lỗi cập nhật sản phẩm:", err);
-                        // Không hiển thị toast lỗi ở đây để không làm gián đoạn đặt hàng
                     }
                 }
 
@@ -95,7 +111,6 @@ function Checkout() {
                 clearCart();
 
                 if (info.paymentMethod === 'PREPAY') {
-                    // Lấy mã đơn từ response của server
                     navigate("/bank-transfer", {
                         state: {
                             orderData: {
@@ -119,7 +134,6 @@ function Checkout() {
 
     return (
         <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-8 py-10">
-            {/* CỘT TRÁI: FORM THÔNG TIN */}
             <form onSubmit={handleConfirmOrder} className="space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Thông tin nhận hàng</h2>
@@ -128,7 +142,7 @@ function Checkout() {
                         type="text"
                         required
                         value={info.name}
-                        placeholder="Họ và tên"
+                        placeholder="Họ và tên *"
                         className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
                         onChange={e => setInfo({ ...info, name: e.target.value })}
                         disabled={isSubmitting}
@@ -138,11 +152,39 @@ function Checkout() {
                         type="tel"
                         required
                         value={info.phone}
-                        placeholder="Số điện thoại"
+                        placeholder="Số điện thoại *"
                         className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
                         onChange={e => setInfo({ ...info, phone: e.target.value })}
                         disabled={isSubmitting}
                     />
+
+                    {/* Email field */}
+                    <input
+                        type="email"
+                        value={info.email}
+                        placeholder="Email (để nhận thông báo đơn hàng)"
+                        className={`w-full border p-3 mb-2 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none ${info.email && !emailValid ? 'border-red-500' : ''
+                            }`}
+                        onChange={handleEmailChange}
+                        disabled={isSubmitting}
+                    />
+                    {info.email && !emailValid && (
+                        <p className="text-xs text-red-500 mb-2">Email không hợp lệ! Vui lòng nhập đúng định dạng (ví dụ: ten@gmail.com)</p>
+                    )}
+
+                    {/* Checkbox nhận thông báo */}
+                    {info.email && emailValid && (
+                        <label className="flex items-center gap-2 mb-3 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={info.receiveUpdates}
+                                onChange={(e) => setInfo({ ...info, receiveUpdates: e.target.checked })}
+                                disabled={isSubmitting}
+                                className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
+                            />
+                            <span className="text-sm text-gray-600">📧 Nhận thông báo trạng thái đơn hàng qua email</span>
+                        </label>
+                    )}
 
                     <div className="grid grid-cols-2 gap-3 mb-3">
                         <select
@@ -152,7 +194,7 @@ function Checkout() {
                             onChange={handleProvinceChange}
                             disabled={isSubmitting}
                         >
-                            <option value="">Chọn Tỉnh/Thành</option>
+                            <option value="">Chọn Tỉnh/Thành *</option>
                             {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
                         </select>
 
@@ -163,7 +205,7 @@ function Checkout() {
                             value={info.district}
                             onChange={e => setInfo({ ...info, district: e.target.value })}
                         >
-                            <option value="">Chọn Quận/Huyện</option>
+                            <option value="">Chọn Quận/Huyện *</option>
                             {districts.map(d => <option key={d.code} value={d.name}>{d.name}</option>)}
                         </select>
                     </div>
@@ -172,13 +214,14 @@ function Checkout() {
                         type="text"
                         required
                         value={info.addressDetail}
-                        placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)"
+                        placeholder="Địa chỉ cụ thể (Số nhà, tên đường...) *"
                         className="w-full border p-3 rounded shadow-sm"
                         onChange={e => setInfo({ ...info, addressDetail: e.target.value })}
                         disabled={isSubmitting}
                     />
                 </div>
 
+                {/* Phần còn lại giữ nguyên */}
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Phương thức thanh toán</h2>
 
@@ -220,11 +263,10 @@ function Checkout() {
                 </button>
             </form>
 
-            {/* CỘT PHẢI: TÓM TẮT ĐƠN HÀNG */}
+            {/* Cột phải: Tóm tắt đơn hàng (giữ nguyên) */}
             <div className="bg-white p-6 rounded-2xl shadow-xl h-fit sticky top-24 border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">Đơn hàng của bạn</h2>
-                    {/* Mã đơn hàng sẽ được hệ thống tạo tự động */}
                 </div>
 
                 <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
