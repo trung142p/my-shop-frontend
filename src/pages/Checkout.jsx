@@ -14,7 +14,7 @@ function Checkout() {
 
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
-    const [orderCode] = useState(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
+    //const [orderCode] = useState(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
 
     const [info, setInfo] = useState({
         name: "",
@@ -52,7 +52,7 @@ function Checkout() {
         }
 
         const orderData = {
-            order_code: orderCode, // Dùng mã đơn đã tạo ở State cho đồng bộ
+            //order_code: orderCode, // Dùng mã đơn đã tạo ở State cho đồng bộ
             customer_info: {
                 name: info.name.trim(),
                 phone: info.phone.trim(),
@@ -191,7 +191,7 @@ function Checkout() {
             <div className="bg-white p-6 rounded-2xl shadow-xl h-fit sticky top-24 border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">Đơn hàng của bạn</h2>
-                    <span className="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-500">{orderCode}</span>
+                    {/* Mã đơn hàng sẽ được hệ thống tạo tự động */}
                 </div>
 
                 <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
