@@ -3,6 +3,7 @@ import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getProvinces, getDistrictsByProvinceCode } from "sub-vn";
+import { useToast } from "../context/ToastContext";
 
 function Checkout() {
     const { cart, clearCart } = useContext(CartContext);
@@ -15,6 +16,7 @@ function Checkout() {
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { showToast } = useToast();
 
     const [info, setInfo] = useState({
         name: "",
@@ -47,12 +49,12 @@ function Checkout() {
 
         // Kiểm tra ràng buộc dữ liệu
         if (!info.name || !info.phone || !info.province || !info.district || !info.addressDetail) {
-            alert("Vui lòng điền đầy đủ thông tin giao hàng!");
+            showToast("Vui lòng điền đầy đủ thông tin giao hàng!", "warning");
             return;
         }
 
         if (selectedItems.length === 0) {
-            alert("Giỏ hàng của bạn đang trống!");
+            showToast("Giỏ hàng của bạn đang trống!", "warning");
             return;
         }
 
@@ -76,7 +78,7 @@ function Checkout() {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
-                alert("🎉 Đặt hàng thành công!");
+                showToast("🎉 Đặt hàng thành công!", "success");
                 clearCart();
 
                 if (info.paymentMethod === 'PREPAY') {
@@ -96,7 +98,7 @@ function Checkout() {
         } catch (err) {
             console.error("Lỗi đặt hàng:", err);
             const msg = err.response?.data?.message || "Kết nối server thất bại!";
-            alert("Lỗi: " + msg);
+            showToast("Lỗi: " + msg, "error");
         } finally {
             setIsSubmitting(false);
         }

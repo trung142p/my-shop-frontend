@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react"; // Thêm useEffect
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Dùng useNavigate thay cho window.location
+import { useToast } from "../context/ToastContext";
 
 function AdminLogin() {
     const [password, setPassword] = useState("");
     const navigate = useNavigate();
+
+    const { showToast } = useToast();
 
     // Nếu đã có token rồi thì vào thẳng Dashboard, không cho ở lại trang Login
     useEffect(() => {
@@ -25,7 +28,7 @@ function AdminLogin() {
             // Dùng navigate mượt hơn window.location.href
             navigate("/admin/dashboard");
         } catch (err) {
-            alert("Sai mật khẩu");
+            showToast("Sai mật khẩu", "error");
         }
     };
 

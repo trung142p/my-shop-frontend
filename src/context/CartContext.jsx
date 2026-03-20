@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
+import { useToast } from "./ToastContext";
 
 export const CartContext = createContext();
 
@@ -7,6 +8,8 @@ const CartProvider = ({ children }) => {
         const savedCart = localStorage.getItem("cart");
         return savedCart ? JSON.parse(savedCart) : [];
     });
+
+    const { showToast } = useToast();
 
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -25,7 +28,7 @@ const CartProvider = ({ children }) => {
             // Mặc định khi thêm vào là đã tích chọn (checked: true)
             return [...prevCart, { ...product, quantity, checked: true }];
         });
-        alert("Đã thêm vào giỏ hàng!");
+        showToast("Đã thêm vào giỏ hàng!", "success");
     };
 
     const updateQuantity = (productId, newQty) => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useToast } from "../context/ToastContext";
 
 const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lot sexy", "Gel bôi trơn"];
 
@@ -9,6 +10,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct }) {
         brand: "", material: "", function: "",
         size: "", description: "", image: "", images: []
     });
+
+    const { showToast } = useToast();
 
     // Đồng bộ hóa khi bấm nút "Sửa" từ danh sách
     useEffect(() => {
@@ -27,16 +30,16 @@ function ProductEditor({ onCreated, editProduct, setEditProduct }) {
         try {
             if (editProduct) {
                 await axios.put(`https://my-shop-api-p7kz.onrender.com/api/products/${editProduct.id}`, formData);
-                alert("Cập nhật thành công!");
+                showToast("Cập nhật thành công!", "success");
                 setEditProduct(null); // Thoát chế độ sửa
             } else {
                 await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", formData);
-                alert("Đăng sản phẩm thành công!");
+                showToast("Đăng sản phẩm thành công!", "success");
             }
             onCreated(); // Load lại danh sách
         } catch (err) {
             console.error(err);
-            alert("Lỗi xử lý!");
+            showToast("Lỗi xử lý!", "error");
         }
     };
 

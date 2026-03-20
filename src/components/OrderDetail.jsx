@@ -1,5 +1,6 @@
 import React, { useState } from "react"; // Thêm useState vào đây
 import axios from "axios";
+import { useToast } from "../context/ToastContext";
 
 function OrderDetail({ order, onClose, onUpdate }) {
     // 1. Tạo state quản lý loading
@@ -9,16 +10,19 @@ function OrderDetail({ order, onClose, onUpdate }) {
 
     const handleUpdateStatus = async (field, value) => {
         const targetUrl = `https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`;
+
+        const { showToast } = useToast();
+
         console.log("Đang gọi tới:", targetUrl);
 
         try {
             const res = await axios.patch(targetUrl, { [field]: value });
             console.log("Kết quả Server trả về:", res.data);
             onUpdate();
-            alert("Thành công!");
+            showToast("Thành công!", "success");
         } catch (err) {
             console.error("LỖI CHI TIẾT:", err.response); // Xem cái này ở Console trình duyệt
-            alert("Lỗi 404: Kiểm tra lại URL trong Console!");
+            showToast("Lỗi 404: Kiểm tra lại URL trong Console!", "error");
         }
     };
 
@@ -26,10 +30,10 @@ function OrderDetail({ order, onClose, onUpdate }) {
         if (window.confirm("Trung có chắc chắn muốn xóa đơn hàng này không? Không thể hoàn tác!")) {
             try {
                 await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/orders/${order.id}`);
-                alert("Đã xóa!");
+                showToast("Đã xóa!", "success");
                 onUpdate();
                 onClose();
-            } catch (err) { alert("Lỗi xóa đơn!"); }
+            } catch (err) { showToast("Lỗi xóa đơn!", "error"); }
         }
     };
 

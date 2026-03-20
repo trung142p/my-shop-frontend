@@ -1,17 +1,26 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
+import ProductSkeleton from "./ProductSkeleton";
 
 // Thêm props admin và onEdit để nhận từ AdminDashboard
 function ProductList({ admin = false, onEdit }) {
   const [products, setProducts] = useState([]);
 
+  const { showToast } = useToast();
+
+  const [loading, setLoading] = useState(true);
+
   const fetchProducts = async () => {
+    setLoading(true);
     try {
       const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
       setProducts(res.data);
     } catch (err) {
       console.error("Lỗi kết nối Backend:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -19,14 +28,25 @@ function ProductList({ admin = false, onEdit }) {
     fetchProducts();
   }, []);
 
+  if (loading) {
+    const skeletonCount = admin ? 6 : 8;
+    return (
+      <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 md:grid-cols-4"} gap-6`}>
+        {[...Array(skeletonCount)].map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
   const handleDelete = async (id) => {
     if (window.confirm("Trung có chắc muốn xóa sản phẩm này không?")) {
       try {
         await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/products/${id}`);
-        alert("Đã xóa xong!");
+        showToast("Đã xóa xong!", "success");
         fetchProducts(); // Load lại danh sách sau khi xóa
       } catch (err) {
-        alert("Lỗi khi xóa sản phẩm!");
+        showToast("Lỗi khi xóa sản phẩm!", "error");
       }
     }
   };
