@@ -5,8 +5,19 @@ import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import ProductSkeleton from "./ProductSkeleton";
 
-function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1, onPageChange }) {
+function ProductList({
+  admin = false,
+  onEdit,
+  itemsPerPage = 6,
+  currentPage = 1,
+  onPageChange,
+  searchTerm = "",        // Thêm prop tìm kiếm
+  filterCategory = "all", // Thêm prop lọc danh mục
+  sortOrder = "",         // Thêm prop sắp xếp giá: "asc" hoặc "desc"
+  sortAlpha = ""          // Thêm prop sắp xếp chữ cái: "az" hoặc "za"
+}) {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
@@ -27,9 +38,47 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
     fetchProducts();
   }, []);
 
-  // Phân trang sản phẩm
-  const totalPages = Math.ceil(products.length / itemsPerPage);
-  const paginatedProducts = products.slice(
+  // Lọc và sắp xếp sản phẩm
+  useEffect(() => {
+    let result = [...products];
+
+    // 1. Lọc theo tên
+    if (searchTerm && searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(product =>
+        product.name?.toLowerCase().includes(term)
+      );
+    }
+
+    // 2. Lọc theo danh mục
+    if (filterCategory && filterCategory !== "all") {
+      result = result.filter(product => product.category === filterCategory);
+    }
+
+    // 3. Sắp xếp theo chữ cái (ưu tiên trước sắp xếp giá)
+    if (sortAlpha === "az") {
+      result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortAlpha === "za") {
+      result.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+    }
+
+    // 4. Sắp xếp theo giá
+    if (sortOrder === "asc") {
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortOrder === "desc") {
+      result.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+
+    setFilteredProducts(result);
+    // Reset về trang 1 khi bộ lọc thay đổi
+    if (onPageChange) {
+      onPageChange(1);
+    }
+  }, [products, searchTerm, filterCategory, sortOrder, sortAlpha]);
+
+  // Phân trang
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -42,7 +91,7 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
   if (loading) {
     const skeletonCount = admin ? 6 : 8;
     return (
-      <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-2 md:grid-cols-4"} gap-4 md:gap-6`}>
+      <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 md:grid-cols-4"} gap-4 md:gap-6`}>
         {[...Array(skeletonCount)].map((_, i) => (
           <ProductSkeleton key={i} />
         ))}
@@ -87,6 +136,7 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
               <p className="text-pink-600 font-black text-base">
                 {Number(product.price).toLocaleString()}₫
               </p>
+              <p className="text-xs text-gray-500 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
               <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
                 <button
@@ -106,9 +156,14 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
           ))}
         </div>
 
+        {/* Hiển thị số lượng kết quả */}
+        <div className="mt-4 text-center text-sm text-gray-500">
+          Tìm thấy {filteredProducts.length} sản phẩm
+        </div>
+
         {/* Phân trang cho admin */}
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-8">
+          <div className="flex justify-center gap-2 mt-4">
             <button
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
@@ -128,11 +183,17 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
             </button>
           </div>
         )}
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-10 text-gray-500">
+            🔍 Không tìm thấy sản phẩm nào phù hợp với từ khóa "{searchTerm}"
+          </div>
+        )}
       </div>
     );
   }
 
-  // ===== SHOP VIEW (trang chủ) =====
+  // ===== SHOP VIEW (giữ nguyên) =====
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -141,7 +202,6 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
             key={product.id}
             className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
           >
-            {/* Ảnh sản phẩm - click vào ảnh để xem chi tiết */}
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
               <div className="relative aspect-square bg-gray-100">
                 <img
@@ -149,11 +209,9 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                {/* Badge giảm giá demo */}
                 <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   -15%
                 </div>
-                {/* Overlay xem nhanh - hover hiện */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <span className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     Xem chi tiết
@@ -163,14 +221,12 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
             </Link>
 
             <div className="p-4">
-              {/* Tên sản phẩm - click vào tên cũng vào chi tiết */}
               <Link to={`/product/${product.id}`}>
                 <h3 className="font-semibold text-gray-800 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">
                   {product.name}
                 </h3>
               </Link>
 
-              {/* Giá */}
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-xl font-bold text-pink-600">
                   {Number(product.price).toLocaleString()}₫
@@ -180,7 +236,6 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
                 </span>
               </div>
 
-              {/* Nút thêm vào giỏ */}
               <button
                 onClick={() => handleAddToCart(product)}
                 className="mt-3 w-full bg-gray-900 hover:bg-pink-600 text-white py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
@@ -195,12 +250,9 @@ function ProductList({ admin = false, onEdit, itemsPerPage = 6, currentPage = 1,
         ))}
       </div>
 
-      {/* Phân trang cho shop (nếu cần, hiện tại không hiển thị ở trang chủ) */}
-      {totalPages > 1 && false && (
-        <div className="flex justify-center gap-2 mt-8">
-          <button className="px-3 py-1 rounded border hover:bg-gray-50">←</button>
-          <span className="px-4 py-1 text-sm">Trang {currentPage} / {totalPages}</span>
-          <button className="px-3 py-1 rounded border hover:bg-gray-50">→</button>
+      {filteredProducts.length === 0 && (
+        <div className="text-center py-10 text-gray-500">
+          🔍 Không tìm thấy sản phẩm nào
         </div>
       )}
     </div>
