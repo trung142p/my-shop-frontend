@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import CategorySkeleton from './CategorySkeleton';
 
-const categories = [
+// Danh mục mặc định (fallback nếu API lỗi)
+const defaultCategories = [
     { id: 1, name: "Âm đạo giả", image: "https://res.cloudinary.com/ddivnd5nh/image/upload/v1773421316/main-nav-am-dao-gia-160x160_p8brsw.png", path: "/category/am-dao-gia" },
     { id: 2, name: "Dương vật giả", image: "https://res.cloudinary.com/ddivnd5nh/image/upload/v1773421273/main-nav-duong-vat-gia-1-160x160_uy8bev.png", path: "/category/duong-vat-gia" },
     { id: 3, name: "Cốc thủ dâm", image: "https://res.cloudinary.com/ddivnd5nh/image/upload/v1773421251/main-nav-coc-thu-dam-1-160x160_bg6urf.png", path: "/category/coc-thu-dam" },
@@ -19,6 +22,49 @@ const categories = [
 
 function Categories() {
     const navigate = useNavigate();
+    const [categories, setCategories] = useState(defaultCategories);
+    const [loading, setLoading] = useState(true);
+    const [productCounts, setProductCounts] = useState({});
+
+    useEffect(() => {
+        fetchProductCounts();
+    }, []);
+
+    const fetchProductCounts = async () => {
+        setLoading(true);
+        try {
+            const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+            const products = res.data;
+
+            // Đếm số lượng sản phẩm theo category
+            const counts = {};
+            products.forEach(p => {
+                if (p.category) {
+                    counts[p.category] = (counts[p.category] || 0) + 1;
+                }
+            });
+            setProductCounts(counts);
+        } catch (err) {
+            console.error("Lỗi lấy số lượng sản phẩm:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="max-w-7xl mx-auto px-4 py-12">
+                <h2 className="text-2xl font-bold text-center mb-10 uppercase tracking-widest">
+                    Danh Mục <span className="text-pink-500">Sản Phẩm</span>
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
+                    {[...Array(13)].map((_, i) => (
+                        <CategorySkeleton key={i} />
+                    ))}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-12">
@@ -26,24 +72,28 @@ function Categories() {
                 Danh Mục <span className="text-pink-500">Sản Phẩm</span>
             </h2>
 
-            {/* Grid hiển thị danh mục */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-6">
                 {categories.map((cat) => (
                     <div
                         key={cat.id}
-                        onClick={() => navigate(cat.path)} // Khi nhấn vào sẽ chuyển trang
-                        className="group cursor-pointer flex flex-col items-center"
+                        onClick={() => navigate(cat.path)}
+                        className="group cursor-pointer flex flex-col items-center transform transition-all duration-300 hover:-translate-y-1"
                     >
-                        {/* Khung chứa ảnh tròn hoặc vuông bo góc */}
-                        <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-pink-500 transition-all duration-300 shadow-sm group-hover:shadow-pink-200">
+                        <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-2 border-gray-100 group-hover:border-pink-500 transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-pink-200">
                             <img
                                 src={cat.image}
                                 alt={cat.name}
+                                loading="lazy"
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             />
+                            {/* Badge số lượng sản phẩm */}
+                            {productCounts[cat.name] > 0 && (
+                                <div className="absolute -top-1 -right-1 bg-pink-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
+                                    {productCounts[cat.name]}
+                                </div>
+                            )}
                         </div>
 
-                        {/* Tên danh mục */}
                         <h3 className="mt-3 text-[13px] font-bold text-gray-700 group-hover:text-pink-600 text-center uppercase tracking-tighter leading-tight h-10 flex items-center">
                             {cat.name}
                         </h3>
