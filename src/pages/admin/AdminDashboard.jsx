@@ -17,6 +17,7 @@ function AdminDashboard() {
     const [editProduct, setEditProduct] = useState(null);
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
+    const [menuOpen, setMenuOpen] = useState(false); // State cho menu trên mobile
 
     // Phân trang cho đơn hàng
     const [orderCurrentPage, setOrderCurrentPage] = useState(1);
@@ -24,7 +25,7 @@ function AdminDashboard() {
 
     // Phân trang cho sản phẩm
     const [productCurrentPage, setProductCurrentPage] = useState(1);
-    const productsPerPage = 8; // 8 sản phẩm mỗi trang (4x2)
+    const productsPerPage = 8;
 
     const navigate = useNavigate();
 
@@ -148,37 +149,102 @@ function AdminDashboard() {
         });
     };
 
+    // Menu items
+    const menuItems = [
+        { id: "products", label: "📦 Sản phẩm", icon: "📦" },
+        { id: "orders", label: "📑 Đơn hàng", icon: "📑" },
+        { id: "stats", label: "📊 Thống kê", icon: "📊" },
+        { id: "logout", label: "🚪 Đăng xuất", icon: "🚪" },
+    ];
+
+    const handleMenuClick = (itemId) => {
+        if (itemId === "logout") {
+            handleLogout();
+        } else {
+            setActiveTab(itemId);
+            setMenuOpen(false); // Đóng menu sau khi chọn trên mobile
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-[#f8f9fa] flex">
-            {/* Sidebar */}
-            <aside className="w-64 bg-slate-900 min-h-screen flex flex-col shadow-xl fixed lg:relative z-20">
-                <div className="p-6 text-white text-2xl font-black italic tracking-widest border-b border-slate-800">
-                    ADMIN<span className="text-pink-500">CP</span>
+        <div className="min-h-screen bg-[#f8f9fa]">
+            {/* Nút Menu */}
+            <div className="fixed top-4 left-4 z-50">
+                <button
+                    onClick={() => setMenuOpen(!menuOpen)}
+                    onMouseEnter={() => {
+                        // Chỉ hover trên desktop (khi màn hình > 768px)
+                        if (window.innerWidth > 768) {
+                            setMenuOpen(true);
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        if (window.innerWidth > 768) {
+                            setMenuOpen(false);
+                        }
+                    }}
+                    className="bg-slate-900 hover:bg-pink-600 text-white p-3 rounded-lg shadow-lg transition-all duration-300 flex items-center gap-2"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                    <span className="hidden md:inline font-medium">MENU</span>
+                </button>
+            </div>
+
+            {/* Menu Slide-out */}
+            <div
+                className={`fixed top-0 left-0 h-full w-64 bg-slate-900 shadow-2xl z-40 transition-all duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
+                onMouseEnter={() => {
+                    if (window.innerWidth > 768) setMenuOpen(true);
+                }}
+                onMouseLeave={() => {
+                    if (window.innerWidth > 768) setMenuOpen(false);
+                }}
+            >
+                <div className="p-6 pt-20">
+                    <div className="text-white text-2xl font-black italic tracking-widest border-b border-slate-800 pb-4 mb-6">
+                        ADMIN<span className="text-pink-500">CP</span>
+                    </div>
+                    <nav className="space-y-2">
+                        {menuItems.map((item) => (
+                            <button
+                                key={item.id}
+                                onClick={() => handleMenuClick(item.id)}
+                                className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-all duration-200 ${activeTab === item.id && item.id !== "logout"
+                                        ? "bg-pink-600 text-white shadow-lg"
+                                        : "text-gray-400 hover:bg-slate-800 hover:text-white"
+                                    }`}
+                            >
+                                <span className="text-xl">{item.icon}</span>
+                                <span className="font-medium">{item.label}</span>
+                            </button>
+                        ))}
+                    </nav>
                 </div>
-                <nav className="flex-1 p-4 space-y-2 mt-4">
-                    <button onClick={() => setActiveTab("products")} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${activeTab === 'products' ? 'bg-pink-600 text-white shadow-lg' : 'text-gray-400 hover:bg-slate-800'}`}>
-                        📦 Sản phẩm
-                    </button>
-                    <button onClick={() => setActiveTab("orders")} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${activeTab === 'orders' ? 'bg-pink-600 text-white shadow-lg' : 'text-gray-400 hover:bg-slate-800'}`}>
-                        📑 Đơn hàng
-                    </button>
-                    <button onClick={() => setActiveTab("stats")} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 transition ${activeTab === 'stats' ? 'bg-pink-600 text-white shadow-lg' : 'text-gray-400 hover:bg-slate-800'}`}>
-                        📊 Thống kê
-                    </button>
-                    <button onClick={handleLogout} className="w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-red-400 hover:bg-red-500/10 transition mt-10">
-                        🚪 Đăng xuất
-                    </button>
-                </nav>
-            </aside>
+            </div>
+
+            {/* Overlay cho mobile (khi menu mở) */}
+            {menuOpen && window.innerWidth <= 768 && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-30"
+                    onClick={() => setMenuOpen(false)}
+                />
+            )}
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-h-screen">
-                <header className="bg-white border-b h-16 flex items-center justify-between px-8 sticky top-0 z-10">
-                    <h1 className="font-bold text-gray-800 uppercase tracking-tight">Hệ thống quản trị</h1>
-                    <button onClick={() => navigate("/")} className="text-pink-600 border border-pink-200 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pink-50 transition">👁️ Xem Web</button>
+            <div className="min-h-screen">
+                <header className="bg-white border-b h-16 flex items-center justify-end px-8 sticky top-0 z-20">
+                    <button
+                        onClick={() => navigate("/")}
+                        className="text-pink-600 border border-pink-200 px-4 py-1.5 rounded-full text-sm font-bold hover:bg-pink-50 transition"
+                    >
+                        👁️ Xem Web
+                    </button>
                 </header>
 
-                <main className="p-8 flex-1">
+                <main className="p-8">
                     {activeTab === "stats" ? (
                         <div>
                             <h2 className="text-xl font-bold mb-6">📊 Thống kê</h2>
@@ -219,7 +285,7 @@ function AdminDashboard() {
                         </div>
                     ) : activeTab === "products" ? (
                         <div className="space-y-8">
-                            {/* Form thêm/sửa sản phẩm - Full width */}
+                            {/* Form thêm/sửa sản phẩm */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
                                     {editProduct ? "✏️ Chỉnh sửa sản phẩm" : "➕ Thêm sản phẩm mới"}
@@ -232,7 +298,7 @@ function AdminDashboard() {
                                 />
                             </div>
 
-                            {/* Danh sách sản phẩm - 4 cột */}
+                            {/* Danh sách sản phẩm */}
                             <div>
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-xl font-bold text-gray-800">📋 Danh sách sản phẩm</h2>
