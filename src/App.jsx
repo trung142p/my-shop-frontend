@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import OrderComplete from "./pages/OrderComplete"; // ĐỔI TÊN Ở ĐÂY
 import BankTransfer from "./pages/BankTransfer"; // Thêm trang chuyển khoản
 import { Routes, Route, Navigate } from "react-router-dom";
+import CategoryPage from "./pages/CategoryPage";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
@@ -43,6 +44,7 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/category/:categoryName" element={<CategoryPage />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/complete" element={<OrderComplete />} />
           <Route path="/bank-transfer" element={<BankTransfer />} />
