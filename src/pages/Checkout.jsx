@@ -14,7 +14,7 @@ function Checkout() {
 
     const [provinces, setProvinces] = useState([]);
     const [districts, setDistricts] = useState([]);
-    //const [orderCode] = useState(`ORD-${Math.floor(100000 + Math.random() * 900000)}`);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [info, setInfo] = useState({
         name: "",
@@ -40,7 +40,12 @@ function Checkout() {
     const handleConfirmOrder = async (e) => {
         e.preventDefault();
 
-        // 1. Kiểm tra ràng buộc dữ liệu
+        // Chống spam
+        if (isSubmitting) {
+            return;
+        }
+
+        // Kiểm tra ràng buộc dữ liệu
         if (!info.name || !info.phone || !info.province || !info.district || !info.addressDetail) {
             alert("Vui lòng điền đầy đủ thông tin giao hàng!");
             return;
@@ -51,8 +56,9 @@ function Checkout() {
             return;
         }
 
+        setIsSubmitting(true);
+
         const orderData = {
-            //order_code: orderCode, // Dùng mã đơn đã tạo ở State cho đồng bộ
             customer_info: {
                 name: info.name.trim(),
                 phone: info.phone.trim(),
@@ -73,14 +79,17 @@ function Checkout() {
                 alert("🎉 Đặt hàng thành công!");
                 clearCart();
 
-                // LOGIC ĐIỀU HƯỚNG MỚI:
                 if (info.paymentMethod === 'PREPAY') {
-                    // Nếu trả trước, chuyển đến trang ngân hàng và gửi kèm orderData
+                    // Lấy mã đơn từ response của server
                     navigate("/bank-transfer", {
-                        state: { orderData: orderData }
+                        state: {
+                            orderData: {
+                                ...orderData,
+                                order_code: res.data.order_code
+                            }
+                        }
                     });
                 } else {
-                    // Nếu COD, về trang chủ
                     navigate("/");
                 }
             }
@@ -88,6 +97,8 @@ function Checkout() {
             console.error("Lỗi đặt hàng:", err);
             const msg = err.response?.data?.message || "Kết nối server thất bại!";
             alert("Lỗi: " + msg);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -105,6 +116,7 @@ function Checkout() {
                         placeholder="Họ và tên"
                         className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
                         onChange={e => setInfo({ ...info, name: e.target.value })}
+                        disabled={isSubmitting}
                     />
 
                     <input
@@ -114,6 +126,7 @@ function Checkout() {
                         placeholder="Số điện thoại"
                         className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
                         onChange={e => setInfo({ ...info, phone: e.target.value })}
+                        disabled={isSubmitting}
                     />
 
                     <div className="grid grid-cols-2 gap-3 mb-3">
@@ -122,6 +135,7 @@ function Checkout() {
                             className="border p-3 rounded shadow-sm"
                             value={info.province}
                             onChange={handleProvinceChange}
+                            disabled={isSubmitting}
                         >
                             <option value="">Chọn Tỉnh/Thành</option>
                             {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
@@ -130,7 +144,7 @@ function Checkout() {
                         <select
                             required
                             className="border p-3 rounded shadow-sm"
-                            disabled={!info.province}
+                            disabled={!info.province || isSubmitting}
                             value={info.district}
                             onChange={e => setInfo({ ...info, district: e.target.value })}
                         >
@@ -146,18 +160,20 @@ function Checkout() {
                         placeholder="Địa chỉ cụ thể (Số nhà, tên đường...)"
                         className="w-full border p-3 rounded shadow-sm"
                         onChange={e => setInfo({ ...info, addressDetail: e.target.value })}
+                        disabled={isSubmitting}
                     />
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Phương thức thanh toán</h2>
 
-                    <label className={`flex items-center gap-3 p-4 border rounded mb-3 cursor-pointer transition-all ${info.paymentMethod === 'COD' ? 'border-pink-500 bg-pink-50 shadow-md' : ''}`}>
+                    <label className={`flex items-center gap-3 p-4 border rounded mb-3 cursor-pointer transition-all ${info.paymentMethod === 'COD' ? 'border-pink-500 bg-pink-50 shadow-md' : ''} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <input
                             type="radio"
                             name="pay"
                             checked={info.paymentMethod === 'COD'}
                             onChange={() => setInfo({ ...info, paymentMethod: 'COD' })}
+                            disabled={isSubmitting}
                         />
                         <div>
                             <p className="font-bold">Thanh toán khi nhận hàng (COD)</p>
@@ -165,12 +181,13 @@ function Checkout() {
                         </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-4 border rounded cursor-pointer transition-all ${info.paymentMethod === 'PREPAY' ? 'border-pink-500 bg-pink-50 shadow-md' : 'border-blue-200 bg-blue-50/30'}`}>
+                    <label className={`flex items-center gap-3 p-4 border rounded cursor-pointer transition-all ${info.paymentMethod === 'PREPAY' ? 'border-pink-500 bg-pink-50 shadow-md' : 'border-blue-200 bg-blue-50/30'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <input
                             type="radio"
                             name="pay"
                             checked={info.paymentMethod === 'PREPAY'}
                             onChange={() => setInfo({ ...info, paymentMethod: 'PREPAY' })}
+                            disabled={isSubmitting}
                         />
                         <div>
                             <p className="font-bold text-blue-700">Chuyển khoản trước 50%</p>
@@ -181,9 +198,10 @@ function Checkout() {
 
                 <button
                     type="submit"
-                    className="w-full bg-pink-600 hover:bg-pink-700 text-white py-4 rounded-xl font-bold uppercase text-lg shadow-lg transform transition active:scale-95"
+                    disabled={isSubmitting}
+                    className={`w-full py-4 rounded-xl font-bold uppercase text-lg shadow-lg transform transition active:scale-95 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-pink-600 hover:bg-pink-700 text-white'}`}
                 >
-                    Đặt hàng ngay
+                    {isSubmitting ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG NGAY'}
                 </button>
             </form>
 
