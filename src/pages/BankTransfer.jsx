@@ -36,7 +36,7 @@ function BankTransfer() {
                         <div className="space-y-3">
                             <p className="text-gray-600 flex justify-between">Ngân hàng: <span className="font-bold text-black">VietinBank</span></p>
                             <p className="text-gray-600 flex justify-between">Số tài khoản: <span className="font-bold text-black text-lg">0792131283</span></p>
-                            <p className="text-gray-600 flex justify-between">Chủ tài khoản: <span className="font-bold text-black uppercase">Châu Ngọc Trung</span></p>
+                            <p className="text-gray-600 flex justify-between">Chủ tài khoản: <span className="font-bold text-black uppercase">VO HOANG PHUC</span></p>
                             <div className="pt-3 border-t">
                                 <p className="text-gray-600">Số tiền cần thanh toán (50%):</p>
                                 <p className="font-black text-pink-600 text-3xl">{halfPrice.toLocaleString()}₫</p>
