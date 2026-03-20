@@ -6,14 +6,14 @@ import { useToast } from "../context/ToastContext";
 import ProductSkeleton from "../components/ProductSkeleton";
 
 function CategoryPage() {
-    const { categoryName } = useParams();
+    const { categoryName } = useParams(); // slug: "am-dao-gia"
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
 
-    // Map tên danh mục URL sang tên hiển thị
-    const getCategoryDisplayName = (slug) => {
+    // Map slug sang tên hiển thị cho tiêu đề
+    const getDisplayName = (slug) => {
         const map = {
             "am-dao-gia": "Âm đạo giả",
             "duong-vat-gia": "Dương vật giả",
@@ -32,15 +32,16 @@ function CategoryPage() {
         return map[slug] || slug;
     };
 
-    const displayName = getCategoryDisplayName(categoryName);
+    const displayName = getDisplayName(categoryName);
 
     useEffect(() => {
         const fetchProductsByCategory = async () => {
             setLoading(true);
             try {
                 const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+                // Lọc theo slug (categoryName) thay vì tên hiển thị
                 const filtered = res.data.filter(
-                    (product) => product.category === displayName
+                    (product) => product.category === categoryName
                 );
                 setProducts(filtered);
             } catch (err) {
@@ -52,7 +53,7 @@ function CategoryPage() {
         };
 
         fetchProductsByCategory();
-    }, [categoryName, displayName, showToast]);
+    }, [categoryName, showToast]); // bỏ displayName khỏi dependency
 
     const handleAddToCart = (product) => {
         addToCart(product, 1);
@@ -77,7 +78,6 @@ function CategoryPage() {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            {/* Header danh mục */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                     <Link to="/" className="hover:text-pink-600">Trang chủ</Link>
@@ -92,7 +92,6 @@ function CategoryPage() {
                 </p>
             </div>
 
-            {/* Danh sách sản phẩm */}
             {products.length === 0 ? (
                 <div className="text-center py-20">
                     <div className="text-6xl mb-4">🔍</div>
