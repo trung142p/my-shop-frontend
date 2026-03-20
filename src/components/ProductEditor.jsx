@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
 
-const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lot sexy", "Gel bôi trơn"];
+const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lót sexy", "Gel bôi trơn"];
 
 function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false }) {
     const [formData, setFormData] = useState({
@@ -15,7 +15,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         brand: "",
         material: "",
         function: "",
-        size: ""
+        size: "",
+        stock: 0,
+        sold: 0
     });
 
     const { showToast } = useToast();
@@ -52,9 +54,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
     // Đồng bộ khi sửa sản phẩm
     useEffect(() => {
         if (editProduct) {
-            console.log("Đang sửa sản phẩm:", editProduct);
-
-            // Chuyển đổi specs sang các trường
             const specsFields = convertSpecsToFields(editProduct.specs);
 
             setFormData({
@@ -67,7 +66,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 brand: specsFields.brand,
                 material: specsFields.material,
                 function: specsFields.function,
-                size: specsFields.size
+                size: specsFields.size,
+                stock: editProduct.stock || 0,
+                sold: editProduct.sold || 0
             });
         } else {
             setFormData({
@@ -80,12 +81,14 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 brand: "",
                 material: "",
                 function: "",
-                size: ""
+                size: "",
+                stock: 0,
+                sold: 0
             });
         }
     }, [editProduct]);
 
-    // Chuyển đổi từ 4 trường sang mảng specs trước khi gửi
+    // Chuyển đổi từ 4 trường sang mảng specs
     const buildSpecsArray = () => {
         const specs = [];
         if (formData.brand && formData.brand.trim()) {
@@ -118,10 +121,10 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             image: formData.image,
             images: formData.images,
             description: formData.description,
-            specs: buildSpecsArray()
+            specs: buildSpecsArray(),
+            stock: Number(formData.stock),
+            sold: Number(formData.sold)
         };
-
-        console.log("Dữ liệu gửi đi:", productData);
 
         try {
             if (editProduct) {
@@ -144,7 +147,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 brand: "",
                 material: "",
                 function: "",
-                size: ""
+                size: "",
+                stock: 0,
+                sold: 0
             });
         } catch (err) {
             console.error(err);
@@ -152,7 +157,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         }
     };
 
-    // ===== COMPACT MODE (cho sidebar cũ) =====
+    // ===== COMPACT MODE =====
     if (compact) {
         return (
             <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
@@ -168,12 +173,18 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input className="border p-2 rounded-lg text-sm" placeholder="Ảnh đại diện URL" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                 </div>
 
-                {/* 4 thông số kỹ thuật cố định */}
+                {/* 4 thông số kỹ thuật */}
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Thương hiệu" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Chất liệu" value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Chức năng" value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Kích thước" value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
+                </div>
+
+                {/* Stock và Sold */}
+                <div className="grid grid-cols-2 gap-4">
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng tồn kho" type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} />
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
                 </div>
 
                 <div className="space-y-2">
@@ -193,7 +204,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         );
     }
 
-    // ===== FULL MODE (cho admin dashboard mới) =====
+    // ===== FULL MODE =====
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -217,7 +228,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* 4 thông số kỹ thuật cố định */}
+            {/* 4 thông số kỹ thuật */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label>
@@ -234,6 +245,30 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">📏 Kích thước</label>
                     <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: 90 x 250 mm, 15cm..." value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
+                </div>
+            </div>
+
+            {/* Stock và Sold */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">📦 Số lượng tồn kho</label>
+                    <input
+                        type="number"
+                        min="0"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                        value={formData.stock}
+                        onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">📈 Số lượng đã bán</label>
+                    <input
+                        type="number"
+                        min="0"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                        value={formData.sold}
+                        onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })}
+                    />
                 </div>
             </div>
 

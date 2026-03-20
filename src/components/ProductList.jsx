@@ -11,10 +11,10 @@ function ProductList({
   itemsPerPage = 6,
   currentPage = 1,
   onPageChange,
-  searchTerm = "",        // Thêm prop tìm kiếm
-  filterCategory = "all", // Thêm prop lọc danh mục
-  sortOrder = "",         // Thêm prop sắp xếp giá: "asc" hoặc "desc"
-  sortAlpha = ""          // Thêm prop sắp xếp chữ cái: "az" hoặc "za"
+  searchTerm = "",
+  filterCategory = "all",
+  sortOrder = "",
+  sortAlpha = ""
 }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -42,7 +42,6 @@ function ProductList({
   useEffect(() => {
     let result = [...products];
 
-    // 1. Lọc theo tên
     if (searchTerm && searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
       result = result.filter(product =>
@@ -50,19 +49,16 @@ function ProductList({
       );
     }
 
-    // 2. Lọc theo danh mục
     if (filterCategory && filterCategory !== "all") {
       result = result.filter(product => product.category === filterCategory);
     }
 
-    // 3. Sắp xếp theo chữ cái (ưu tiên trước sắp xếp giá)
     if (sortAlpha === "az") {
       result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
     } else if (sortAlpha === "za") {
       result.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
     }
 
-    // 4. Sắp xếp theo giá
     if (sortOrder === "asc") {
       result.sort((a, b) => (a.price || 0) - (b.price || 0));
     } else if (sortOrder === "desc") {
@@ -70,13 +66,11 @@ function ProductList({
     }
 
     setFilteredProducts(result);
-    // Reset về trang 1 khi bộ lọc thay đổi
     if (onPageChange) {
       onPageChange(1);
     }
   }, [products, searchTerm, filterCategory, sortOrder, sortAlpha]);
 
-  // Phân trang
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * itemsPerPage,
@@ -84,14 +78,18 @@ function ProductList({
   );
 
   const handleAddToCart = (product) => {
+    if (product.stock <= 0) {
+      showToast("Sản phẩm này đã hết hàng!", "error");
+      return;
+    }
     addToCart(product, 1);
     showToast("Đã thêm vào giỏ hàng!", "success");
   };
 
   if (loading) {
-    const skeletonCount = admin ? 6 : 8;
+    const skeletonCount = admin ? 8 : 8;
     return (
-      <div className={`grid ${admin ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 md:grid-cols-4"} gap-4 md:gap-6`}>
+      <div className={`grid ${admin ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 md:grid-cols-4"} gap-4 md:gap-6`}>
         {[...Array(skeletonCount)].map((_, i) => (
           <ProductSkeleton key={i} />
         ))}
@@ -136,6 +134,13 @@ function ProductList({
               <p className="text-pink-600 font-black text-base">
                 {Number(product.price).toLocaleString()}₫
               </p>
+
+              {/* Stock và Sold cho Admin */}
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>📦 Kho: {product.stock || 0}</span>
+                <span>📈 Đã bán: {product.sold || 0}</span>
+              </div>
+
               <p className="text-xs text-gray-500 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
               <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
@@ -156,12 +161,10 @@ function ProductList({
           ))}
         </div>
 
-        {/* Hiển thị số lượng kết quả */}
         <div className="mt-4 text-center text-sm text-gray-500">
           Tìm thấy {filteredProducts.length} sản phẩm
         </div>
 
-        {/* Phân trang cho admin */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-2 mt-4">
             <button
@@ -186,14 +189,14 @@ function ProductList({
 
         {filteredProducts.length === 0 && (
           <div className="text-center py-10 text-gray-500">
-            🔍 Không tìm thấy sản phẩm nào phù hợp với từ khóa "{searchTerm}"
+            🔍 Không tìm thấy sản phẩm nào phù hợp
           </div>
         )}
       </div>
     );
   }
 
-  // ===== SHOP VIEW (giữ nguyên) =====
+  // ===== SHOP VIEW =====
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -209,9 +212,24 @@ function ProductList({
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
+                {/* Badge hết hàng */}
+                {(product.stock || 0) <= 0 && (
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                      HẾT HÀNG
+                    </span>
+                  </div>
+                )}
+                {/* Badge giảm giá */}
                 <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   -15%
                 </div>
+                {/* Badge số lượng còn lại */}
+                {(product.stock || 0) > 0 && (product.stock || 0) <= 5 && (
+                  <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                    Còn {product.stock}
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <span className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                     Xem chi tiết
@@ -227,6 +245,7 @@ function ProductList({
                 </h3>
               </Link>
 
+              {/* Giá */}
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-xl font-bold text-pink-600">
                   {Number(product.price).toLocaleString()}₫
@@ -236,14 +255,24 @@ function ProductList({
                 </span>
               </div>
 
+              {/* Stock và Sold cho khách hàng */}
+              <div className="flex justify-between text-xs text-gray-500 mt-2">
+                <span>📦 Còn lại: {product.stock || 0}</span>
+                <span>❤️ Đã bán: {product.sold || 0}</span>
+              </div>
+
               <button
                 onClick={() => handleAddToCart(product)}
-                className="mt-3 w-full bg-gray-900 hover:bg-pink-600 text-white py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2"
+                disabled={(product.stock || 0) <= 0}
+                className={`mt-3 w-full py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    : "bg-gray-900 hover:bg-pink-600 text-white"
+                  }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Thêm vào giỏ
+                {(product.stock || 0) <= 0 ? "Hết hàng" : "Thêm vào giỏ"}
               </button>
             </div>
           </div>

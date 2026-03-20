@@ -78,6 +78,19 @@ function Checkout() {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
+                // Cập nhật stock và sold cho từng sản phẩm trong giỏ hàng
+                for (const item of selectedItems) {
+                    try {
+                        await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${item.id}`, {
+                            stock: (item.stock || 0) - item.quantity,
+                            sold: (item.sold || 0) + item.quantity
+                        });
+                    } catch (err) {
+                        console.error("Lỗi cập nhật sản phẩm:", err);
+                        // Không hiển thị toast lỗi ở đây để không làm gián đoạn đặt hàng
+                    }
+                }
+
                 showToast("🎉 Đặt hàng thành công!", "success");
                 clearCart();
 
