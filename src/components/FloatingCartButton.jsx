@@ -22,40 +22,40 @@ function FloatingCartButton() {
         return null;
     }
 
+    // Không hiển thị nếu giỏ hàng trống
     if (totalItems === 0) {
         return null;
     }
 
     return (
-        <div className="fixed bottom-24 right-4 z-50 md:hidden">
-            {/* Tooltip hướng dẫn - nằm bên trái nút giỏ hàng */}
+        <>
+            {/* Tooltip chỉ xuất hiện khi showTooltip = true */}
             {showTooltip && (
-                <>
-                    {/* Tooltip chính */}
-                    <div className="absolute bottom-0 right-16 mb-0 mr-2 animate-bounce-slow">
-                        <div className="relative bg-pink-500 text-white text-sm font-medium px-4 py-2.5 rounded-2xl shadow-lg whitespace-nowrap">
-                            <span className="flex items-center gap-2">
-                                🛍️ Có sản phẩm mới!
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </span>
-                            {/* Mũi tên chỉ sang phải (về phía nút giỏ) */}
-                            <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-l-8 border-l-pink-500"></div>
-                        </div>
+                <div className="fixed bottom-28 right-20 z-[60] md:hidden pointer-events-none">
+                    {/* Khung tooltip */}
+                    <div className="relative bg-pink-500 text-white text-sm font-medium px-4 py-2.5 rounded-2xl shadow-lg whitespace-nowrap animate-bounce-slow">
+                        <span className="flex items-center gap-2">
+                            🛍️ Có sản phẩm mới!
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </span>
+                        {/* Mũi tên chỉ sang phải */}
+                        <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-l-8 border-l-pink-500"></div>
                     </div>
 
-                    {/* Bàn tay chỉ - chỉ vào nút giỏ */}
-                    <div className="absolute -bottom-2 right-14 text-3xl animate-bounce z-10 pointer-events-none">
+                    {/* Bàn tay chỉ - đặt bên cạnh tooltip */}
+                    <div className="absolute -bottom-4 -right-8 text-3xl animate-bounce">
                         👆
                     </div>
-                </>
+                </div>
             )}
 
+            {/* Nút giỏ hàng */}
             <Link
                 to="/cart"
                 onClick={() => setShowTooltip(false)}
-                className="relative block"
+                className="fixed bottom-24 right-4 z-50 md:hidden"
             >
                 <div className="bg-pink-600 rounded-full p-3 shadow-lg hover:bg-pink-700 transition-all duration-300 active:scale-95">
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@ function FloatingCartButton() {
                     </div>
                 )}
             </Link>
-        </div>
+        </>
     );
 }
 
