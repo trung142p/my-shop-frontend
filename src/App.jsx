@@ -15,6 +15,7 @@ import BankTransfer from "./pages/BankTransfer";
 import CategoryPage from "./pages/CategoryPage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
+import OrderTracking from "./pages/OrderTracking";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
@@ -84,6 +85,7 @@ function App() {
           <Route path="/complete" element={<OrderComplete />} />
           <Route path="/bank-transfer" element={<BankTransfer />} />
           <Route path="/category/:categoryName" element={<CategoryPage />} />
+          <Route path="/track-order" element={<OrderTracking />} />
           <Route
             path="/admin/dashboard"
             element={

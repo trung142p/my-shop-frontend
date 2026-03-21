@@ -63,7 +63,6 @@ function Checkout() {
             return;
         }
 
-        // Nếu có email nhưng không hợp lệ
         if (info.email && !emailValid) {
             showToast("Email không hợp lệ! Vui lòng nhập đúng định dạng.", "warning");
             return;
@@ -110,18 +109,15 @@ function Checkout() {
                 showToast("🎉 Đặt hàng thành công!", "success");
                 clearCart();
 
-                if (info.paymentMethod === 'PREPAY') {
-                    navigate("/bank-transfer", {
-                        state: {
-                            orderData: {
-                                ...orderData,
-                                order_code: res.data.order_code
-                            }
+                // CHUYỂN SANG TRANG ORDER COMPLETE CHO CẢ HAI PHƯƠNG THỨC
+                navigate("/complete", {
+                    state: {
+                        orderData: {
+                            ...orderData,
+                            order_code: res.data.order_code
                         }
-                    });
-                } else {
-                    navigate("/");
-                }
+                    }
+                });
             }
         } catch (err) {
             console.error("Lỗi đặt hàng:", err);
@@ -221,7 +217,6 @@ function Checkout() {
                     />
                 </div>
 
-                {/* Phần còn lại giữ nguyên */}
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Phương thức thanh toán</h2>
 
@@ -263,7 +258,7 @@ function Checkout() {
                 </button>
             </form>
 
-            {/* Cột phải: Tóm tắt đơn hàng (giữ nguyên) */}
+            {/* Cột phải: Tóm tắt đơn hàng */}
             <div className="bg-white p-6 rounded-2xl shadow-xl h-fit sticky top-24 border border-gray-100">
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-xl font-bold">Đơn hàng của bạn</h2>

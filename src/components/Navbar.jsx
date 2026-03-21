@@ -41,6 +41,9 @@ function Navbar() {
                         <Link to="/products" className="hover:text-pink-400 font-semibold transition">
                             Sản phẩm
                         </Link>
+                        <Link to="/track-order" className="hover:text-pink-400 font-semibold transition">
+                            Tra cứu đơn
+                        </Link>
                         <Link to="/contact" className="hover:text-pink-400 font-semibold transition">
                             Liên hệ
                         </Link>
@@ -77,6 +80,9 @@ function Navbar() {
                     </Link>
                     <Link to="/products" className="block py-3 border-b border-gray-800 hover:text-pink-500">
                         Sản phẩm
+                    </Link>
+                    <Link to="/track-order" className="block py-3 border-b border-gray-800 hover:text-pink-500">
+                        Tra cứu đơn
                     </Link>
                     <Link to="/contact" className="block py-3 border-b border-gray-800 hover:text-pink-500">
                         Liên hệ
