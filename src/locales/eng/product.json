@@ -1,0 +1,11 @@
+{
+    "detail": {
+        "specs": "Specifications",
+        "stock": "In stock",
+        "outOfStock": "Out of stock",
+        "sold": "Sold",
+        "quantity": "Quantity",
+        "addToCart": "ADD TO CART",
+        "description": "Product Details"
+    }
+}

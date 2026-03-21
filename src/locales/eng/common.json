@@ -1,0 +1,14 @@
+{
+    "nav": {
+        "home": "Home",
+        "products": "Products",
+        "contact": "Contact",
+        "cart": "Cart",
+        "trackOrder": "Track Order",
+        "searchPlaceholder": "Search products (e.g., condom, vibrator...)"
+    },
+    "theme": {
+        "light": "Light",
+        "dark": "Dark"
+    }
+}

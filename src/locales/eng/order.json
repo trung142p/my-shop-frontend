@@ -1,0 +1,29 @@
+{
+    "complete": {
+        "success": "CONGRATULATIONS, YOUR ORDER HAS BEEN PLACED!",
+        "wait": "PLEASE WAIT FOR US TO CONFIRM YOUR ORDER.",
+        "saveCode": "Save your order code to track status",
+        "trackNow": "Track order status",
+        "backHome": "Back to home"
+    },
+    "track": {
+        "title": "Order Tracking",
+        "desc": "Enter your order code to check delivery status",
+        "placeholder": "e.g., ORD-1742480000000",
+        "search": "Search",
+        "notFound": "Order not found",
+        "checkCode": "Please check your order code",
+        "customerInfo": "Recipient Information",
+        "orderDate": "Order Date",
+        "name": "Name",
+        "phone": "Phone",
+        "addressHidden": "(Hidden for privacy)",
+        "orderDetails": "Order Details",
+        "total": "Total",
+        "paymentMethod": "Method",
+        "status": "Order Status",
+        "delivered": "✅ Order has been delivered successfully. Thank you!",
+        "shipping": "🚚 Your order is on the way.",
+        "contactHotline": "For any questions, please contact hotline:"
+    }
+}

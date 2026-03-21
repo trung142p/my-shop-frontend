@@ -17,6 +17,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import OrderTracking from "./pages/OrderTracking";
 import FloatingCartButton from "./components/FloatingCartButton";
+import { useTranslation } from "react-i18next";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
@@ -26,9 +27,10 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { t } = useTranslation('home');
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
       <ScrollToTop />
       <Navbar />
       <FloatingContact />
@@ -41,12 +43,12 @@ function App() {
               <Categories />
               <div id="featured-products" className="max-w-7xl mx-auto px-4 py-12">
                 <div className="text-center mb-10">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-3">
-                    Sản phẩm <span className="text-pink-500">Đặc sắc</span>
+                  <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-3">
+                    {t('featured.title')} <span className="text-pink-500">{t('featured.title')?.split(' ').pop()}</span>
                   </h2>
                   <div className="w-24 h-1 bg-pink-500 mx-auto rounded-full"></div>
-                  <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
-                    Những sản phẩm bán chạy nhất, được nhiều khách hàng tin tưởng lựa chọn
+                  <p className="text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
+                    {t('featured.desc')}
                   </p>
                 </div>
 
@@ -55,23 +57,23 @@ function App() {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="🔍 Tìm kiếm sản phẩm theo tên..."
+                      placeholder={t('featured.searchPlaceholder')}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full px-5 py-3 border border-gray-300 rounded-full focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none shadow-sm"
+                      className="w-full px-5 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-full focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none shadow-sm transition-colors"
                     />
                     {searchTerm && (
                       <button
                         onClick={() => setSearchTerm("")}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
                         ✕
                       </button>
                     )}
                   </div>
                   {searchTerm && (
-                    <p className="text-sm text-gray-500 mt-2 text-center">
-                      Kết quả tìm kiếm cho: "<span className="font-medium text-pink-600">{searchTerm}</span>"
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                      {t('featured.searchResult')}: "<span className="font-medium text-pink-600">{searchTerm}</span>"
                     </p>
                   )}
                 </div>

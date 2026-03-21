@@ -1,8 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function Hero() {
   const navigate = useNavigate();
+  const { t } = useTranslation('home');
 
   return (
     <div className="relative bg-black h-[500px] md:h-[600px] overflow-hidden">
@@ -20,22 +22,20 @@ function Hero() {
       <div className="relative h-full flex items-center max-w-7xl mx-auto px-4">
         <div className="text-white max-w-2xl animate-fade-in-up">
           <div className="inline-block px-3 py-1 bg-pink-500/20 backdrop-blur-sm rounded-full text-pink-300 text-sm mb-4">
-            ✨ Khuyến mãi lên đến 30% ✨
+            ✨ {t('hero.discount')} ✨
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-4 leading-tight">
-            THIÊN ĐƯỜNG <br />
-            <span className="text-pink-500">CẢM XÚC</span>
+            {t('hero.title')}
           </h1>
           <p className="text-gray-200 text-lg md:text-xl mb-8 max-w-xl">
-            Khám phá bộ sưu tập đồ chơi người lớn cao cấp, bảo mật thông tin 100%,
-            giao hàng kín đáo trong vòng 24h.
+            {t('hero.desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
             <button
               onClick={() => navigate("/products")}
               className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-pink-500/25"
             >
-              MUA NGAY
+              {t('hero.buyNow')}
             </button>
             <button
               onClick={() => {
@@ -44,7 +44,7 @@ function Hero() {
               }}
               className="border-2 border-white hover:bg-white/10 text-white px-8 py-3 rounded-full font-bold transition-all"
             >
-              KHÁM PHÁ
+              {t('hero.explore')}
             </button>
           </div>
         </div>

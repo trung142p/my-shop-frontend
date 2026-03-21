@@ -1,0 +1,17 @@
+{
+    "shippingInfo": "Thông tin nhận hàng",
+    "fullName": "Họ và tên *",
+    "phone": "Số điện thoại *",
+    "email": "Email (để nhận thông báo đơn hàng)",
+    "receiveUpdates": "Nhận thông báo trạng thái đơn hàng qua email",
+    "province": "Chọn Tỉnh/Thành *",
+    "district": "Chọn Quận/Huyện *",
+    "address": "Địa chỉ cụ thể (Số nhà, tên đường...) *",
+    "paymentMethod": "Phương thức thanh toán",
+    "cod": "Thanh toán khi nhận hàng (COD)",
+    "codFee": "Phí vận chuyển: +30.000₫",
+    "prepay": "Chuyển khoản trước 50%",
+    "prepayDesc": "MIỄN PHÍ GIAO HÀNG (Tiết kiệm 30k)",
+    "submitOrder": "ĐẶT HÀNG NGAY",
+    "processing": "ĐANG XỬ LÝ..."
+}

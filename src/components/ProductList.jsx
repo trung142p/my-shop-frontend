@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
+import { useTranslation } from "react-i18next";
 import ProductSkeleton from "./ProductSkeleton";
 
 function ProductList({
@@ -21,6 +22,7 @@ function ProductList({
   const [loading, setLoading] = useState(true);
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
+  const { t } = useTranslation('home');
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -83,7 +85,6 @@ function ProductList({
       return;
     }
     addToCart(product, 1);
-    //showToast("Đã thêm vào giỏ hàng!", "success");
   };
 
   if (loading) {
@@ -117,9 +118,9 @@ function ProductList({
           {paginatedProducts.map((product) => (
             <div
               key={product.id}
-              className="bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition group relative"
+              className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
-              <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50">
+              <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
                 <img
                   src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
                   alt={product.name}
@@ -127,7 +128,7 @@ function ProductList({
                 />
               </div>
 
-              <h3 className="text-sm font-bold text-gray-800 line-clamp-2 h-10 mb-1">
+              <h3 className="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 h-10 mb-1">
                 {product.name}
               </h3>
 
@@ -136,23 +137,23 @@ function ProductList({
               </p>
 
               {/* Stock và Sold cho Admin */}
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <span>📦 Kho: {product.stock || 0}</span>
                 <span>📈 Đã bán: {product.sold || 0}</span>
               </div>
 
-              <p className="text-xs text-gray-500 mt-1">📁 {product.category || "Chưa phân loại"}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed">
+              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed dark:border-gray-700">
                 <button
                   onClick={() => onEdit(product)}
-                  className="bg-slate-100 text-slate-700 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
+                  className="bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
                 >
                   🛠️ Sửa
                 </button>
                 <button
                   onClick={() => handleDelete(product.id)}
-                  className="bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
+                  className="bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
                 >
                   🗑️ Xóa
                 </button>
@@ -161,7 +162,7 @@ function ProductList({
           ))}
         </div>
 
-        <div className="mt-4 text-center text-sm text-gray-500">
+        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Tìm thấy {filteredProducts.length} sản phẩm
         </div>
 
@@ -170,17 +171,17 @@ function ProductList({
             <button
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ←
             </button>
-            <span className="px-4 py-1 text-sm">
+            <span className="px-4 py-1 text-sm dark:text-white">
               Trang {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
               disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               →
             </button>
@@ -188,7 +189,7 @@ function ProductList({
         )}
 
         {filteredProducts.length === 0 && (
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
             🔍 Không tìm thấy sản phẩm nào phù hợp
           </div>
         )}
@@ -203,10 +204,10 @@ function ProductList({
         {paginatedProducts.map((product) => (
           <div
             key={product.id}
-            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+            className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
           >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
-              <div className="relative aspect-square bg-gray-100">
+              <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
                 <img
                   src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
                   alt={product.name}
@@ -216,23 +217,23 @@ function ProductList({
                 {(product.stock || 0) <= 0 && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                     <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
-                      HẾT HÀNG
+                      {t('product.outOfStock')}
                     </span>
                   </div>
                 )}
                 {/* Badge giảm giá */}
                 <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  -15%
+                  {t('product.discount')}
                 </div>
                 {/* Badge số lượng còn lại */}
                 {(product.stock || 0) > 0 && (product.stock || 0) <= 5 && (
                   <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                    Còn {product.stock}
+                    {t('product.left')} {product.stock}
                   </div>
                 )}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                   <span className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                    Xem chi tiết
+                    {t('product.viewDetail')}
                   </span>
                 </div>
               </div>
@@ -240,7 +241,7 @@ function ProductList({
 
             <div className="p-4">
               <Link to={`/product/${product.id}`}>
-                <h3 className="font-semibold text-gray-800 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">
                   {product.name}
                 </h3>
               </Link>
@@ -256,23 +257,23 @@ function ProductList({
               </div>
 
               {/* Stock và Sold cho khách hàng */}
-              <div className="flex justify-between text-xs text-gray-500 mt-2">
-                <span>📦 Còn lại: {product.stock || 0}</span>
-                <span>❤️ Đã bán: {product.sold || 0}</span>
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                <span>📦 {t('product.left')}: {product.stock || 0}</span>
+                <span>❤️ {t('product.sold')}: {product.sold || 0}</span>
               </div>
 
               <button
                 onClick={() => handleAddToCart(product)}
                 disabled={(product.stock || 0) <= 0}
                 className={`mt-3 w-full py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-gray-900 hover:bg-pink-600 text-white"
+                  ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  : "bg-gray-900 dark:bg-gray-700 hover:bg-pink-600 text-white"
                   }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                {(product.stock || 0) <= 0 ? "Hết hàng" : "Thêm vào giỏ"}
+                {(product.stock || 0) <= 0 ? t('product.outOfStock') : t('product.addToCart')}
               </button>
             </div>
           </div>
@@ -280,7 +281,7 @@ function ProductList({
       </div>
 
       {filteredProducts.length === 0 && (
-        <div className="text-center py-10 text-gray-500">
+        <div className="text-center py-10 text-gray-500 dark:text-gray-400">
           🔍 Không tìm thấy sản phẩm nào
         </div>
       )}

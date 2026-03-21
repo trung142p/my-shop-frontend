@@ -1,0 +1,17 @@
+{
+    "shippingInfo": "Shipping Information",
+    "fullName": "Full Name *",
+    "phone": "Phone Number *",
+    "email": "Email (to receive order updates)",
+    "receiveUpdates": "Receive order status updates via email",
+    "province": "Select Province/City *",
+    "district": "Select District *",
+    "address": "Street Address *",
+    "paymentMethod": "Payment Method",
+    "cod": "Cash on Delivery (COD)",
+    "codFee": "Shipping fee: +30,000₫",
+    "prepay": "Bank Transfer 50%",
+    "prepayDesc": "FREE SHIPPING (Save 30k)",
+    "submitOrder": "PLACE ORDER",
+    "processing": "PROCESSING..."
+}

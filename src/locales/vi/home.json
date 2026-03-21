@@ -1,0 +1,26 @@
+{
+    "hero": {
+        "discount": "Khuyến mãi lên đến 30%",
+        "title": "THIÊN ĐƯỜNG CẢM XÚC",
+        "desc": "Khám phá bộ sưu tập đồ chơi người lớn cao cấp, bảo mật thông tin 100%, giao hàng kín đáo trong vòng 24h.",
+        "buyNow": "MUA NGAY",
+        "explore": "KHÁM PHÁ"
+    },
+    "categories": {
+        "title": "Danh Mục Sản Phẩm"
+    },
+    "featured": {
+        "title": "Sản phẩm Đặc sắc",
+        "desc": "Những sản phẩm bán chạy nhất, được nhiều khách hàng tin tưởng lựa chọn",
+        "searchPlaceholder": "Tìm kiếm sản phẩm theo tên...",
+        "searchResult": "Kết quả tìm kiếm cho"
+    },
+    "product": {
+        "outOfStock": "HẾT HÀNG",
+        "discount": "-15%",
+        "left": "Còn lại",
+        "sold": "Đã bán",
+        "viewDetail": "Xem chi tiết",
+        "addToCart": "Thêm vào giỏ"
+    }
+}

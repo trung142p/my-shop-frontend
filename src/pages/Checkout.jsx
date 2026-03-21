@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { getProvinces, getDistrictsByProvinceCode } from "sub-vn";
 import { useToast } from "../context/ToastContext";
+import { useTranslation } from "react-i18next";
 
 function Checkout() {
     const { cart, clearCart } = useContext(CartContext);
     const navigate = useNavigate();
+    const { t } = useTranslation('checkout');
 
     const selectedItems = cart.filter(item => item.checked);
     const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -131,15 +133,15 @@ function Checkout() {
     return (
         <div className="max-w-6xl mx-auto p-4 grid grid-cols-1 lg:grid-cols-2 gap-8 py-10">
             <form onSubmit={handleConfirmOrder} className="space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Thông tin nhận hàng</h2>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                    <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">{t('shippingInfo')}</h2>
 
                     <input
                         type="text"
                         required
                         value={info.name}
-                        placeholder="Họ và tên *"
-                        className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
+                        placeholder={t('fullName')}
+                        className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         onChange={e => setInfo({ ...info, name: e.target.value })}
                         disabled={isSubmitting}
                     />
@@ -148,8 +150,8 @@ function Checkout() {
                         type="tel"
                         required
                         value={info.phone}
-                        placeholder="Số điện thoại *"
-                        className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none"
+                        placeholder={t('phone')}
+                        className="w-full border p-3 mb-3 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         onChange={e => setInfo({ ...info, phone: e.target.value })}
                         disabled={isSubmitting}
                     />
@@ -158,8 +160,8 @@ function Checkout() {
                     <input
                         type="email"
                         value={info.email}
-                        placeholder="Email (để nhận thông báo đơn hàng)"
-                        className={`w-full border p-3 mb-2 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none ${info.email && !emailValid ? 'border-red-500' : ''
+                        placeholder={t('email')}
+                        className={`w-full border p-3 mb-2 rounded shadow-sm focus:ring-2 focus:ring-pink-300 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white ${info.email && !emailValid ? 'border-red-500' : ''
                             }`}
                         onChange={handleEmailChange}
                         disabled={isSubmitting}
@@ -178,30 +180,30 @@ function Checkout() {
                                 disabled={isSubmitting}
                                 className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
                             />
-                            <span className="text-sm text-gray-600">📧 Nhận thông báo trạng thái đơn hàng qua email</span>
+                            <span className="text-sm text-gray-600 dark:text-gray-300">{t('receiveUpdates')}</span>
                         </label>
                     )}
 
                     <div className="grid grid-cols-2 gap-3 mb-3">
                         <select
                             required
-                            className="border p-3 rounded shadow-sm"
+                            className="border p-3 rounded shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             value={info.province}
                             onChange={handleProvinceChange}
                             disabled={isSubmitting}
                         >
-                            <option value="">Chọn Tỉnh/Thành *</option>
+                            <option value="">{t('province')}</option>
                             {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
                         </select>
 
                         <select
                             required
-                            className="border p-3 rounded shadow-sm"
+                            className="border p-3 rounded shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             disabled={!info.province || isSubmitting}
                             value={info.district}
                             onChange={e => setInfo({ ...info, district: e.target.value })}
                         >
-                            <option value="">Chọn Quận/Huyện *</option>
+                            <option value="">{t('district')}</option>
                             {districts.map(d => <option key={d.code} value={d.name}>{d.name}</option>)}
                         </select>
                     </div>
@@ -210,17 +212,17 @@ function Checkout() {
                         type="text"
                         required
                         value={info.addressDetail}
-                        placeholder="Địa chỉ cụ thể (Số nhà, tên đường...) *"
-                        className="w-full border p-3 rounded shadow-sm"
+                        placeholder={t('address')}
+                        className="w-full border p-3 rounded shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                         onChange={e => setInfo({ ...info, addressDetail: e.target.value })}
                         disabled={isSubmitting}
                     />
                 </div>
 
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">Phương thức thanh toán</h2>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                    <h2 className="text-xl font-bold mb-4 border-b pb-2 text-pink-600">{t('paymentMethod')}</h2>
 
-                    <label className={`flex items-center gap-3 p-4 border rounded mb-3 cursor-pointer transition-all ${info.paymentMethod === 'COD' ? 'border-pink-500 bg-pink-50 shadow-md' : ''} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <label className={`flex items-center gap-3 p-4 border rounded mb-3 cursor-pointer transition-all ${info.paymentMethod === 'COD' ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20 shadow-md' : 'dark:border-gray-600'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <input
                             type="radio"
                             name="pay"
@@ -229,12 +231,12 @@ function Checkout() {
                             disabled={isSubmitting}
                         />
                         <div>
-                            <p className="font-bold">Thanh toán khi nhận hàng (COD)</p>
-                            <p className="text-xs text-gray-500 italic">Phí vận chuyển: +30.000₫</p>
+                            <p className="font-bold dark:text-white">{t('cod')}</p>
+                            <p className="text-xs text-gray-500 italic">{t('codFee')}</p>
                         </div>
                     </label>
 
-                    <label className={`flex items-center gap-3 p-4 border rounded cursor-pointer transition-all ${info.paymentMethod === 'PREPAY' ? 'border-pink-500 bg-pink-50 shadow-md' : 'border-blue-200 bg-blue-50/30'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <label className={`flex items-center gap-3 p-4 border rounded cursor-pointer transition-all ${info.paymentMethod === 'PREPAY' ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/20 shadow-md' : 'border-blue-200 dark:border-gray-600 bg-blue-50/30 dark:bg-blue-900/20'} ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
                         <input
                             type="radio"
                             name="pay"
@@ -243,8 +245,8 @@ function Checkout() {
                             disabled={isSubmitting}
                         />
                         <div>
-                            <p className="font-bold text-blue-700">Chuyển khoản trước 50%</p>
-                            <p className="text-xs text-green-600 font-medium">✨ MIỄN PHÍ GIAO HÀNG (Tiết kiệm 30k)</p>
+                            <p className="font-bold text-blue-700 dark:text-blue-400">{t('prepay')}</p>
+                            <p className="text-xs text-green-600 font-medium">✨ {t('prepayDesc')}</p>
                         </div>
                     </label>
                 </div>
@@ -254,54 +256,54 @@ function Checkout() {
                     disabled={isSubmitting}
                     className={`w-full py-4 rounded-xl font-bold uppercase text-lg shadow-lg transform transition active:scale-95 ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-pink-600 hover:bg-pink-700 text-white'}`}
                 >
-                    {isSubmitting ? 'ĐANG XỬ LÝ...' : 'ĐẶT HÀNG NGAY'}
+                    {isSubmitting ? t('processing') : t('submitOrder')}
                 </button>
             </form>
 
             {/* Cột phải: Tóm tắt đơn hàng */}
-            <div className="bg-white p-6 rounded-2xl shadow-xl h-fit sticky top-24 border border-gray-100">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl h-fit sticky top-24 border border-gray-100 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-bold">Đơn hàng của bạn</h2>
+                    <h2 className="text-xl font-bold dark:text-white">{t('orderSummary') || "Đơn hàng của bạn"}</h2>
                 </div>
 
                 <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
                     {selectedItems.map(item => (
-                        <div key={item.id} className="flex gap-4 items-center border-b pb-3">
+                        <div key={item.id} className="flex gap-4 items-center border-b pb-3 dark:border-gray-700">
                             <img
                                 src={item.coverImage || item.image}
                                 alt={item.name}
-                                className="w-16 h-16 object-cover rounded-lg border bg-gray-50"
+                                className="w-16 h-16 object-cover rounded-lg border bg-gray-50 dark:bg-gray-700"
                                 onError={(e) => { e.target.src = "https://placehold.co/150"; }}
                             />
                             <div className="flex-1">
-                                <p className="text-sm font-medium line-clamp-1">{item.name}</p>
-                                <p className="text-xs text-gray-400">Số lượng: {item.quantity}</p>
+                                <p className="text-sm font-medium line-clamp-1 dark:text-white">{item.name}</p>
+                                <p className="text-xs text-gray-400">{t('quantity') || "Số lượng"}: {item.quantity}</p>
                             </div>
-                            <span className="font-bold text-sm">{(item.price * item.quantity).toLocaleString()}₫</span>
+                            <span className="font-bold text-sm dark:text-white">{(item.price * item.quantity).toLocaleString()}₫</span>
                         </div>
                     ))}
                 </div>
 
-                <div className="space-y-2 pt-4 border-t">
-                    <div className="flex justify-between text-gray-500">
-                        <span>Tạm tính:</span>
+                <div className="space-y-2 pt-4 border-t dark:border-gray-700">
+                    <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                        <span>{t('subtotal') || "Tạm tính"}:</span>
                         <span>{totalPrice.toLocaleString()}₫</span>
                     </div>
-                    <div className="flex justify-between text-gray-500">
-                        <span>Phí ship:</span>
+                    <div className="flex justify-between text-gray-500 dark:text-gray-400">
+                        <span>{t('shipping') || "Phí ship"}:</span>
                         <span>{info.paymentMethod === 'COD' ? "30.000₫" : "0₫ (Freeship)"}</span>
                     </div>
-                    <div className="flex justify-between border-t pt-3 mt-3">
-                        <span className="text-lg font-bold">TỔNG CỘNG:</span>
+                    <div className="flex justify-between border-t pt-3 mt-3 dark:border-gray-700">
+                        <span className="text-lg font-bold dark:text-white">{t('total') || "TỔNG CỘNG"}:</span>
                         <span className="text-2xl font-black text-pink-600">
                             {(info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice).toLocaleString()}₫
                         </span>
                     </div>
 
                     {info.paymentMethod === 'PREPAY' && (
-                        <div className="bg-blue-50 p-3 rounded-lg mt-4 border border-blue-100">
-                            <p className="text-xs text-blue-800 font-medium">Cần thanh toán trước 50%:</p>
-                            <p className="text-lg font-bold text-blue-600">{(totalPrice / 2).toLocaleString()}₫</p>
+                        <div className="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg mt-4 border border-blue-100 dark:border-blue-800">
+                            <p className="text-xs text-blue-800 dark:text-blue-300 font-medium">{t('needPay') || "Cần thanh toán trước 50%:"}</p>
+                            <p className="text-lg font-bold text-blue-600 dark:text-blue-400">{(totalPrice / 2).toLocaleString()}₫</p>
                         </div>
                     )}
                 </div>

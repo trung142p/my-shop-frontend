@@ -1,0 +1,14 @@
+{
+    "nav": {
+        "home": "Trang chủ",
+        "products": "Sản phẩm",
+        "contact": "Liên hệ",
+        "cart": "Giỏ hàng",
+        "trackOrder": "Tra cứu đơn",
+        "searchPlaceholder": "Tìm kiếm sản phẩm (vd: bao cao su, trứng rung...)"
+    },
+    "theme": {
+        "light": "Sáng",
+        "dark": "Tối"
+    }
+}

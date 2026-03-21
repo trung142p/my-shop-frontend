@@ -1,0 +1,26 @@
+{
+    "hero": {
+        "discount": "Sale up to 30%",
+        "title": "PARADISE OF PLEASURE",
+        "desc": "Discover premium adult toys collection, 100% privacy guaranteed, discreet delivery within 24h.",
+        "buyNow": "BUY NOW",
+        "explore": "EXPLORE"
+    },
+    "categories": {
+        "title": "Product Categories"
+    },
+    "featured": {
+        "title": "Featured Products",
+        "desc": "Best-selling products, trusted by many customers",
+        "searchPlaceholder": "Search products by name...",
+        "searchResult": "Search results for"
+    },
+    "product": {
+        "outOfStock": "OUT OF STOCK",
+        "discount": "-15%",
+        "left": "Left",
+        "sold": "Sold",
+        "viewDetail": "View details",
+        "addToCart": "Add to cart"
+    }
+}

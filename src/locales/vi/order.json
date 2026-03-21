@@ -1,0 +1,29 @@
+{
+    "complete": {
+        "success": "CHÚC MỪNG, ĐƠN HÀNG CỦA BẠN ĐÃ ĐƯỢC ĐẶT!",
+        "wait": "XIN VUI LÒNG CHỜ CHÚNG TÔI LIÊN HỆ ĐỂ XÁC NHẬN ĐƠN HÀNG.",
+        "saveCode": "Hãy lưu mã đơn hàng để tra cứu trạng thái",
+        "trackNow": "Tra cứu trạng thái đơn hàng",
+        "backHome": "Về trang chủ"
+    },
+    "track": {
+        "title": "Tra cứu đơn hàng",
+        "desc": "Nhập mã đơn hàng để kiểm tra trạng thái giao hàng",
+        "placeholder": "VD: ORD-1742480000000",
+        "search": "Tìm",
+        "notFound": "Không tìm thấy đơn hàng",
+        "checkCode": "Vui lòng kiểm tra lại mã đơn hàng",
+        "customerInfo": "Thông tin người nhận",
+        "orderDate": "Ngày đặt",
+        "name": "Họ tên",
+        "phone": "Số điện thoại",
+        "addressHidden": "(Đã được bảo mật)",
+        "orderDetails": "Chi tiết đơn hàng",
+        "total": "Tổng tiền",
+        "paymentMethod": "Phương thức",
+        "status": "Trạng thái đơn hàng",
+        "delivered": "✅ Đơn hàng đã được giao thành công. Cảm ơn bạn!",
+        "shipping": "🚚 Đơn hàng đang trên đường giao đến bạn.",
+        "contactHotline": "Mọi thắc mắc vui lòng liên hệ hotline:"
+    }
+}

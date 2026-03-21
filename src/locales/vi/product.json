@@ -1,0 +1,11 @@
+{
+    "detail": {
+        "specs": "Thông số kỹ thuật",
+        "stock": "Tồn kho",
+        "outOfStock": "Hết hàng",
+        "sold": "Đã bán",
+        "quantity": "Số lượng",
+        "addToCart": "THÊM VÀO GIỎ HÀNG",
+        "description": "Chi Tiết Sản Phẩm"
+    }
+}
