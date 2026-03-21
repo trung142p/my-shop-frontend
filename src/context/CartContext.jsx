@@ -8,6 +8,7 @@ const CartProvider = ({ children }) => {
         const savedCart = localStorage.getItem("cart");
         return savedCart ? JSON.parse(savedCart) : [];
     });
+    const [showTooltip, setShowTooltip] = useState(false);
 
     const { showToast } = useToast();
 
@@ -15,8 +16,17 @@ const CartProvider = ({ children }) => {
         localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);
 
+    // Tự động ẩn tooltip sau 5 giây
+    useEffect(() => {
+        if (showTooltip) {
+            const timer = setTimeout(() => {
+                setShowTooltip(false);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [showTooltip]);
+
     const addToCart = (product, quantity = 1) => {
-        // Kiểm tra tồn kho
         if (product.stock <= 0) {
             showToast("Sản phẩm này đã hết hàng!", "error");
             return;
@@ -26,7 +36,6 @@ const CartProvider = ({ children }) => {
             const existingItem = prevCart.find((item) => item.id === product.id);
             const newQuantity = (existingItem?.quantity || 0) + quantity;
 
-            // Kiểm tra nếu số lượng vượt quá tồn kho
             if (newQuantity > product.stock) {
                 showToast(`Chỉ còn ${product.stock} sản phẩm trong kho!`, "warning");
                 return prevCart;
@@ -43,8 +52,12 @@ const CartProvider = ({ children }) => {
                 newCart = [...prevCart, { ...product, quantity, checked: true }];
             }
 
-            // CHỈ HIỂN THỊ 1 TOAST DUY NHẤT TẠI ĐÂY
             showToast("Đã thêm vào giỏ hàng!", "success");
+
+            // Hiển thị tooltip hướng dẫn trên mobile
+            if (window.innerWidth <= 768) {
+                setShowTooltip(true);
+            }
 
             return newCart;
         });
@@ -86,7 +99,9 @@ const CartProvider = ({ children }) => {
             removeFromCart,
             clearCart,
             updateQuantity,
-            toggleCheck
+            toggleCheck,
+            showTooltip,
+            setShowTooltip
         }}>
             {children}
         </CartContext.Provider>
