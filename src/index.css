@@ -59,3 +59,10 @@
 .animate-bounce-slow {
     animation: bounce-slow 1s ease-in-out infinite;
 }
+
+/* Cho màn hình > 480px hiển thị chữ Xóa */
+@media (min-width: 480px) {
+    .xs\:inline {
+        display: inline;
+    }
+}
