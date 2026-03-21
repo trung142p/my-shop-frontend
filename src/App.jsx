@@ -16,6 +16,7 @@ import CategoryPage from "./pages/CategoryPage";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import OrderTracking from "./pages/OrderTracking";
+import FloatingCartButton from "./components/FloatingCartButton";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("adminToken");
@@ -31,6 +32,7 @@ function App() {
       <ScrollToTop />
       <Navbar />
       <FloatingContact />
+      <FloatingCartButton />
       <div className="pt-16">
         <Routes>
           <Route path="/" element={

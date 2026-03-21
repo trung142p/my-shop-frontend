@@ -43,3 +43,19 @@
 .animate-fade-in-up {
     animation: fade-in-up 0.8s ease-out forwards;
 }
+
+@keyframes bounce-slow {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 1s ease-in-out infinite;
+}
