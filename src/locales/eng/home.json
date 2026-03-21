@@ -6,9 +6,6 @@
         "buyNow": "BUY NOW",
         "explore": "EXPLORE"
     },
-    "categories": {
-        "title": "Product Categories"
-    },
     "featured": {
         "title": "Featured Products",
         "desc": "Best-selling products, trusted by many customers",

@@ -13,5 +13,11 @@
     "prepay": "Bank Transfer 50%",
     "prepayDesc": "FREE SHIPPING (Save 30k)",
     "submitOrder": "PLACE ORDER",
-    "processing": "PROCESSING..."
+    "processing": "PROCESSING...",
+    "orderSummary": "Your Order",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "TOTAL",
+    "needPay": "Need to pay 50%:",
+    "quantity": "Quantity"
 }

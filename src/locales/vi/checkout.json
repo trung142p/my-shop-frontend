@@ -13,5 +13,11 @@
     "prepay": "Chuyển khoản trước 50%",
     "prepayDesc": "MIỄN PHÍ GIAO HÀNG (Tiết kiệm 30k)",
     "submitOrder": "ĐẶT HÀNG NGAY",
-    "processing": "ĐANG XỬ LÝ..."
+    "processing": "ĐANG XỬ LÝ...",
+    "orderSummary": "Đơn hàng của bạn",
+    "subtotal": "Tạm tính",
+    "shipping": "Phí ship",
+    "total": "TỔNG CỘNG",
+    "needPay": "Cần thanh toán trước 50%",
+    "quantity": "Số lượng"
 }
