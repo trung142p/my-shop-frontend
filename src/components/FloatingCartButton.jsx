@@ -27,25 +27,29 @@ function FloatingCartButton() {
     }
 
     return (
-        <div className="fixed bottom-6 right-4 z-50 md:hidden">
-            {/* Tooltip hướng dẫn */}
+        <div className="fixed bottom-24 right-4 z-50 md:hidden">
+            {/* Tooltip hướng dẫn - nằm bên trái nút giỏ hàng */}
             {showTooltip && (
-                <div className="absolute bottom-16 right-0 mb-2 animate-bounce-slow">
-                    <div className="relative bg-pink-500 text-white text-sm font-medium px-4 py-2 rounded-2xl shadow-lg whitespace-nowrap">
-                        <span className="flex items-center gap-2">
-                            ✨ Có sản phẩm mới!
-                            <svg className="w-4 h-4 animate-ping" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                            </svg>
-                        </span>
-                        {/* Mũi tên chỉ xuống */}
-                        <div className="absolute -bottom-2 right-5 w-4 h-4 bg-pink-500 rotate-45"></div>
+                <>
+                    {/* Tooltip chính */}
+                    <div className="absolute bottom-0 right-16 mb-0 mr-2 animate-bounce-slow">
+                        <div className="relative bg-pink-500 text-white text-sm font-medium px-4 py-2.5 rounded-2xl shadow-lg whitespace-nowrap">
+                            <span className="flex items-center gap-2">
+                                🛍️ Có sản phẩm mới!
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </span>
+                            {/* Mũi tên chỉ sang phải (về phía nút giỏ) */}
+                            <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-l-8 border-l-pink-500"></div>
+                        </div>
                     </div>
-                    {/* Bàn tay chỉ */}
-                    <div className="absolute -top-8 right-0 text-3xl animate-bounce">
+
+                    {/* Bàn tay chỉ - chỉ vào nút giỏ */}
+                    <div className="absolute -bottom-2 right-14 text-3xl animate-bounce z-10 pointer-events-none">
                         👆
                     </div>
-                </div>
+                </>
             )}
 
             <Link
