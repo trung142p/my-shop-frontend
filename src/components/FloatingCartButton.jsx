@@ -44,11 +44,6 @@ function FloatingCartButton() {
                             <div className="absolute -right-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-l-8 border-l-pink-500"></div>
                         </div>
                     </div>
-
-                    {/* Bàn tay chỉ - chỉ vào nút giỏ */}
-                    <div className="absolute -bottom-2 right-14 text-3xl animate-bounce z-10 pointer-events-none">
-                        👆
-                    </div>
                 </>
             )}
 
