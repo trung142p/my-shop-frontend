@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
+import VariantManager from "./VariantManager";
 
 const categories = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lót sexy", "Gel bôi trơn"];
 
@@ -19,6 +20,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         stock: 0,
         sold: 0
     });
+    const [savedProductId, setSavedProductId] = useState(null);
 
     const { showToast } = useToast();
 
@@ -70,6 +72,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 stock: editProduct.stock || 0,
                 sold: editProduct.sold || 0
             });
+            setSavedProductId(editProduct.id);
         } else {
             setFormData({
                 name: "",
@@ -85,6 +88,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 stock: 0,
                 sold: 0
             });
+            setSavedProductId(null);
         }
     }, [editProduct]);
 
@@ -130,27 +134,13 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             if (editProduct) {
                 await axios.put(`https://my-shop-api-p7kz.onrender.com/api/products/${editProduct.id}`, productData);
                 showToast("Cập nhật thành công!", "success");
-                setEditProduct(null);
+                setSavedProductId(editProduct.id);
             } else {
-                await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", productData);
+                const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/products", productData);
                 showToast("Đăng sản phẩm thành công!", "success");
+                setSavedProductId(res.data.id);
             }
             onCreated();
-            // Reset form
-            setFormData({
-                name: "",
-                price: "",
-                category: categories[0],
-                image: "",
-                images: [],
-                description: "",
-                brand: "",
-                material: "",
-                function: "",
-                size: "",
-                stock: 0,
-                sold: 0
-            });
         } catch (err) {
             console.error(err);
             showToast("Lỗi xử lý!", "error");
@@ -200,6 +190,13 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                         <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-100 px-4 rounded-xl font-bold text-xs">Hủy</button>
                     )}
                 </div>
+
+                {/* VariantManager - chỉ hiển thị khi đã có productId */}
+                {savedProductId && (
+                    <div className="mt-6 border-t pt-4">
+                        <VariantManager productId={savedProductId} />
+                    </div>
+                )}
             </form>
         );
     }
@@ -293,6 +290,13 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     </button>
                 )}
             </div>
+
+            {/* VariantManager - chỉ hiển thị khi đã có productId */}
+            {savedProductId && (
+                <div className="mt-6 border-t pt-6">
+                    <VariantManager productId={savedProductId} />
+                </div>
+            )}
         </form>
     );
 }

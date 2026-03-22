@@ -10,6 +10,8 @@ function ProductDetail() {
     const [product, setProduct] = useState(null);
     const [mainImage, setMainImage] = useState("");
     const [quantity, setQuantity] = useState(1);
+    const [variants, setVariants] = useState([]);
+    const [selectedVariant, setSelectedVariant] = useState(null);
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
     const { t } = useTranslation('product');
@@ -53,24 +55,55 @@ function ProductDetail() {
         fetchProduct();
     }, [id]);
 
+    // Lấy variants
+    useEffect(() => {
+        if (product?.id) {
+            fetchVariants(product.id);
+        }
+    }, [product?.id]);
+
+    const fetchVariants = async (productId) => {
+        try {
+            const res = await axios.get(`https://my-shop-api-p7kz.onrender.com/api/products/${productId}/variants`);
+            setVariants(res.data);
+            if (res.data.length > 0) {
+                setSelectedVariant(res.data[0]);
+            }
+        } catch (err) {
+            console.error("Lỗi lấy variants:", err);
+        }
+    };
+
+    // Giá và tồn kho hiển thị (ưu tiên variant)
+    const displayPrice = selectedVariant?.price || product?.price;
+    const displayStock = selectedVariant?.stock ?? product?.stock;
+    const isOutOfStock = displayStock <= 0;
+
     const handleAddToCart = () => {
         if (!product) return;
-        if (product.stock <= 0) {
+        if (displayStock <= 0) {
             showToast("Sản phẩm này đã hết hàng!", "error");
             return;
         }
-        if (quantity > product.stock) {
-            showToast(`Chỉ còn ${product.stock} sản phẩm trong kho!`, "warning");
+        if (quantity > displayStock) {
+            showToast(`Chỉ còn ${displayStock} sản phẩm trong kho!`, "warning");
             return;
         }
-        addToCart(product, quantity);
+
+        const itemToAdd = {
+            ...product,
+            variant_id: selectedVariant?.id,
+            variant_name: selectedVariant?.name,
+            price: displayPrice,
+            stock: displayStock
+        };
+        addToCart(itemToAdd, quantity);
     };
 
     if (loading) return <div className="text-center py-20 font-bold dark:text-white">Đang tải dữ liệu...</div>;
     if (!product) return <div className="text-center py-20 dark:text-white">Sản phẩm không tồn tại!</div>;
 
     const allImages = Array.isArray(product.images) ? product.images : [product.image];
-    const isOutOfStock = (product.stock || 0) <= 0;
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
@@ -107,7 +140,7 @@ function ProductDetail() {
                     {/* Giá và thông tin tồn kho */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 p-5 mb-6">
                         <div className="flex items-baseline gap-4 flex-wrap">
-                            <span className="text-3xl font-bold text-pink-600">{product.price?.toLocaleString()} ₫</span>
+                            <span className="text-3xl font-bold text-pink-600">{displayPrice?.toLocaleString()} ₫</span>
                             <span className="text-sm text-gray-400 line-through">
                                 {Math.round(product.price * 1.15).toLocaleString()} ₫
                             </span>
@@ -118,7 +151,7 @@ function ProductDetail() {
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 dark:text-gray-400">📦 {t('detail.stock')}:</span>
                                 <span className={`font-bold ${isOutOfStock ? 'text-red-500' : 'text-green-600'}`}>
-                                    {isOutOfStock ? t('detail.outOfStock') : `${product.stock} sản phẩm`}
+                                    {isOutOfStock ? t('detail.outOfStock') : `${displayStock} sản phẩm`}
                                 </span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -143,6 +176,32 @@ function ProductDetail() {
                         </div>
                     )}
 
+                    {/* CHỌN BIẾN THỂ */}
+                    {variants.length > 0 && (
+                        <div className="mb-6">
+                            <h3 className="text-sm font-bold mb-2 uppercase dark:text-white">Chọn loại:</h3>
+                            <div className="flex flex-wrap gap-3">
+                                {variants.map((variant) => (
+                                    <button
+                                        key={variant.id}
+                                        onClick={() => setSelectedVariant(variant)}
+                                        className={`px-4 py-2 rounded-full border transition-all ${selectedVariant?.id === variant.id
+                                                ? "border-pink-500 bg-pink-500 text-white"
+                                                : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
+                                            }`}
+                                    >
+                                        {variant.name}
+                                        {variant.price && variant.price !== product.price && (
+                                            <span className="ml-1 text-xs">
+                                                ({variant.price.toLocaleString()}₫)
+                                            </span>
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Số lượng và nút mua */}
                     {!isOutOfStock && (
                         <>
@@ -159,18 +218,18 @@ function ProductDetail() {
                                         value={quantity}
                                         onChange={(e) => {
                                             const val = parseInt(e.target.value) || 1;
-                                            setQuantity(Math.min(product.stock, Math.max(1, val)));
+                                            setQuantity(Math.min(displayStock, Math.max(1, val)));
                                         }}
                                         className="w-12 text-center font-bold border-x dark:border-gray-600 outline-none dark:bg-gray-800 dark:text-white"
                                     />
                                     <button
-                                        onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                                        onClick={() => setQuantity(Math.min(displayStock, quantity + 1))}
                                         className="px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-white"
                                     >
                                         +
                                     </button>
                                 </div>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">Còn {product.stock} sản phẩm</span>
+                                <span className="text-sm text-gray-500 dark:text-gray-400">Còn {displayStock} sản phẩm</span>
                             </div>
                             <button
                                 onClick={handleAddToCart}

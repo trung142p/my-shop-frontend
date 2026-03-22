@@ -46,6 +46,11 @@ function Cart() {
                                     <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm line-clamp-2">
                                         {item.name}
                                     </h3>
+                                    {item.variant_name && (
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            🎨 {item.variant_name}
+                                        </p>
+                                    )}
                                     <p className="text-pink-600 font-bold text-sm mt-1">
                                         {item.price.toLocaleString()} ₫
                                     </p>

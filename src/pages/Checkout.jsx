@@ -35,7 +35,6 @@ function Checkout() {
         setProvinces(getProvinces());
     }, []);
 
-    // Validate email
     const validateEmail = (email) => {
         const emailRegex = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
         return emailRegex.test(email);
@@ -87,7 +86,11 @@ function Checkout() {
                 district: info.district,
                 addressDetail: info.addressDetail.trim()
             },
-            items: selectedItems,
+            items: selectedItems.map(item => ({
+                ...item,
+                variant_id: item.variant_id,
+                variant_name: item.variant_name
+            })),
             total_price: info.paymentMethod === 'COD' ? totalPrice + 30000 : totalPrice,
             payment_method: info.paymentMethod
         };
@@ -111,7 +114,6 @@ function Checkout() {
                 showToast("🎉 Đặt hàng thành công!", "success");
                 clearCart();
 
-                // CHUYỂN SANG TRANG ORDER COMPLETE CHO CẢ HAI PHƯƠNG THỨC
                 navigate("/complete", {
                     state: {
                         orderData: {
@@ -156,7 +158,6 @@ function Checkout() {
                         disabled={isSubmitting}
                     />
 
-                    {/* Email field */}
                     <input
                         type="email"
                         value={info.email}
@@ -170,7 +171,6 @@ function Checkout() {
                         <p className="text-xs text-red-500 mb-2">Email không hợp lệ! Vui lòng nhập đúng định dạng (ví dụ: ten@gmail.com)</p>
                     )}
 
-                    {/* Checkbox nhận thông báo */}
                     {info.email && emailValid && (
                         <label className="flex items-center gap-2 mb-3 cursor-pointer">
                             <input
@@ -277,6 +277,11 @@ function Checkout() {
                             />
                             <div className="flex-1">
                                 <p className="text-sm font-medium line-clamp-1 dark:text-white">{item.name}</p>
+                                {item.variant_name && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                        🎨 {item.variant_name}
+                                    </p>
+                                )}
                                 <p className="text-xs text-gray-400">{t('quantity') || "Số lượng"}: {item.quantity}</p>
                             </div>
                             <span className="font-bold text-sm dark:text-white">{(item.price * item.quantity).toLocaleString()}₫</span>
