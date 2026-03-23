@@ -20,6 +20,7 @@ function ProductList({
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [variantsCache, setVariantsCache] = useState({});
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
   const { t } = useTranslation('home');
@@ -39,6 +40,55 @@ function ProductList({
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  // Lấy biến thể đầu tiên của sản phẩm (có cache)
+  const getFirstVariant = async (productId) => {
+    if (variantsCache[productId] !== undefined) {
+      return variantsCache[productId];
+    }
+
+    try {
+      const res = await axios.get(`https://my-shop-api-p7kz.onrender.com/api/products/${productId}/variants`);
+      const firstVariant = res.data.length > 0 ? res.data[0] : null;
+      setVariantsCache(prev => ({ ...prev, [productId]: firstVariant }));
+      return firstVariant;
+    } catch (err) {
+      console.error("Lỗi lấy biến thể:", err);
+      return null;
+    }
+  };
+
+  const handleAddToCart = async (product) => {
+    // Kiểm tra tồn kho cơ bản
+    if (product.stock <= 0) {
+      showToast("Sản phẩm này đã hết hàng!", "error");
+      return;
+    }
+
+    let itemToAdd = { ...product, quantity: 1 };
+
+    // Kiểm tra nếu sản phẩm có biến thể
+    const firstVariant = await getFirstVariant(product.id);
+
+    if (firstVariant) {
+      // Nếu có biến thể, dùng biến thể đầu tiên
+      itemToAdd = {
+        ...product,
+        variant_id: firstVariant.id,
+        variant_name: firstVariant.name,
+        price: firstVariant.price || product.price,
+        stock: firstVariant.stock ?? product.stock
+      };
+
+      // Kiểm tra tồn kho của biến thể
+      if (firstVariant.stock <= 0) {
+        showToast(`Biến thể "${firstVariant.name}" đã hết hàng!`, "error");
+        return;
+      }
+    }
+
+    addToCart(itemToAdd, 1);
+  };
 
   // Lọc và sắp xếp sản phẩm
   useEffect(() => {
@@ -78,14 +128,6 @@ function ProductList({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const handleAddToCart = (product) => {
-    if (product.stock <= 0) {
-      showToast("Sản phẩm này đã hết hàng!", "error");
-      return;
-    }
-    addToCart(product, 1);
-  };
 
   if (loading) {
     const skeletonCount = admin ? 8 : 8;
@@ -136,7 +178,6 @@ function ProductList({
                 {Number(product.price).toLocaleString()}₫
               </p>
 
-              {/* Stock và Sold cho Admin */}
               <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <span>📦 Kho: {product.stock || 0}</span>
                 <span>📈 Đã bán: {product.sold || 0}</span>
@@ -213,7 +254,6 @@ function ProductList({
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
-                {/* Badge hết hàng */}
                 {(product.stock || 0) <= 0 && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                     <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -221,11 +261,9 @@ function ProductList({
                     </span>
                   </div>
                 )}
-                {/* Badge giảm giá */}
                 <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   {t('product.discount')}
                 </div>
-                {/* Badge số lượng còn lại */}
                 {(product.stock || 0) > 0 && (product.stock || 0) <= 5 && (
                   <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                     {t('product.left')} {product.stock}
@@ -246,7 +284,6 @@ function ProductList({
                 </h3>
               </Link>
 
-              {/* Giá */}
               <div className="mt-2 flex items-center gap-2">
                 <span className="text-xl font-bold text-pink-600">
                   {Number(product.price).toLocaleString()}₫
@@ -256,7 +293,6 @@ function ProductList({
                 </span>
               </div>
 
-              {/* Stock và Sold cho khách hàng */}
               <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <span>📦 {t('product.left')}: {product.stock || 0}</span>
                 <span>❤️ {t('product.sold')}: {product.sold || 0}</span>
