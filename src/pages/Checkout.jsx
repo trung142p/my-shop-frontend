@@ -104,15 +104,16 @@ function Checkout() {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
-                // Cập nhật stock và sold cho từng sản phẩm (cập nhật đúng biến thể)
+                // Cập nhật stock và sold cho từng sản phẩm
                 for (const item of selectedItems) {
                     try {
-                        // Nếu có variant_id, cập nhật stock của variant, không thì cập nhật product
                         if (item.variant_id) {
-                            await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/variants/${item.variant_id}`, {
+                            // Cập nhật stock của variant
+                            await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/variants/${item.variant_id}/stock`, {
                                 stock: (item.stock || 0) - item.quantity
                             });
                         } else {
+                            // Cập nhật stock và sold của sản phẩm chính
                             await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${item.id}`, {
                                 stock: (item.stock || 0) - item.quantity,
                                 sold: (item.sold || 0) + item.quantity
@@ -126,14 +127,28 @@ function Checkout() {
                 showToast("🎉 Đặt hàng thành công!", "success");
                 clearCart();
 
-                navigate("/complete", {
-                    state: {
-                        orderData: {
-                            ...orderData,
-                            order_code: res.data.order_code
+                // Phân biệt phương thức thanh toán
+                if (info.paymentMethod === 'PREPAY') {
+                    // Chuyển sang trang chuyển khoản
+                    navigate("/bank-transfer", {
+                        state: {
+                            orderData: {
+                                ...orderData,
+                                order_code: res.data.order_code
+                            }
                         }
-                    }
-                });
+                    });
+                } else {
+                    // COD: chuyển sang trang hoàn tất
+                    navigate("/complete", {
+                        state: {
+                            orderData: {
+                                ...orderData,
+                                order_code: res.data.order_code
+                            }
+                        }
+                    });
+                }
             }
         } catch (err) {
             console.error("Lỗi đặt hàng:", err);
