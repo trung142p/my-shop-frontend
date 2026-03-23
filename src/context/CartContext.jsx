@@ -16,7 +16,11 @@ const CartProvider = ({ children }) => {
         localStorage.setItem("cart", JSON.stringify(cart));
     }, [cart]);
 
-    // Tự động ẩn tooltip sau 5 giây
+    // Tạo key duy nhất cho sản phẩm (dựa trên id + variant_id)
+    const getItemKey = (item) => {
+        return item.variant_id ? `${item.id}_${item.variant_id}` : `${item.id}`;
+    };
+
     useEffect(() => {
         if (showTooltip) {
             const timer = setTimeout(() => {
@@ -27,24 +31,26 @@ const CartProvider = ({ children }) => {
     }, [showTooltip]);
 
     const addToCart = (product, quantity = 1) => {
-        if (product.stock <= 0) {
+        const stockToCheck = product.stock ?? 0;
+        if (stockToCheck <= 0) {
             showToast("Sản phẩm này đã hết hàng!", "error");
             return;
         }
 
         setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === product.id);
+            const itemKey = getItemKey(product);
+            const existingItem = prevCart.find((item) => getItemKey(item) === itemKey);
             const newQuantity = (existingItem?.quantity || 0) + quantity;
 
-            if (newQuantity > product.stock) {
-                showToast(`Chỉ còn ${product.stock} sản phẩm trong kho!`, "warning");
+            if (newQuantity > stockToCheck) {
+                showToast(`Chỉ còn ${stockToCheck} sản phẩm trong kho!`, "warning");
                 return prevCart;
             }
 
             let newCart;
             if (existingItem) {
                 newCart = prevCart.map((item) =>
-                    item.id === product.id
+                    getItemKey(item) === itemKey
                         ? { ...item, quantity: newQuantity }
                         : item
                 );
@@ -54,7 +60,6 @@ const CartProvider = ({ children }) => {
 
             showToast("Đã thêm vào giỏ hàng!", "success");
 
-            // Hiển thị tooltip hướng dẫn trên mobile
             if (window.innerWidth <= 768) {
                 setShowTooltip(true);
             }
@@ -63,28 +68,43 @@ const CartProvider = ({ children }) => {
         });
     };
 
-    const updateQuantity = (productId, newQty) => {
+    const updateQuantity = (productId, newQty, variantId = null) => {
         if (newQty < 1) return;
 
-        const item = cart.find(item => item.id === productId);
-        if (item && newQty > (item.stock || 0)) {
-            showToast(`Chỉ còn ${item.stock} sản phẩm trong kho!`, "warning");
-            return;
-        }
+        setCart(prev => {
+            const itemKey = variantId ? `${productId}_${variantId}` : `${productId}`;
+            const item = prev.find(item => getItemKey(item) === itemKey);
 
-        setCart(prev => prev.map(item =>
-            item.id === productId ? { ...item, quantity: newQty } : item
-        ));
+            if (item && newQty > (item.stock || 0)) {
+                showToast(`Chỉ còn ${item.stock} sản phẩm trong kho!`, "warning");
+                return prev;
+            }
+
+            return prev.map(item => {
+                const currentKey = getItemKey(item);
+                if (currentKey === itemKey) {
+                    return { ...item, quantity: newQty };
+                }
+                return item;
+            });
+        });
     };
 
-    const toggleCheck = (productId) => {
-        setCart(prev => prev.map(item =>
-            item.id === productId ? { ...item, checked: !item.checked } : item
-        ));
+    const toggleCheck = (productId, variantId = null) => {
+        setCart(prev => prev.map(item => {
+            const itemKey = variantId ? `${productId}_${variantId}` : `${productId}`;
+            if (getItemKey(item) === itemKey) {
+                return { ...item, checked: !item.checked };
+            }
+            return item;
+        }));
     };
 
-    const removeFromCart = (productId) => {
-        setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
+    const removeFromCart = (productId, variantId = null) => {
+        setCart((prevCart) => {
+            const itemKey = variantId ? `${productId}_${variantId}` : `${productId}`;
+            return prevCart.filter((item) => getItemKey(item) !== itemKey);
+        });
         showToast("Đã xóa khỏi giỏ hàng!", "info");
     };
 

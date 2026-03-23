@@ -87,7 +87,12 @@ function Checkout() {
                 addressDetail: info.addressDetail.trim()
             },
             items: selectedItems.map(item => ({
-                ...item,
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image,
+                coverImage: item.coverImage,
                 variant_id: item.variant_id,
                 variant_name: item.variant_name
             })),
@@ -99,13 +104,20 @@ function Checkout() {
             const res = await axios.post("https://my-shop-api-p7kz.onrender.com/api/orders", orderData);
 
             if (res.data.success) {
-                // Cập nhật stock và sold
+                // Cập nhật stock và sold cho từng sản phẩm (cập nhật đúng biến thể)
                 for (const item of selectedItems) {
                     try {
-                        await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${item.id}`, {
-                            stock: (item.stock || 0) - item.quantity,
-                            sold: (item.sold || 0) + item.quantity
-                        });
+                        // Nếu có variant_id, cập nhật stock của variant, không thì cập nhật product
+                        if (item.variant_id) {
+                            await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/variants/${item.variant_id}`, {
+                                stock: (item.stock || 0) - item.quantity
+                            });
+                        } else {
+                            await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${item.id}`, {
+                                stock: (item.stock || 0) - item.quantity,
+                                sold: (item.sold || 0) + item.quantity
+                            });
+                        }
                     } catch (err) {
                         console.error("Lỗi cập nhật sản phẩm:", err);
                     }
@@ -267,8 +279,8 @@ function Checkout() {
                 </div>
 
                 <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
-                    {selectedItems.map(item => (
-                        <div key={item.id} className="flex gap-4 items-center border-b pb-3 dark:border-gray-700">
+                    {selectedItems.map((item, index) => (
+                        <div key={`${item.id}-${item.variant_id || 'default'}-${index}`} className="flex gap-4 items-center border-b pb-3 dark:border-gray-700">
                             <img
                                 src={item.coverImage || item.image}
                                 alt={item.name}

@@ -11,6 +11,21 @@ function Cart() {
     const selectedItems = cart.filter(item => item.checked);
     const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
+    // Hàm xử lý toggleCheck với variant_id
+    const handleToggleCheck = (item) => {
+        toggleCheck(item.id, item.variant_id);
+    };
+
+    // Hàm xử lý updateQuantity với variant_id
+    const handleUpdateQuantity = (item, newQty) => {
+        updateQuantity(item.id, newQty, item.variant_id);
+    };
+
+    // Hàm xử lý removeFromCart với variant_id
+    const handleRemoveFromCart = (item) => {
+        removeFromCart(item.id, item.variant_id);
+    };
+
     return (
         <div className="max-w-4xl mx-auto p-4 py-10">
             <h1 className="text-2xl font-bold mb-8 border-b pb-4 text-gray-800 dark:text-white">{t('title')}</h1>
@@ -23,25 +38,19 @@ function Cart() {
             ) : (
                 <div className="space-y-4">
                     {cart.map((item) => (
-                        <div key={item.id} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border dark:border-gray-700">
-                            {/* Hàng trên: checkbox + ảnh + tên */}
+                        <div key={`${item.id}-${item.variant_id || 'default'}`} className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border dark:border-gray-700">
                             <div className="flex gap-3">
-                                {/* Checkbox */}
                                 <input
                                     type="checkbox"
                                     checked={item.checked}
-                                    onChange={() => toggleCheck(item.id)}
+                                    onChange={() => handleToggleCheck(item)}
                                     className="w-5 h-5 accent-pink-600 cursor-pointer mt-1 flex-shrink-0"
                                 />
-
-                                {/* Ảnh */}
                                 <img
                                     src={item.images?.[0] || item.image}
                                     className="w-16 h-16 object-cover rounded-md flex-shrink-0"
                                     alt={item.name}
                                 />
-
-                                {/* Tên và giá */}
                                 <div className="flex-1 min-w-0">
                                     <h3 className="font-medium text-gray-800 dark:text-gray-200 text-sm line-clamp-2">
                                         {item.name}
@@ -57,12 +66,10 @@ function Cart() {
                                 </div>
                             </div>
 
-                            {/* Hàng dưới: bộ tăng giảm + nút xóa */}
                             <div className="flex items-center justify-between mt-3 pl-8">
-                                {/* Bộ tăng giảm số lượng */}
                                 <div className="flex items-center border border-gray-200 dark:border-gray-600 rounded">
                                     <button
-                                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                        onClick={() => handleUpdateQuantity(item, item.quantity - 1)}
                                         className="px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
                                     >
                                         -
@@ -71,16 +78,15 @@ function Cart() {
                                         {item.quantity}
                                     </span>
                                     <button
-                                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                        onClick={() => handleUpdateQuantity(item, item.quantity + 1)}
                                         className="px-3 py-1 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
                                     >
                                         +
                                     </button>
                                 </div>
 
-                                {/* Nút xóa */}
                                 <button
-                                    onClick={() => removeFromCart(item.id)}
+                                    onClick={() => handleRemoveFromCart(item)}
                                     className="text-red-500 hover:text-red-700 text-sm flex items-center gap-1"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +98,6 @@ function Cart() {
                         </div>
                     ))}
 
-                    {/* Thanh tổng tiền */}
                     <div className="sticky bottom-0 bg-white dark:bg-gray-800 p-4 shadow-lg border-t dark:border-gray-700 mt-4 rounded-t-xl">
                         <div className="flex justify-between items-center mb-3">
                             <p className="text-gray-600 dark:text-gray-400 text-sm">
