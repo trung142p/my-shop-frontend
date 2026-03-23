@@ -10,7 +10,8 @@ function VariantManager({ productId }) {
         name: "",
         price: "",
         stock: "",
-        sku: ""
+        sku: "",
+        image: ""  // Thêm trường ảnh
     });
     const { showToast } = useToast();
 
@@ -32,12 +33,12 @@ function VariantManager({ productId }) {
     }, [productId]);
 
     const resetForm = () => {
-        setFormData({ name: "", price: "", stock: "", sku: "" });
+        setFormData({ name: "", price: "", stock: "", sku: "", image: "" });
         setEditingVariant(null);
     };
 
     const handleCreate = async (e) => {
-        e.preventDefault();
+        e.preventDefault();  // QUAN TRỌNG: chặn refresh trang
         if (!formData.name.trim()) {
             showToast("Vui lòng nhập tên biến thể!", "warning");
             return;
@@ -48,7 +49,8 @@ function VariantManager({ productId }) {
                 name: formData.name.trim(),
                 price: formData.price ? parseInt(formData.price) : null,
                 stock: formData.stock ? parseInt(formData.stock) : 0,
-                sku: formData.sku?.trim() || null
+                sku: formData.sku?.trim() || null,
+                image: formData.image?.trim() || null
             };
 
             const res = await axios.post(
@@ -59,12 +61,13 @@ function VariantManager({ productId }) {
             resetForm();
             showToast("Thêm biến thể thành công!", "success");
         } catch (err) {
+            console.error(err);
             showToast("Lỗi khi thêm biến thể!", "error");
         }
     };
 
     const handleUpdate = async (e) => {
-        e.preventDefault();
+        e.preventDefault();  // QUAN TRỌNG: chặn refresh trang
         if (!formData.name.trim()) {
             showToast("Vui lòng nhập tên biến thể!", "warning");
             return;
@@ -75,7 +78,8 @@ function VariantManager({ productId }) {
                 name: formData.name.trim(),
                 price: formData.price ? parseInt(formData.price) : null,
                 stock: formData.stock ? parseInt(formData.stock) : 0,
-                sku: formData.sku?.trim() || null
+                sku: formData.sku?.trim() || null,
+                image: formData.image?.trim() || null
             };
 
             const res = await axios.put(
@@ -86,6 +90,7 @@ function VariantManager({ productId }) {
             resetForm();
             showToast("Cập nhật biến thể thành công!", "success");
         } catch (err) {
+            console.error(err);
             showToast("Lỗi khi cập nhật biến thể!", "error");
         }
     };
@@ -98,6 +103,7 @@ function VariantManager({ productId }) {
             setVariants(variants.filter(v => v.id !== variant.id));
             showToast("Xóa biến thể thành công!", "success");
         } catch (err) {
+            console.error(err);
             showToast("Lỗi khi xóa biến thể!", "error");
         }
     };
@@ -108,7 +114,8 @@ function VariantManager({ productId }) {
             name: variant.name || "",
             price: variant.price || "",
             stock: variant.stock || "",
-            sku: variant.sku || ""
+            sku: variant.sku || "",
+            image: variant.image || ""
         });
     };
 
@@ -120,7 +127,7 @@ function VariantManager({ productId }) {
             </p>
 
             <form onSubmit={editingVariant ? handleUpdate : handleCreate} className="bg-gray-50 p-4 rounded-lg mb-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                     <input
                         type="text"
                         placeholder="Tên biến thể (VD: Màu đen)"
@@ -148,6 +155,13 @@ function VariantManager({ productId }) {
                         placeholder="Mã SKU (tùy chọn)"
                         value={formData.sku}
                         onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                        className="border p-2 rounded-lg text-sm"
+                    />
+                    <input
+                        type="text"
+                        placeholder="🔗 Ảnh biến thể (URL)"
+                        value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
                     />
                 </div>
@@ -181,6 +195,7 @@ function VariantManager({ productId }) {
                     <table className="w-full text-sm">
                         <thead className="bg-gray-100">
                             <tr>
+                                <th className="p-2 text-left">Ảnh</th>
                                 <th className="p-2 text-left">Tên biến thể</th>
                                 <th className="p-2 text-left">Giá</th>
                                 <th className="p-2 text-left">Tồn kho</th>
@@ -191,6 +206,20 @@ function VariantManager({ productId }) {
                         <tbody>
                             {variants.map((variant) => (
                                 <tr key={variant.id} className="border-b hover:bg-gray-50">
+                                    <td className="p-2">
+                                        {variant.image ? (
+                                            <img
+                                                src={variant.image}
+                                                alt={variant.name}
+                                                className="w-10 h-10 object-cover rounded"
+                                                onError={(e) => { e.target.src = "https://placehold.co/40x40?text=No+Image"; }}
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
+                                                Ảnh
+                                            </div>
+                                        )}
+                                    </td>
                                     <td className="p-2 font-medium">{variant.name}</td>
                                     <td className="p-2">
                                         {variant.price ? `${variant.price.toLocaleString()}₫` : 'Giá gốc'}

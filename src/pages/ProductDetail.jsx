@@ -12,6 +12,7 @@ function ProductDetail() {
     const [quantity, setQuantity] = useState(1);
     const [variants, setVariants] = useState([]);
     const [selectedVariant, setSelectedVariant] = useState(null);
+    const [variantImage, setVariantImage] = useState(null); // Thêm state cho ảnh biến thể
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
     const { t } = useTranslation('product');
@@ -68,11 +69,28 @@ function ProductDetail() {
             setVariants(res.data);
             if (res.data.length > 0) {
                 setSelectedVariant(res.data[0]);
+                // Nếu biến thể đầu tiên có ảnh, set làm ảnh chính
+                if (res.data[0].image) {
+                    setVariantImage(res.data[0].image);
+                }
             }
         } catch (err) {
             console.error("Lỗi lấy variants:", err);
         }
     };
+
+    // Hàm xử lý khi chọn biến thể
+    const handleSelectVariant = (variant) => {
+        setSelectedVariant(variant);
+        if (variant.image) {
+            setVariantImage(variant.image);
+        } else {
+            setVariantImage(null);
+        }
+    };
+
+    // Ảnh hiển thị chính (ưu tiên ảnh biến thể)
+    const displayImage = variantImage || mainImage;
 
     // Giá và tồn kho hiển thị (ưu tiên variant)
     const displayPrice = selectedVariant?.price || product?.price;
@@ -118,17 +136,38 @@ function ProductDetail() {
                                 </span>
                             </div>
                         )}
-                        <img src={mainImage} alt={product.name} className="max-w-full max-h-full object-contain" />
+                        {/* Hiển thị ảnh chính - ưu tiên ảnh biến thể */}
+                        <img src={displayImage} alt={product.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
+                        {/* Ảnh gallery từ sản phẩm */}
                         {allImages.map((img, index) => (
                             <img
                                 key={index}
                                 src={img}
-                                onClick={() => setMainImage(img)}
-                                className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 ${mainImage === img ? 'border-pink-500' : 'border-transparent'}`}
+                                onClick={() => {
+                                    setMainImage(img);
+                                    setVariantImage(null); // Reset ảnh biến thể khi chọn ảnh gallery
+                                }}
+                                className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 ${displayImage === img && !variantImage ? 'border-pink-500' : 'border-transparent'}`}
                                 alt="thumb"
                             />
+                        ))}
+                        {/* Nếu có ảnh biến thể, hiển thị thêm trong gallery */}
+                        {variants.map((variant) => (
+                            variant.image && (
+                                <img
+                                    key={`variant-${variant.id}`}
+                                    src={variant.image}
+                                    alt={variant.name}
+                                    onClick={() => {
+                                        setVariantImage(variant.image);
+                                        setSelectedVariant(variant);
+                                    }}
+                                    className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 ${variantImage === variant.image ? 'border-pink-500' : 'border-transparent'}`}
+                                    title={variant.name}
+                                />
+                            )
                         ))}
                     </div>
                 </div>
@@ -184,12 +223,19 @@ function ProductDetail() {
                                 {variants.map((variant) => (
                                     <button
                                         key={variant.id}
-                                        onClick={() => setSelectedVariant(variant)}
-                                        className={`px-4 py-2 rounded-full border transition-all ${selectedVariant?.id === variant.id
+                                        onClick={() => handleSelectVariant(variant)}
+                                        className={`px-4 py-2 rounded-full border transition-all flex items-center gap-2 ${selectedVariant?.id === variant.id
                                                 ? "border-pink-500 bg-pink-500 text-white"
                                                 : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
                                             }`}
                                     >
+                                        {variant.image && (
+                                            <img
+                                                src={variant.image}
+                                                alt={variant.name}
+                                                className="w-5 h-5 rounded-full object-cover"
+                                            />
+                                        )}
                                         {variant.name}
                                         {variant.price && variant.price !== product.price && (
                                             <span className="ml-1 text-xs">
