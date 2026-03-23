@@ -184,7 +184,37 @@ function ProductList({
               </div>
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
-
+              {/* Link CNBUY và OICHIN (chỉ admin thấy) */}
+              <div className="flex gap-2 mt-2">
+                {product.cnbuy_link && (
+                  <a
+                    href={product.cnbuy_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-500 hover:text-blue-700 underline flex items-center gap-1"
+                    title="Mua trên CNBUY"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    CNBUY
+                  </a>
+                )}
+                {product.oichin_link && (
+                  <a
+                    href={product.oichin_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-500 hover:text-green-700 underline flex items-center gap-1"
+                    title="Mua trên OICHIN"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    OICHIN
+                  </a>
+                )}
+              </div>
               <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed dark:border-gray-700">
                 <button
                   onClick={() => onEdit(product)}

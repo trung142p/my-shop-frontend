@@ -18,7 +18,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         function: "",
         size: "",
         stock: 0,
-        sold: 0
+        sold: 0,
+        cnbuy_link: "",   // Link CNBUY
+        oichin_link: ""   // Link OICHIN
     });
     const [savedProductId, setSavedProductId] = useState(null);
 
@@ -70,7 +72,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 function: specsFields.function,
                 size: specsFields.size,
                 stock: editProduct.stock || 0,
-                sold: editProduct.sold || 0
+                sold: editProduct.sold || 0,
+                cnbuy_link: editProduct.cnbuy_link || "",
+                oichin_link: editProduct.oichin_link || ""
             });
             setSavedProductId(editProduct.id);
         } else {
@@ -86,7 +90,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 function: "",
                 size: "",
                 stock: 0,
-                sold: 0
+                sold: 0,
+                cnbuy_link: "",
+                oichin_link: ""
             });
             setSavedProductId(null);
         }
@@ -127,7 +133,9 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             description: formData.description,
             specs: buildSpecsArray(),
             stock: Number(formData.stock),
-            sold: Number(formData.sold)
+            sold: Number(formData.sold),
+            cnbuy_link: formData.cnbuy_link || null,
+            oichin_link: formData.oichin_link || null
         };
 
         try {
@@ -175,6 +183,12 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng tồn kho" type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
+                </div>
+
+                {/* Link CNBUY và OICHIN */}
+                <div className="grid grid-cols-2 gap-4">
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Link CNBUY (nội bộ)" value={formData.cnbuy_link} onChange={e => setFormData({ ...formData, cnbuy_link: e.target.value })} />
+                    <input className="border p-2 rounded-lg text-sm" placeholder="Link OICHIN (nội bộ)" value={formData.oichin_link} onChange={e => setFormData({ ...formData, oichin_link: e.target.value })} />
                 </div>
 
                 <div className="space-y-2">
@@ -266,6 +280,40 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                         value={formData.sold}
                         onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })}
                     />
+                </div>
+            </div>
+
+            {/* Link CNBUY và OICHIN (nội bộ) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        🔗 Link CNBUY (nội bộ)
+                    </label>
+                    <input
+                        type="url"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                        placeholder="https://cnbuy.com/san-pham/..."
+                        value={formData.cnbuy_link}
+                        onChange={e => setFormData({ ...formData, cnbuy_link: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                        Link mua hàng trên CNBUY (chỉ admin thấy)
+                    </p>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        🔗 Link OICHIN (nội bộ)
+                    </label>
+                    <input
+                        type="url"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                        placeholder="https://oichin.com/san-pham/..."
+                        value={formData.oichin_link}
+                        onChange={e => setFormData({ ...formData, oichin_link: e.target.value })}
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                        Link mua hàng trên OICHIN (chỉ admin thấy)
+                    </p>
                 </div>
             </div>
 
