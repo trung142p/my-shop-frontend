@@ -203,9 +203,16 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     </div>
                 )}
 
+                {/* Ảnh chi tiết - dùng textarea */}
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh chi tiết (cách nhau bởi dấu phẩy):</label>
-                    <input className="w-full border p-2 rounded-lg text-sm" placeholder="URL1, URL2..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
+                    <textarea
+                        rows="3"
+                        className="w-full border p-2 rounded-lg text-sm resize-y"
+                        placeholder="URL1, URL2, URL3..."
+                        value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
+                        onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })}
+                    />
                 </div>
                 <textarea className="w-full border p-2 rounded-lg text-sm h-24" placeholder="Mô tả sản phẩm" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                 <div className="flex gap-2 pt-2">
@@ -327,10 +334,17 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 )}
             </div>
 
+            {/* Ảnh chi tiết - dùng textarea */}
             <div className="grid grid-cols-1 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🖼️ Ảnh chi tiết (cách nhau bởi dấu phẩy)</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="URL1, URL2, URL3..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
+                    <textarea
+                        rows="4"
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none resize-y"
+                        placeholder="URL1, URL2, URL3..."
+                        value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
+                        onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })}
+                    />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">📝 Mô tả sản phẩm</label>

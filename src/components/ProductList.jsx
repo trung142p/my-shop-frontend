@@ -21,6 +21,7 @@ function ProductList({
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [variantsCache, setVariantsCache] = useState({});
+  const [refreshKey, setRefreshKey] = useState(0);
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
   const { t } = useTranslation('home');
@@ -29,6 +30,7 @@ function ProductList({
     setLoading(true);
     try {
       const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+      console.log("Fetched products:", res.data.length);
       setProducts(res.data);
     } catch (err) {
       console.error("Lỗi kết nối Backend:", err);
@@ -39,7 +41,12 @@ function ProductList({
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [refreshKey]);
+
+  // Hàm để refresh danh sách (gọi từ bên ngoài nếu cần)
+  const refreshProducts = () => {
+    setRefreshKey(prev => prev + 1);
+  };
 
   // Lấy biến thể đầu tiên của sản phẩm (có cache)
   const getFirstVariant = async (productId) => {
@@ -59,19 +66,15 @@ function ProductList({
   };
 
   const handleAddToCart = async (product) => {
-    // Kiểm tra tồn kho cơ bản
     if (product.stock <= 0) {
       showToast("Sản phẩm này đã hết hàng!", "error");
       return;
     }
 
     let itemToAdd = { ...product, quantity: 1 };
-
-    // Kiểm tra nếu sản phẩm có biến thể
     const firstVariant = await getFirstVariant(product.id);
 
     if (firstVariant) {
-      // Nếu có biến thể, dùng biến thể đầu tiên
       itemToAdd = {
         ...product,
         variant_id: firstVariant.id,
@@ -80,7 +83,6 @@ function ProductList({
         stock: firstVariant.stock ?? product.stock
       };
 
-      // Kiểm tra tồn kho của biến thể
       if (firstVariant.stock <= 0) {
         showToast(`Biến thể "${firstVariant.name}" đã hết hàng!`, "error");
         return;
@@ -145,7 +147,7 @@ function ProductList({
       try {
         await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/products/${id}`);
         showToast("Đã xóa xong!", "success");
-        fetchProducts();
+        refreshProducts();
       } catch (err) {
         showToast("Lỗi khi xóa sản phẩm!", "error");
       }
@@ -162,13 +164,14 @@ function ProductList({
               key={product.id}
               className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
-              <div className="overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
+              {/* Link to product detail - click vào ảnh để xem chi tiết */}
+              <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
                 <img
                   src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-              </div>
+              </Link>
 
               <h3 className="text-sm font-bold text-gray-800 dark:text-white line-clamp-2 h-10 mb-1">
                 {product.name}
@@ -184,6 +187,7 @@ function ProductList({
               </div>
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
+
               {/* Link CNBUY và OICHIN (chỉ admin thấy) */}
               <div className="flex gap-2 mt-2">
                 {product.cnbuy_link && (
