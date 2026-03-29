@@ -21,7 +21,6 @@ function ProductList({
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [variantsCache, setVariantsCache] = useState({});
-  const [refreshKey, setRefreshKey] = useState(0);
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
   const { t } = useTranslation('home');
@@ -30,7 +29,9 @@ function ProductList({
     setLoading(true);
     try {
       const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-      console.log("Fetched products:", res.data.length);
+      console.log("=== FETCHED PRODUCTS ===");
+      console.log("Total products:", res.data.length);
+      console.log("Products list:", res.data.map(p => ({ id: p.id, name: p.name, category: p.category })));
       setProducts(res.data);
     } catch (err) {
       console.error("Lỗi kết nối Backend:", err);
@@ -41,12 +42,7 @@ function ProductList({
 
   useEffect(() => {
     fetchProducts();
-  }, [refreshKey]);
-
-  // Hàm để refresh danh sách (gọi từ bên ngoài nếu cần)
-  const refreshProducts = () => {
-    setRefreshKey(prev => prev + 1);
-  };
+  }, []);
 
   // Lấy biến thể đầu tiên của sản phẩm (có cache)
   const getFirstVariant = async (productId) => {
@@ -94,6 +90,11 @@ function ProductList({
 
   // Lọc và sắp xếp sản phẩm
   useEffect(() => {
+    console.log("=== FILTERING PRODUCTS ===");
+    console.log("Raw products count:", products.length);
+    console.log("Search term:", searchTerm);
+    console.log("Filter category:", filterCategory);
+
     let result = [...products];
 
     if (searchTerm && searchTerm.trim()) {
@@ -101,10 +102,12 @@ function ProductList({
       result = result.filter(product =>
         product.name?.toLowerCase().includes(term)
       );
+      console.log("After search filter:", result.length);
     }
 
     if (filterCategory && filterCategory !== "all") {
       result = result.filter(product => product.category === filterCategory);
+      console.log("After category filter:", result.length);
     }
 
     if (sortAlpha === "az") {
@@ -119,6 +122,7 @@ function ProductList({
       result.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
+    console.log("Final filtered products count:", result.length);
     setFilteredProducts(result);
     if (onPageChange) {
       onPageChange(1);
@@ -147,7 +151,7 @@ function ProductList({
       try {
         await axios.delete(`https://my-shop-api-p7kz.onrender.com/api/products/${id}`);
         showToast("Đã xóa xong!", "success");
-        refreshProducts();
+        fetchProducts();
       } catch (err) {
         showToast("Lỗi khi xóa sản phẩm!", "error");
       }
@@ -164,7 +168,6 @@ function ProductList({
               key={product.id}
               className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
-              {/* Link to product detail - click vào ảnh để xem chi tiết */}
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
                 <img
                   src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
@@ -188,7 +191,6 @@ function ProductList({
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
-              {/* Link CNBUY và OICHIN (chỉ admin thấy) */}
               <div className="flex gap-2 mt-2">
                 {product.cnbuy_link && (
                   <a
@@ -273,6 +275,19 @@ function ProductList({
   }
 
   // ===== SHOP VIEW =====
+  // Debug: log số lượng sản phẩm sẽ hiển thị
+  console.log("=== SHOP VIEW RENDER ===");
+  console.log("Paginated products count:", paginatedProducts.length);
+  console.log("Paginated products:", paginatedProducts.map(p => ({ id: p.id, name: p.name })));
+
+  if (paginatedProducts.length === 0 && !loading) {
+    return (
+      <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+        🔍 Không tìm thấy sản phẩm nào
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
@@ -349,12 +364,6 @@ function ProductList({
           </div>
         ))}
       </div>
-
-      {filteredProducts.length === 0 && (
-        <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-          🔍 Không tìm thấy sản phẩm nào
-        </div>
-      )}
     </div>
   );
 }
