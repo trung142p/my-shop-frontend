@@ -27,6 +27,7 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [shopCurrentPage, setShopCurrentPage] = useState(1);
   const { t } = useTranslation('home');
 
   return (
@@ -52,7 +53,7 @@ function App() {
                   </p>
                 </div>
 
-                {/* THÊM THANH TÌM KIẾM VÀO ĐÂY */}
+                {/* Thanh tìm kiếm */}
                 <div className="mb-8 max-w-md mx-auto">
                   <div className="relative">
                     <input
@@ -78,7 +79,12 @@ function App() {
                   )}
                 </div>
 
-                <ProductList searchTerm={searchTerm} />
+                <ProductList
+                  searchTerm={searchTerm}
+                  currentPage={shopCurrentPage}
+                  onPageChange={setShopCurrentPage}
+                  itemsPerPage={16}
+                />
               </div>
             </>
           } />

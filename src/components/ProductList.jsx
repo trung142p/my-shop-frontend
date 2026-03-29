@@ -9,7 +9,7 @@ import ProductSkeleton from "./ProductSkeleton";
 function ProductList({
   admin = false,
   onEdit,
-  itemsPerPage = 8,
+  itemsPerPage = 16,
   currentPage = 1,
   onPageChange,
   searchTerm = "",
@@ -137,6 +137,76 @@ function ProductList({
     }
   };
 
+  // Component phân trang dạng số
+  const Pagination = ({ currentPage, totalPages, onPageChange }) => {
+    const maxVisible = 9;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex justify-center gap-2 mt-8 flex-wrap">
+        {/* Nút đầu trang */}
+        <button
+          onClick={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          «
+        </button>
+
+        {/* Nút lùi */}
+        <button
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ‹
+        </button>
+
+        {/* Các số trang */}
+        {pages.map(page => (
+          <button
+            key={page}
+            onClick={() => onPageChange(page)}
+            className={`px-3 py-1 rounded border transition ${currentPage === page
+                ? "bg-pink-600 text-white border-pink-600"
+                : "hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+              }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Nút tới */}
+        <button
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          ›
+        </button>
+
+        {/* Nút cuối trang */}
+        <button
+          onClick={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          »
+        </button>
+      </div>
+    );
+  };
+
   // ===== ADMIN VIEW =====
   if (admin) {
     if (loading) {
@@ -233,25 +303,11 @@ function ProductList({
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center gap-2 mt-4">
-            <button
-              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
-              className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ←
-            </button>
-            <span className="px-4 py-1 text-sm dark:text-white">
-              Trang {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              →
-            </button>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
         )}
 
         {filteredProducts.length === 0 && (
@@ -267,14 +323,14 @@ function ProductList({
   if (loading) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(16)].map((_, i) => (
           <ProductSkeleton key={i} />
         ))}
       </div>
     );
   }
 
-  // Shop view: hiển thị tất cả sản phẩm (không lọc ẩn)
+  // Shop view: hiển thị tất cả sản phẩm
   const shopProducts = products;
   const shopTotalPages = Math.ceil(shopProducts.length / itemsPerPage);
   const shopPaginatedProducts = shopProducts.slice(
@@ -367,27 +423,13 @@ function ProductList({
         ))}
       </div>
 
-      {/* Phân trang cho shop view */}
+      {/* Phân trang dạng số cho shop view */}
       {shopTotalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-8">
-          <button
-            onClick={() => onPageChange && onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
-            className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            ←
-          </button>
-          <span className="px-4 py-1 text-sm dark:text-white">
-            Trang {currentPage} / {shopTotalPages}
-          </span>
-          <button
-            onClick={() => onPageChange && onPageChange(Math.min(shopTotalPages, currentPage + 1))}
-            disabled={currentPage === shopTotalPages}
-            className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            →
-          </button>
-        </div>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={shopTotalPages}
+          onPageChange={onPageChange}
+        />
       )}
     </div>
   );
