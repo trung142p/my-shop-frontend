@@ -12,7 +12,8 @@ function CategoryPage() {
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
 
-    const getDisplayName = (slug) => {
+    // Map slug sang tên hiển thị (để so sánh với category trong database)
+    const getCategoryDisplayName = (slug) => {
         const map = {
             "am-dao-gia": "Âm đạo giả",
             "duong-vat-gia": "Dương vật giả",
@@ -31,15 +32,16 @@ function CategoryPage() {
         return map[slug] || slug;
     };
 
-    const displayName = getDisplayName(categoryName);
+    const displayName = getCategoryDisplayName(categoryName);
 
     useEffect(() => {
         const fetchProductsByCategory = async () => {
             setLoading(true);
             try {
                 const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+                // Lọc sản phẩm theo tên hiển thị (tiếng Việt có dấu)
                 const filtered = res.data.filter(
-                    (product) => product.category === categoryName
+                    (product) => product.category === displayName
                 );
                 setProducts(filtered);
             } catch (err) {
@@ -51,7 +53,7 @@ function CategoryPage() {
         };
 
         fetchProductsByCategory();
-    }, [categoryName, showToast]);
+    }, [categoryName, displayName, showToast]);
 
     const handleAddToCart = (product) => {
         if (product.stock <= 0) {
@@ -59,7 +61,6 @@ function CategoryPage() {
             return;
         }
         addToCart(product, 1);
-        // Toast sẽ hiển thị từ CartContext
     };
 
     if (loading) {
@@ -115,16 +116,15 @@ function CategoryPage() {
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
+                            className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
                         >
                             <Link to={`/product/${product.id}`} className="block overflow-hidden">
-                                <div className="relative aspect-square bg-gray-100">
+                                <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
                                     <img
                                         src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
                                         alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    {/* Badge hết hàng */}
                                     {(product.stock || 0) <= 0 && (
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                             <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
@@ -132,17 +132,14 @@ function CategoryPage() {
                                             </span>
                                         </div>
                                     )}
-                                    {/* Badge giảm giá -15% */}
                                     <div className="absolute top-3 left-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                                         -15%
                                     </div>
-                                    {/* Badge số lượng còn lại */}
                                     {(product.stock || 0) > 0 && (product.stock || 0) <= 5 && (
                                         <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                                             Còn {product.stock}
                                         </div>
                                     )}
-                                    {/* Overlay xem nhanh */}
                                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                         <span className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
                                             Xem chi tiết
@@ -153,12 +150,11 @@ function CategoryPage() {
 
                             <div className="p-4">
                                 <Link to={`/product/${product.id}`}>
-                                    <h3 className="font-semibold text-gray-800 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">
+                                    <h3 className="font-semibold text-gray-800 dark:text-gray-200 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">
                                         {product.name}
                                     </h3>
                                 </Link>
 
-                                {/* Giá */}
                                 <div className="mt-2 flex items-center gap-2">
                                     <span className="text-xl font-bold text-pink-600">
                                         {Number(product.price).toLocaleString()}₫
@@ -168,8 +164,7 @@ function CategoryPage() {
                                     </span>
                                 </div>
 
-                                {/* Stock và Sold */}
-                                <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
                                     <span>📦 Còn lại: {product.stock || 0}</span>
                                     <span>❤️ Đã bán: {product.sold || 0}</span>
                                 </div>
@@ -178,8 +173,8 @@ function CategoryPage() {
                                     onClick={() => handleAddToCart(product)}
                                     disabled={(product.stock || 0) <= 0}
                                     className={`mt-3 w-full py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
-                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                            : "bg-gray-900 hover:bg-pink-600 text-white"
+                                        ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-900 dark:bg-gray-700 hover:bg-pink-600 text-white"
                                         }`}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
