@@ -9,7 +9,7 @@ import ProductSkeleton from "./ProductSkeleton";
 function ProductList({
   admin = false,
   onEdit,
-  itemsPerPage = 6,
+  itemsPerPage = 8,
   currentPage = 1,
   onPageChange,
   searchTerm = "",
@@ -274,23 +274,21 @@ function ProductList({
     );
   }
 
-  // Lọc sản phẩm: chỉ hiển thị sản phẩm chưa bị ẩn và có stock > 0 (hoặc stock >= 0 tùy ý)
-  const visibleProducts = products.filter(p => !p.is_hidden);
+  // Shop view: hiển thị tất cả sản phẩm (không lọc ẩn)
+  const shopProducts = products;
+  const shopTotalPages = Math.ceil(shopProducts.length / itemsPerPage);
+  const shopPaginatedProducts = shopProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  if (visibleProducts.length === 0) {
+  if (shopProducts.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500 dark:text-gray-400">
         🔍 Không tìm thấy sản phẩm nào
       </div>
     );
   }
-
-  // Phân trang cho shop view
-  const shopTotalPages = Math.ceil(visibleProducts.length / itemsPerPage);
-  const shopPaginatedProducts = visibleProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
 
   return (
     <div>
@@ -368,6 +366,29 @@ function ProductList({
           </div>
         ))}
       </div>
+
+      {/* Phân trang cho shop view */}
+      {shopTotalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-8">
+          <button
+            onClick={() => onPageChange && onPageChange(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            ←
+          </button>
+          <span className="px-4 py-1 text-sm dark:text-white">
+            Trang {currentPage} / {shopTotalPages}
+          </span>
+          <button
+            onClick={() => onPageChange && onPageChange(Math.min(shopTotalPages, currentPage + 1))}
+            disabled={currentPage === shopTotalPages}
+            className="px-3 py-1 rounded border hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
