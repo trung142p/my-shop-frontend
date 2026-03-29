@@ -29,9 +29,7 @@ function ProductList({
     setLoading(true);
     try {
       const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-      console.log("=== FETCHED PRODUCTS ===");
-      console.log("Total products:", res.data.length);
-      console.log("Products list:", res.data.map(p => ({ id: p.id, name: p.name, category: p.category })));
+      console.log("Fetched products:", res.data.length);
       setProducts(res.data);
     } catch (err) {
       console.error("Lỗi kết nối Backend:", err);
@@ -44,7 +42,6 @@ function ProductList({
     fetchProducts();
   }, []);
 
-  // Lấy biến thể đầu tiên của sản phẩm (có cache)
   const getFirstVariant = async (productId) => {
     if (variantsCache[productId] !== undefined) {
       return variantsCache[productId];
@@ -90,11 +87,6 @@ function ProductList({
 
   // Lọc và sắp xếp sản phẩm
   useEffect(() => {
-    console.log("=== FILTERING PRODUCTS ===");
-    console.log("Raw products count:", products.length);
-    console.log("Search term:", searchTerm);
-    console.log("Filter category:", filterCategory);
-
     let result = [...products];
 
     if (searchTerm && searchTerm.trim()) {
@@ -102,12 +94,10 @@ function ProductList({
       result = result.filter(product =>
         product.name?.toLowerCase().includes(term)
       );
-      console.log("After search filter:", result.length);
     }
 
     if (filterCategory && filterCategory !== "all") {
       result = result.filter(product => product.category === filterCategory);
-      console.log("After category filter:", result.length);
     }
 
     if (sortAlpha === "az") {
@@ -122,7 +112,6 @@ function ProductList({
       result.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
-    console.log("Final filtered products count:", result.length);
     setFilteredProducts(result);
     if (onPageChange) {
       onPageChange(1);
@@ -134,17 +123,6 @@ function ProductList({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  if (loading) {
-    const skeletonCount = admin ? 8 : 8;
-    return (
-      <div className={`grid ${admin ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4" : "grid-cols-2 md:grid-cols-4"} gap-4 md:gap-6`}>
-        {[...Array(skeletonCount)].map((_, i) => (
-          <ProductSkeleton key={i} />
-        ))}
-      </div>
-    );
-  }
 
   const handleDelete = async (id) => {
     if (window.confirm("Trung có chắc muốn xóa sản phẩm này không?")) {
@@ -160,6 +138,16 @@ function ProductList({
 
   // ===== ADMIN VIEW =====
   if (admin) {
+    if (loading) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <ProductSkeleton key={i} />
+          ))}
+        </div>
+      );
+    }
+
     return (
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -275,12 +263,17 @@ function ProductList({
   }
 
   // ===== SHOP VIEW =====
-  // Debug: log số lượng sản phẩm sẽ hiển thị
-  console.log("=== SHOP VIEW RENDER ===");
-  console.log("Paginated products count:", paginatedProducts.length);
-  console.log("Paginated products:", paginatedProducts.map(p => ({ id: p.id, name: p.name })));
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {[...Array(8)].map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
 
-  if (paginatedProducts.length === 0 && !loading) {
+  if (paginatedProducts.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500 dark:text-gray-400">
         🔍 Không tìm thấy sản phẩm nào
