@@ -20,13 +20,13 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         stock: 0,
         sold: 0,
         cnbuy_link: "",
-        oichin_link: ""
+        oichin_link: "",
+        is_hidden: false
     });
     const [savedProductId, setSavedProductId] = useState(null);
 
     const { showToast } = useToast();
 
-    // Hàm chuyển đổi từ specs array sang các trường riêng
     const convertSpecsToFields = (specs) => {
         const fields = {
             brand: "",
@@ -55,7 +55,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         return fields;
     };
 
-    // Đồng bộ khi sửa sản phẩm
     useEffect(() => {
         if (editProduct) {
             const specsFields = convertSpecsToFields(editProduct.specs);
@@ -74,7 +73,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 stock: editProduct.stock || 0,
                 sold: editProduct.sold || 0,
                 cnbuy_link: editProduct.cnbuy_link || "",
-                oichin_link: editProduct.oichin_link || ""
+                oichin_link: editProduct.oichin_link || "",
+                is_hidden: editProduct.is_hidden || false
             });
             setSavedProductId(editProduct.id);
         } else {
@@ -92,13 +92,13 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 stock: 0,
                 sold: 0,
                 cnbuy_link: "",
-                oichin_link: ""
+                oichin_link: "",
+                is_hidden: false
             });
             setSavedProductId(null);
         }
     }, [editProduct]);
 
-    // Chuyển đổi từ 4 trường sang mảng specs
     const buildSpecsArray = () => {
         const specs = [];
         if (formData.brand && formData.brand.trim()) {
@@ -135,7 +135,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             stock: Number(formData.stock),
             sold: Number(formData.sold),
             cnbuy_link: formData.cnbuy_link || null,
-            oichin_link: formData.oichin_link || null
+            oichin_link: formData.oichin_link || null,
+            is_hidden: formData.is_hidden || false
         };
 
         try {
@@ -171,7 +172,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input className="border p-2 rounded-lg text-sm" placeholder="Ảnh đại diện URL" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                 </div>
 
-                {/* 4 thông số kỹ thuật */}
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Thương hiệu" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Chất liệu" value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
@@ -179,13 +179,22 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input className="border p-2 rounded-lg text-sm" placeholder="Kích thước" value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
                 </div>
 
-                {/* Stock và Sold */}
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng tồn kho" type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
                 </div>
 
-                {/* Hiển thị link CNBUY và OICHIN (chỉ xem, không sửa) */}
+                {/* Checkbox ẩn sản phẩm */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={formData.is_hidden}
+                        onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })}
+                        className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
+                    />
+                    <span className="text-sm text-gray-600">🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)</span>
+                </label>
+
                 {formData.cnbuy_link && (
                     <div className="bg-gray-50 p-2 rounded-lg">
                         <label className="text-[10px] font-bold text-gray-400 uppercase">Link CNBUY:</label>
@@ -203,7 +212,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     </div>
                 )}
 
-                {/* Ảnh chi tiết - dùng textarea */}
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh chi tiết (cách nhau bởi dấu phẩy):</label>
                     <textarea
@@ -224,7 +232,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     )}
                 </div>
 
-                {/* VariantManager - chỉ hiển thị khi đã có productId */}
                 {savedProductId && (
                     <div className="mt-6 border-t pt-4">
                         <VariantManager productId={savedProductId} />
@@ -258,7 +265,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* 4 thông số kỹ thuật */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label>
@@ -278,7 +284,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* Stock và Sold */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">📦 Số lượng tồn kho</label>
@@ -302,39 +307,40 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* Hiển thị link CNBUY và OICHIN (chỉ xem, không sửa) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {formData.cnbuy_link && (
-                    <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link CNBUY</label>
-                        <a
-                            href={formData.cnbuy_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all"
-                        >
-                            {formData.cnbuy_link}
-                        </a>
-                        <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
-                    </div>
-                )}
-                {formData.oichin_link && (
-                    <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link OICHIN</label>
-                        <a
-                            href={formData.oichin_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all"
-                        >
-                            {formData.oichin_link}
-                        </a>
-                        <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
-                    </div>
-                )}
+            {/* Checkbox ẩn sản phẩm */}
+            <div className="grid grid-cols-1 gap-6">
+                <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        checked={formData.is_hidden}
+                        onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })}
+                        className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)
+                    </span>
+                </label>
             </div>
 
-            {/* Ảnh chi tiết - dùng textarea */}
+            {formData.cnbuy_link && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link CNBUY</label>
+                    <a href={formData.cnbuy_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all">
+                        {formData.cnbuy_link}
+                    </a>
+                    <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
+                </div>
+            )}
+            {formData.oichin_link && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link OICHIN</label>
+                    <a href={formData.oichin_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all">
+                        {formData.oichin_link}
+                    </a>
+                    <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🖼️ Ảnh chi tiết (cách nhau bởi dấu phẩy)</label>
@@ -363,7 +369,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 )}
             </div>
 
-            {/* VariantManager - chỉ hiển thị khi đã có productId */}
             {savedProductId && (
                 <div className="mt-6 border-t pt-6">
                     <VariantManager productId={savedProductId} />

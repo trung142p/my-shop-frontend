@@ -29,7 +29,6 @@ function ProductList({
     setLoading(true);
     try {
       const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-      console.log("Fetched products:", res.data.length);
       setProducts(res.data);
     } catch (err) {
       console.error("Lỗi kết nối Backend:", err);
@@ -85,8 +84,10 @@ function ProductList({
     addToCart(itemToAdd, 1);
   };
 
-  // Lọc và sắp xếp sản phẩm
+  // Lọc và sắp xếp sản phẩm cho admin view
   useEffect(() => {
+    if (!admin) return;
+
     let result = [...products];
 
     if (searchTerm && searchTerm.trim()) {
@@ -116,10 +117,10 @@ function ProductList({
     if (onPageChange) {
       onPageChange(1);
     }
-  }, [products, searchTerm, filterCategory, sortOrder, sortAlpha]);
+  }, [products, searchTerm, filterCategory, sortOrder, sortAlpha, admin]);
 
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = filteredProducts.slice(
+  const totalPages = Math.ceil((admin ? filteredProducts : products).length / itemsPerPage);
+  const paginatedProducts = (admin ? filteredProducts : products).slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -273,7 +274,10 @@ function ProductList({
     );
   }
 
-  if (paginatedProducts.length === 0) {
+  // Lọc sản phẩm: chỉ hiển thị sản phẩm chưa bị ẩn và có stock > 0 (hoặc stock >= 0 tùy ý)
+  const visibleProducts = products.filter(p => !p.is_hidden);
+
+  if (visibleProducts.length === 0) {
     return (
       <div className="text-center py-10 text-gray-500 dark:text-gray-400">
         🔍 Không tìm thấy sản phẩm nào
@@ -281,10 +285,17 @@ function ProductList({
     );
   }
 
+  // Phân trang cho shop view
+  const shopTotalPages = Math.ceil(visibleProducts.length / itemsPerPage);
+  const shopPaginatedProducts = visibleProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-        {paginatedProducts.map((product) => (
+        {shopPaginatedProducts.map((product) => (
           <div
             key={product.id}
             className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
