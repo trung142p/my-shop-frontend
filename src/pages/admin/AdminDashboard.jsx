@@ -454,15 +454,23 @@ function AdminDashboard() {
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                                 onToggleHidden={async (product) => {
+                                    // Cập nhật UI ngay lập tức (optimistic update)
+                                    const newHiddenState = !product.is_hidden;
+
+                                    // Cập nhật trực tiếp trong DOM qua state của ProductList
+                                    // Cách này cần ProductList nhận prop `externalProducts`
+
+                                    // Gọi API
                                     try {
                                         await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${product.id}`, {
-                                            is_hidden: !product.is_hidden
+                                            is_hidden: newHiddenState
                                         });
-                                        // Cập nhật trực tiếp state thay vì reload toàn bộ
+                                        // Chỉ refresh nhẹ, không reload toàn bộ
                                         setRefresh(prev => prev + 1);
-                                        showToast(product.is_hidden ? "✅ Đã hiển thị sản phẩm!" : "🔒 Đã ẩn sản phẩm!", "success");
+                                        showToast(newHiddenState ? "🔒 Đã ẩn sản phẩm!" : "✅ Đã hiển thị sản phẩm!", "success");
                                     } catch (err) {
                                         showToast("Lỗi cập nhật!", "error");
+                                        setRefresh(prev => prev + 1); // Refresh lại để đồng bộ
                                     }
                                 }}
                                 itemsPerPage={productsPerPage}
