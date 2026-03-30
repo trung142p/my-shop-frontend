@@ -9,6 +9,8 @@ import ProductSkeleton from "./ProductSkeleton";
 function ProductList({
   admin = false,
   onEdit,
+  adjustMode = false,
+  onToggleHidden = null,
   itemsPerPage = 16,
   currentPage = 1,
   onPageChange,
@@ -154,7 +156,6 @@ function ProductList({
 
     return (
       <div className="flex justify-center gap-2 mt-8 flex-wrap">
-        {/* Nút đầu trang */}
         <button
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
@@ -162,8 +163,6 @@ function ProductList({
         >
           «
         </button>
-
-        {/* Nút lùi */}
         <button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
@@ -171,8 +170,6 @@ function ProductList({
         >
           ‹
         </button>
-
-        {/* Các số trang */}
         {pages.map(page => (
           <button
             key={page}
@@ -185,8 +182,6 @@ function ProductList({
             {page}
           </button>
         ))}
-
-        {/* Nút tới */}
         <button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
@@ -194,8 +189,6 @@ function ProductList({
         >
           ›
         </button>
-
-        {/* Nút cuối trang */}
         <button
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
@@ -250,6 +243,7 @@ function ProductList({
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
+              {/* Link CNBUY và OICHIN */}
               <div className="flex gap-2 mt-2">
                 {product.cnbuy_link && (
                   <a
@@ -280,20 +274,44 @@ function ProductList({
                   </a>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed dark:border-gray-700">
-                <button
-                  onClick={() => onEdit(product)}
-                  className="bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
-                >
-                  🛠️ Sửa
-                </button>
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  className="bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
-                >
-                  🗑️ Xóa
-                </button>
-              </div>
+
+              {/* adjustMode: hiển thị cần gạt, ngược lại hiển thị nút Sửa/Xóa */}
+              {adjustMode ? (
+                <div className="flex justify-between items-center mt-3 pt-3 border-t border-dashed dark:border-gray-700">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={!product.is_hidden}
+                      onChange={() => onToggleHidden && onToggleHidden(product)}
+                      className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500"
+                    />
+                    <span className="text-xs font-medium">
+                      {product.is_hidden ? "🔒 Đã ẩn" : "🔓 Hiển thị"}
+                    </span>
+                  </label>
+                  <button
+                    onClick={() => onEdit(product)}
+                    className="text-blue-500 hover:text-blue-700 text-xs"
+                  >
+                    ✏️ Sửa
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-dashed dark:border-gray-700">
+                  <button
+                    onClick={() => onEdit(product)}
+                    className="bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 py-2 rounded-lg text-xs font-bold hover:bg-blue-500 hover:text-white transition"
+                  >
+                    🛠️ Sửa
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    className="bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition"
+                  >
+                    🗑️ Xóa
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -330,7 +348,6 @@ function ProductList({
     );
   }
 
-  // Shop view: hiển thị tất cả sản phẩm
   const shopProducts = products;
   const shopTotalPages = Math.ceil(shopProducts.length / itemsPerPage);
   const shopPaginatedProducts = shopProducts.slice(
@@ -423,7 +440,6 @@ function ProductList({
         ))}
       </div>
 
-      {/* Phân trang dạng số cho shop view */}
       {shopTotalPages > 1 && (
         <Pagination
           currentPage={currentPage}

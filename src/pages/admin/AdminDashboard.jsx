@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import { useToast } from "../../context/ToastContext";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -18,6 +19,7 @@ function AdminDashboard() {
     const [filterStatus, setFilterStatus] = useState("all");
     const [searchTerm, setSearchTerm] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
+    const { showToast } = useToast();
 
     // Phân trang cho đơn hàng
     const [orderCurrentPage, setOrderCurrentPage] = useState(1);
@@ -25,7 +27,7 @@ function AdminDashboard() {
 
     // Phân trang cho sản phẩm
     const [productCurrentPage, setProductCurrentPage] = useState(1);
-    const productsPerPage = 8;
+    const productsPerPage = 16;
 
     // Tìm kiếm và lọc sản phẩm
     const [searchProductTerm, setSearchProductTerm] = useState("");
@@ -118,7 +120,6 @@ function AdminDashboard() {
         setOrderCurrentPage(1);
     }, [filterStatus, searchTerm]);
 
-    // Chart data
     const revenueChartData = {
         labels: stats.last7Days.map(d => d.slice(5)),
         datasets: [
@@ -155,11 +156,11 @@ function AdminDashboard() {
         });
     };
 
-    // Menu items
     const menuItems = [
         { id: "products", label: "📦 Sản phẩm", icon: "📦" },
         { id: "orders", label: "📑 Đơn hàng", icon: "📑" },
         { id: "stats", label: "📊 Thống kê", icon: "📊" },
+        { id: "adjust", label: "⚙️ Điều chỉnh", icon: "⚙️" },
         { id: "logout", label: "🚪 Đăng xuất", icon: "🚪" },
     ];
 
@@ -172,10 +173,8 @@ function AdminDashboard() {
         }
     };
 
-    // Categories list cho filter
     const categoriesList = ["Âm đạo giả", "Dương vật giả", "Cốc thủ dâm", "Trứng rung tình yêu", "Máy thủ dâm bú mút", "Máy massage tình yêu", "Vòng đeo dương vật", "Đồ chơi hậu môn", "Máy tập dương vật", "Đồ chơi SM", "Bao cao su", "Đồ lót sexy", "Gel bôi trơn"];
 
-    // Hàm reset bộ lọc
     const resetFilters = () => {
         setSearchProductTerm("");
         setFilterCategory("all");
@@ -183,6 +182,110 @@ function AdminDashboard() {
         setSortAlpha("");
         setProductCurrentPage(1);
     };
+
+    // Component bộ lọc dùng chung
+    const FilterBar = () => (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">🔍 Tìm kiếm & Lọc sản phẩm</h2>
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="🔍 Tìm kiếm sản phẩm theo tên..."
+                    value={searchProductTerm}
+                    onChange={(e) => setSearchProductTerm(e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                />
+            </div>
+            <div className="flex flex-wrap gap-3 items-center">
+                <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                >
+                    <option value="all">📁 Tất cả danh mục</option>
+                    {categoriesList.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
+                <button
+                    onClick={() => {
+                        if (sortAlpha === "az") {
+                            setSortAlpha("za");
+                            setSortOrder("");
+                        } else if (sortAlpha === "za") {
+                            setSortAlpha("");
+                        } else {
+                            setSortAlpha("az");
+                            setSortOrder("");
+                        }
+                    }}
+                    className={`px-4 py-2 rounded-lg border transition-all duration-200 flex items-center gap-2 ${sortAlpha === "az" || sortAlpha === "za"
+                        ? "bg-pink-600 text-white border-pink-600"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                        }`}
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                    </svg>
+                    {sortAlpha === "az" ? "A → Z" : sortAlpha === "za" ? "Z → A" : "A-Z"}
+                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => {
+                            if (sortOrder === "asc") {
+                                setSortOrder("desc");
+                                setSortAlpha("");
+                            } else if (sortOrder === "desc") {
+                                setSortOrder("");
+                            } else {
+                                setSortOrder("asc");
+                                setSortAlpha("");
+                            }
+                        }}
+                        className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "asc"
+                            ? "bg-pink-600 text-white border-pink-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                            }`}
+                        title="Giá tăng dần"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => {
+                            if (sortOrder === "desc") {
+                                setSortOrder("asc");
+                                setSortAlpha("");
+                            } else if (sortOrder === "asc") {
+                                setSortOrder("");
+                            } else {
+                                setSortOrder("desc");
+                                setSortAlpha("");
+                            }
+                        }}
+                        className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "desc"
+                            ? "bg-pink-600 text-white border-pink-600"
+                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
+                            }`}
+                        title="Giá giảm dần"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4l4 4m0 0l4-4m-4 4V4" />
+                        </svg>
+                    </button>
+                </div>
+                {(searchProductTerm || filterCategory !== "all" || sortOrder || sortAlpha) && (
+                    <button
+                        onClick={resetFilters}
+                        className="px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50 transition"
+                    >
+                        🔄 Xóa bộ lọc
+                    </button>
+                )}
+            </div>
+        </div>
+    );
 
     return (
         <div className="min-h-screen bg-[#f8f9fa]">
@@ -302,7 +405,6 @@ function AdminDashboard() {
                         </div>
                     ) : activeTab === "products" ? (
                         <div className="space-y-8">
-                            {/* Form thêm/sửa sản phẩm */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                                 <h2 className="text-xl font-bold text-gray-800 mb-4 pb-2 border-b">
                                     {editProduct ? "✏️ Chỉnh sửa sản phẩm" : "➕ Thêm sản phẩm mới"}
@@ -314,121 +416,7 @@ function AdminDashboard() {
                                     compact={false}
                                 />
                             </div>
-
-                            {/* Thanh tìm kiếm và bộ lọc sản phẩm */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                                <h2 className="text-lg font-bold text-gray-800 mb-4">🔍 Tìm kiếm & Lọc sản phẩm</h2>
-
-                                {/* Ô tìm kiếm */}
-                                <div className="mb-4">
-                                    <input
-                                        type="text"
-                                        placeholder="🔍 Tìm kiếm sản phẩm theo tên..."
-                                        value={searchProductTerm}
-                                        onChange={(e) => setSearchProductTerm(e.target.value)}
-                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
-                                    />
-                                </div>
-
-                                {/* Các bộ lọc */}
-                                <div className="flex flex-wrap gap-3 items-center">
-                                    {/* Lọc theo danh mục */}
-                                    <select
-                                        value={filterCategory}
-                                        onChange={(e) => setFilterCategory(e.target.value)}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
-                                    >
-                                        <option value="all">📁 Tất cả danh mục</option>
-                                        {categoriesList.map(cat => (
-                                            <option key={cat} value={cat}>{cat}</option>
-                                        ))}
-                                    </select>
-
-                                    {/* Sắp xếp theo chữ cái A-Z / Z-A */}
-                                    <button
-                                        onClick={() => {
-                                            if (sortAlpha === "az") {
-                                                setSortAlpha("za");
-                                                setSortOrder("");
-                                            } else if (sortAlpha === "za") {
-                                                setSortAlpha("");
-                                            } else {
-                                                setSortAlpha("az");
-                                                setSortOrder("");
-                                            }
-                                        }}
-                                        className={`px-4 py-2 rounded-lg border transition-all duration-200 flex items-center gap-2 ${sortAlpha === "az" || sortAlpha === "za"
-                                            ? "bg-pink-600 text-white border-pink-600"
-                                            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                                            }`}
-                                    >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                        </svg>
-                                        {sortAlpha === "az" ? "A → Z" : sortAlpha === "za" ? "Z → A" : "A-Z"}
-                                    </button>
-
-                                    {/* Sắp xếp theo giá */}
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => {
-                                                if (sortOrder === "asc") {
-                                                    setSortOrder("desc");
-                                                    setSortAlpha("");
-                                                } else if (sortOrder === "desc") {
-                                                    setSortOrder("");
-                                                } else {
-                                                    setSortOrder("asc");
-                                                    setSortAlpha("");
-                                                }
-                                            }}
-                                            className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "asc"
-                                                ? "bg-pink-600 text-white border-pink-600"
-                                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                                                }`}
-                                            title="Giá tăng dần"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                                            </svg>
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                if (sortOrder === "desc") {
-                                                    setSortOrder("asc");
-                                                    setSortAlpha("");
-                                                } else if (sortOrder === "asc") {
-                                                    setSortOrder("");
-                                                } else {
-                                                    setSortOrder("desc");
-                                                    setSortAlpha("");
-                                                }
-                                            }}
-                                            className={`p-2 rounded-lg border transition-all duration-200 ${sortOrder === "desc"
-                                                ? "bg-pink-600 text-white border-pink-600"
-                                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                                                }`}
-                                            title="Giá giảm dần"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4l4 4m0 0l4-4m-4 4V4" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    {/* Nút reset bộ lọc */}
-                                    {(searchProductTerm || filterCategory !== "all" || sortOrder || sortAlpha) && (
-                                        <button
-                                            onClick={resetFilters}
-                                            className="px-4 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50 transition"
-                                        >
-                                            🔄 Xóa bộ lọc
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Danh sách sản phẩm */}
+                            <FilterBar />
                             <div>
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-xl font-bold text-gray-800">📋 Danh sách sản phẩm</h2>
@@ -437,6 +425,7 @@ function AdminDashboard() {
                                 <ProductList
                                     key={refresh}
                                     admin={true}
+                                    adjustMode={false}
                                     onEdit={(product) => {
                                         setEditProduct(product);
                                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -451,9 +440,41 @@ function AdminDashboard() {
                                 />
                             </div>
                         </div>
+                    ) : activeTab === "adjust" ? (
+                        <div>
+                            <h2 className="text-xl font-bold mb-6">⚙️ Điều chỉnh sản phẩm</h2>
+                            <FilterBar />
+                            <ProductList
+                                key={refresh}
+                                admin={true}
+                                adjustMode={true}
+                                onEdit={(product) => {
+                                    setEditProduct(product);
+                                    setActiveTab("products");
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                onToggleHidden={async (product) => {
+                                    try {
+                                        await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${product.id}`, {
+                                            is_hidden: !product.is_hidden
+                                        });
+                                        reloadData();
+                                        showToast(product.is_hidden ? "✅ Đã hiển thị sản phẩm!" : "🔒 Đã ẩn sản phẩm!", "success");
+                                    } catch (err) {
+                                        showToast("Lỗi cập nhật!", "error");
+                                    }
+                                }}
+                                itemsPerPage={productsPerPage}
+                                currentPage={productCurrentPage}
+                                onPageChange={setProductCurrentPage}
+                                searchTerm={searchProductTerm}
+                                filterCategory={filterCategory}
+                                sortOrder={sortOrder}
+                                sortAlpha={sortAlpha}
+                            />
+                        </div>
                     ) : (
                         <div>
-                            {/* Thanh tìm kiếm và lọc đơn hàng */}
                             <div className="flex flex-col md:flex-row gap-4 mb-6">
                                 <input
                                     type="text"
@@ -475,15 +496,13 @@ function AdminDashboard() {
                                     <option value="Hủy">Hủy đơn</option>
                                 </select>
                             </div>
-
-                            {/* Bảng đơn hàng */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
                                 <table className="w-full text-left text-sm">
                                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[11px]">
                                         <tr>
                                             <th className="p-4">Mã đơn</th>
                                             <th className="p-4">Khách hàng</th>
-                                            <th className="p-4">Email</th>  {/* Thêm dòng này */}
+                                            <th className="p-4">Email</th>
                                             <th className="p-4">Khu vực</th>
                                             <th className="p-4">Sản phẩm</th>
                                             <th className="p-4">Tổng tiền</th>
@@ -499,7 +518,6 @@ function AdminDashboard() {
                                                     <p className="font-bold">{order.customer_info?.name || "N/A"}</p>
                                                     <p className="text-xs text-gray-500">{order.customer_info?.phone}</p>
                                                 </td>
-                                                {/* THÊM CỘT EMAIL VÀO ĐÂY */}
                                                 <td className="p-4 text-xs">
                                                     {order.customer_info?.email ? (
                                                         <div>
@@ -512,7 +530,6 @@ function AdminDashboard() {
                                                         <span className="text-gray-400">—</span>
                                                     )}
                                                 </td>
-                                                {/* KẾT THÚC THÊM CỘT EMAIL */}
                                                 <td className="p-4 text-xs">{order.customer_info?.district}, {order.customer_info?.province}</td>
                                                 <td className="p-4 text-xs">{order.items?.length} món</td>
                                                 <td className="p-4 font-bold text-pink-600">{order.total_price?.toLocaleString()}₫</td>
@@ -530,12 +547,9 @@ function AdminDashboard() {
                                         ))}
                                     </tbody>
                                 </table>
-
                                 {filteredOrders.length === 0 && (
                                     <div className="text-center py-10 text-gray-500">Không tìm thấy đơn hàng</div>
                                 )}
-
-                                {/* Phân trang đơn hàng */}
                                 {totalOrderPages > 1 && (
                                     <div className="flex justify-center gap-2 py-4 border-t">
                                         <button
