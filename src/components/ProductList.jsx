@@ -403,7 +403,7 @@ function ProductList({
     );
   }
 
-  const shopProducts = products;
+  const shopProducts = products.filter(p => !p.is_hidden);
   const shopTotalPages = Math.ceil(shopProducts.length / itemsPerPage);
   const shopPaginatedProducts = shopProducts.slice(
     (currentPage - 1) * itemsPerPage,

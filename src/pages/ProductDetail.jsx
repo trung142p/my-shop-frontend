@@ -4,6 +4,7 @@ import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { Link, useParams } from "react-router-dom";
 
 function ProductDetail() {
     const { id } = useParams();
@@ -120,7 +121,18 @@ function ProductDetail() {
 
     if (loading) return <div className="text-center py-20 font-bold dark:text-white">Đang tải dữ liệu...</div>;
     if (!product) return <div className="text-center py-20 dark:text-white">Sản phẩm không tồn tại!</div>;
-
+    if (product?.is_hidden) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-900">
+                <div className="text-6xl mb-4">🔒</div>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Sản phẩm không tồn tại</h1>
+                <p className="text-gray-500 dark:text-gray-400 mb-6">Sản phẩm này hiện không được hiển thị.</p>
+                <Link to="/" className="text-pink-600 font-medium underline hover:text-pink-700">
+                    Bấm vào đây để đến trang chủ!
+                </Link>
+            </div>
+        );
+    }
     const allImages = Array.isArray(product.images) ? product.images : [product.image];
 
     return (
@@ -225,8 +237,8 @@ function ProductDetail() {
                                         key={variant.id}
                                         onClick={() => handleSelectVariant(variant)}
                                         className={`px-4 py-2 rounded-full border transition-all flex items-center gap-2 ${selectedVariant?.id === variant.id
-                                                ? "border-pink-500 bg-pink-500 text-white"
-                                                : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
+                                            ? "border-pink-500 bg-pink-500 text-white"
+                                            : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
                                             }`}
                                     >
                                         {variant.image && (

@@ -41,7 +41,7 @@ function CategoryPage() {
                 const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
                 // Lọc sản phẩm: chấp nhận cả slug (am-dao-gia) và tên hiển thị (Âm đạo giả)
                 const filtered = res.data.filter(
-                    (product) => product.category === categoryName || product.category === displayName
+                    (product) => (product.category === categoryName || product.category === displayName) && !product.is_hidden
                 );
                 setProducts(filtered);
             } catch (err) {
