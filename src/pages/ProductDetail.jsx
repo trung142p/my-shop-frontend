@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-import { Link, useParams } from "react-router-dom";
 
 function ProductDetail() {
     const { id } = useParams();
@@ -13,7 +12,7 @@ function ProductDetail() {
     const [quantity, setQuantity] = useState(1);
     const [variants, setVariants] = useState([]);
     const [selectedVariant, setSelectedVariant] = useState(null);
-    const [variantImage, setVariantImage] = useState(null); // Thêm state cho ảnh biến thể
+    const [variantImage, setVariantImage] = useState(null);
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
     const { t } = useTranslation('product');
@@ -57,7 +56,6 @@ function ProductDetail() {
         fetchProduct();
     }, [id]);
 
-    // Lấy variants
     useEffect(() => {
         if (product?.id) {
             fetchVariants(product.id);
@@ -70,7 +68,6 @@ function ProductDetail() {
             setVariants(res.data);
             if (res.data.length > 0) {
                 setSelectedVariant(res.data[0]);
-                // Nếu biến thể đầu tiên có ảnh, set làm ảnh chính
                 if (res.data[0].image) {
                     setVariantImage(res.data[0].image);
                 }
@@ -80,7 +77,6 @@ function ProductDetail() {
         }
     };
 
-    // Hàm xử lý khi chọn biến thể
     const handleSelectVariant = (variant) => {
         setSelectedVariant(variant);
         if (variant.image) {
@@ -90,10 +86,7 @@ function ProductDetail() {
         }
     };
 
-    // Ảnh hiển thị chính (ưu tiên ảnh biến thể)
     const displayImage = variantImage || mainImage;
-
-    // Giá và tồn kho hiển thị (ưu tiên variant)
     const displayPrice = selectedVariant?.price || product?.price;
     const displayStock = selectedVariant?.stock ?? product?.stock;
     const isOutOfStock = displayStock <= 0;
@@ -121,6 +114,7 @@ function ProductDetail() {
 
     if (loading) return <div className="text-center py-20 font-bold dark:text-white">Đang tải dữ liệu...</div>;
     if (!product) return <div className="text-center py-20 dark:text-white">Sản phẩm không tồn tại!</div>;
+
     if (product?.is_hidden) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-900">
@@ -133,12 +127,12 @@ function ProductDetail() {
             </div>
         );
     }
+
     const allImages = Array.isArray(product.images) ? product.images : [product.image];
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
             <div className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-sm shadow-sm flex flex-col md:flex-row gap-8">
-                {/* CỘT TRÁI: HÌNH ẢNH GALLERY */}
                 <div className="w-full md:w-2/5">
                     <div className="border border-gray-100 dark:border-gray-700 rounded-sm overflow-hidden mb-4 bg-white dark:bg-gray-800 aspect-square flex items-center justify-center relative">
                         {isOutOfStock && (
@@ -148,24 +142,21 @@ function ProductDetail() {
                                 </span>
                             </div>
                         )}
-                        {/* Hiển thị ảnh chính - ưu tiên ảnh biến thể */}
                         <img src={displayImage} alt={product.name} className="max-w-full max-h-full object-contain" />
                     </div>
                     <div className="flex gap-2 overflow-x-auto pb-2">
-                        {/* Ảnh gallery từ sản phẩm */}
                         {allImages.map((img, index) => (
                             <img
                                 key={index}
                                 src={img}
                                 onClick={() => {
                                     setMainImage(img);
-                                    setVariantImage(null); // Reset ảnh biến thể khi chọn ảnh gallery
+                                    setVariantImage(null);
                                 }}
                                 className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 ${displayImage === img && !variantImage ? 'border-pink-500' : 'border-transparent'}`}
                                 alt="thumb"
                             />
                         ))}
-                        {/* Nếu có ảnh biến thể, hiển thị thêm trong gallery */}
                         {variants.map((variant) => (
                             variant.image && (
                                 <img
@@ -184,11 +175,9 @@ function ProductDetail() {
                     </div>
                 </div>
 
-                {/* CỘT PHẢI: THÔNG TIN */}
                 <div className="w-full md:w-3/5 flex flex-col">
                     <h1 className="text-2xl font-medium text-gray-800 dark:text-white mb-4 uppercase">{product.name}</h1>
 
-                    {/* Giá và thông tin tồn kho */}
                     <div className="bg-gray-50 dark:bg-gray-700/50 p-5 mb-6">
                         <div className="flex items-baseline gap-4 flex-wrap">
                             <span className="text-3xl font-bold text-pink-600">{displayPrice?.toLocaleString()} ₫</span>
@@ -197,7 +186,6 @@ function ProductDetail() {
                             </span>
                         </div>
 
-                        {/* Thông tin tồn kho và đã bán */}
                         <div className="flex gap-6 mt-3 text-sm">
                             <div className="flex items-center gap-2">
                                 <span className="text-gray-500 dark:text-gray-400">📦 {t('detail.stock')}:</span>
@@ -212,7 +200,6 @@ function ProductDetail() {
                         </div>
                     </div>
 
-                    {/* THÔNG SỐ KỸ THUẬT */}
                     {product.specs && product.specs.length > 0 && (
                         <div className="border border-dashed border-pink-200 dark:border-pink-800 bg-pink-50/30 dark:bg-pink-900/20 p-4 rounded-md mb-6">
                             <h3 className="text-sm font-bold mb-3 uppercase dark:text-white">{t('detail.specs')}</h3>
@@ -227,7 +214,6 @@ function ProductDetail() {
                         </div>
                     )}
 
-                    {/* CHỌN BIẾN THỂ */}
                     {variants.length > 0 && (
                         <div className="mb-6">
                             <h3 className="text-sm font-bold mb-2 uppercase dark:text-white">Chọn loại:</h3>
@@ -260,7 +246,6 @@ function ProductDetail() {
                         </div>
                     )}
 
-                    {/* Số lượng và nút mua */}
                     {!isOutOfStock && (
                         <>
                             <div className="flex items-center gap-6 mb-8">
@@ -309,7 +294,6 @@ function ProductDetail() {
                 </div>
             </div>
 
-            {/* PHẦN MÔ TẢ */}
             <div className="mt-8 bg-white dark:bg-gray-800 p-6 md:p-10 rounded-sm shadow-sm">
                 <h2 className="bg-gray-800 dark:bg-gray-700 p-4 text-white text-lg font-bold uppercase mb-8 text-center">{t('detail.description')}</h2>
                 <div className="max-w-3xl mx-auto">
