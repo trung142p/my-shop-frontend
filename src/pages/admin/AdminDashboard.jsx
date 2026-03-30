@@ -35,6 +35,10 @@ function AdminDashboard() {
     const [sortOrder, setSortOrder] = useState("");
     const [sortAlpha, setSortAlpha] = useState("");
 
+    // State riêng cho adjust mode
+    const [adjustProducts, setAdjustProducts] = useState([]);
+    const [adjustLoading, setAdjustLoading] = useState(false);
+
     const navigate = useNavigate();
 
     const reloadData = () => {
@@ -42,6 +46,7 @@ function AdminDashboard() {
         setEditProduct(null);
     };
 
+    // Fetch orders
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -53,6 +58,25 @@ function AdminDashboard() {
         };
         fetchOrders();
     }, [refresh]);
+
+    // Fetch products cho adjust mode
+    const fetchAdjustProducts = async () => {
+        setAdjustLoading(true);
+        try {
+            const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
+            setAdjustProducts(res.data);
+        } catch (err) {
+            console.error("Lỗi lấy sản phẩm:", err);
+        } finally {
+            setAdjustLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === "adjust") {
+            fetchAdjustProducts();
+        }
+    }, [activeTab, refresh]);
 
     const handleLogout = () => {
         localStorage.removeItem("adminToken");
@@ -183,7 +207,6 @@ function AdminDashboard() {
         setProductCurrentPage(1);
     };
 
-    // Component bộ lọc dùng chung
     const FilterBar = () => (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">🔍 Tìm kiếm & Lọc sản phẩm</h2>
@@ -445,32 +468,32 @@ function AdminDashboard() {
                             <h2 className="text-xl font-bold mb-6">⚙️ Điều chỉnh sản phẩm</h2>
                             <FilterBar />
                             <ProductList
-                                key={refresh}
                                 admin={true}
                                 adjustMode={true}
+                                adjustProducts={adjustProducts}
+                                adjustLoading={adjustLoading}
                                 onEdit={(product) => {
                                     setEditProduct(product);
                                     setActiveTab("products");
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }}
                                 onToggleHidden={async (product) => {
-                                    // Cập nhật UI ngay lập tức (optimistic update)
                                     const newHiddenState = !product.is_hidden;
-
-                                    // Cập nhật trực tiếp trong DOM qua state của ProductList
-                                    // Cách này cần ProductList nhận prop `externalProducts`
-
-                                    // Gọi API
+                                    // Cập nhật UI ngay lập tức
+                                    setAdjustProducts(prev => prev.map(p =>
+                                        p.id === product.id ? { ...p, is_hidden: newHiddenState } : p
+                                    ));
                                     try {
                                         await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${product.id}`, {
                                             is_hidden: newHiddenState
                                         });
-                                        // Chỉ refresh nhẹ, không reload toàn bộ
-                                        setRefresh(prev => prev + 1);
                                         showToast(newHiddenState ? "🔒 Đã ẩn sản phẩm!" : "✅ Đã hiển thị sản phẩm!", "success");
                                     } catch (err) {
+                                        // Rollback nếu lỗi
+                                        setAdjustProducts(prev => prev.map(p =>
+                                            p.id === product.id ? { ...p, is_hidden: !newHiddenState } : p
+                                        ));
                                         showToast("Lỗi cập nhật!", "error");
-                                        setRefresh(prev => prev + 1); // Refresh lại để đồng bộ
                                     }
                                 }}
                                 itemsPerPage={productsPerPage}

@@ -11,6 +11,8 @@ function ProductList({
   onEdit,
   adjustMode = false,
   onToggleHidden = null,
+  adjustProducts = null,
+  adjustLoading = false,
   itemsPerPage = 16,
   currentPage = 1,
   onPageChange,
@@ -86,9 +88,9 @@ function ProductList({
     addToCart(itemToAdd, 1);
   };
 
-  // Lọc và sắp xếp sản phẩm cho admin view
+  // Lọc và sắp xếp sản phẩm cho admin view (chỉ khi không dùng adjustProducts)
   useEffect(() => {
-    if (!admin) return;
+    if (!admin || adjustMode) return;
 
     let result = [...products];
 
@@ -119,10 +121,50 @@ function ProductList({
     if (onPageChange) {
       onPageChange(1);
     }
-  }, [products, searchTerm, filterCategory, sortOrder, sortAlpha, admin]);
+  }, [products, searchTerm, filterCategory, sortOrder, sortAlpha, admin, adjustMode]);
 
-  const totalPages = Math.ceil((admin ? filteredProducts : products).length / itemsPerPage);
-  const paginatedProducts = (admin ? filteredProducts : products).slice(
+  // Lọc cho adjust mode
+  const getFilteredAdjustProducts = () => {
+    if (!adjustProducts) return [];
+    let result = [...adjustProducts];
+
+    if (searchTerm && searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      result = result.filter(product =>
+        product.name?.toLowerCase().includes(term)
+      );
+    }
+
+    if (filterCategory && filterCategory !== "all") {
+      result = result.filter(product => product.category === filterCategory);
+    }
+
+    if (sortAlpha === "az") {
+      result.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    } else if (sortAlpha === "za") {
+      result.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+    }
+
+    if (sortOrder === "asc") {
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortOrder === "desc") {
+      result.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+
+    return result;
+  };
+
+  const filteredAdjustProducts = getFilteredAdjustProducts();
+
+  // Xác định dữ liệu hiển thị
+  const displayProducts = adjustMode && adjustProducts
+    ? filteredAdjustProducts
+    : (admin ? filteredProducts : products);
+
+  const displayLoading = adjustMode ? adjustLoading : loading;
+
+  const totalPages = Math.ceil(displayProducts.length / itemsPerPage);
+  const paginatedProducts = displayProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -202,12 +244,20 @@ function ProductList({
 
   // ===== ADMIN VIEW =====
   if (admin) {
-    if (loading) {
+    if (displayLoading) {
       return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <ProductSkeleton key={i} />
           ))}
+        </div>
+      );
+    }
+
+    if (displayProducts.length === 0) {
+      return (
+        <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+          🔍 Không tìm thấy sản phẩm nào phù hợp
         </div>
       );
     }
@@ -328,7 +378,7 @@ function ProductList({
         </div>
 
         <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          Tìm thấy {filteredProducts.length} sản phẩm
+          Tìm thấy {displayProducts.length} sản phẩm
         </div>
 
         {totalPages > 1 && (
@@ -337,12 +387,6 @@ function ProductList({
             totalPages={totalPages}
             onPageChange={onPageChange}
           />
-        )}
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
-            🔍 Không tìm thấy sản phẩm nào phù hợp
-          </div>
         )}
       </div>
     );
