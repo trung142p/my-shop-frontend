@@ -15,16 +15,19 @@ function OrderTracking() {
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
 
-    // Đọc mã đơn từ localStorage hoặc state khi vào trang
+    // 1. Đọc từ localStorage khi component mount
+    useEffect(() => {
+        const savedCode = localStorage.getItem("lastOrderCode");
+        if (savedCode) {
+            setOrderCode(savedCode);
+        }
+    }, []);
+
+    // 2. Xử lý khi có state từ OrderComplete
     useEffect(() => {
         if (state?.orderCode) {
             localStorage.setItem("lastOrderCode", state.orderCode);
             setOrderCode(state.orderCode);
-        } else {
-            const savedCode = localStorage.getItem("lastOrderCode");
-            if (savedCode) {
-                setOrderCode(savedCode);
-            }
         }
     }, [state]);
 
