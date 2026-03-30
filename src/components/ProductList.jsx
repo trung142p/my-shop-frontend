@@ -175,8 +175,8 @@ function ProductList({
             key={page}
             onClick={() => onPageChange(page)}
             className={`px-3 py-1 rounded border transition ${currentPage === page
-                ? "bg-pink-600 text-white border-pink-600"
-                : "hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
+              ? "bg-pink-600 text-white border-pink-600"
+              : "hover:bg-gray-50 dark:border-gray-600 dark:hover:bg-gray-700"
               }`}
           >
             {page}
@@ -278,22 +278,33 @@ function ProductList({
               {/* adjustMode: hiển thị cần gạt, ngược lại hiển thị nút Sửa/Xóa */}
               {adjustMode ? (
                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-dashed dark:border-gray-700">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={!product.is_hidden}
-                      onChange={() => onToggleHidden && onToggleHidden(product)}
-                      className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500"
-                    />
-                    <span className="text-xs font-medium">
-                      {product.is_hidden ? "🔒 Đã ẩn" : "🔓 Hiển thị"}
+                  {/* Toggle Switch */}
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs ${!product.is_hidden ? 'text-green-600' : 'text-gray-400'}`}>
+                      {!product.is_hidden ? 'Hiển thị' : 'Đã ẩn'}
                     </span>
-                  </label>
+                    <button
+                      onClick={() => onToggleHidden && onToggleHidden(product)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 ${!product.is_hidden ? 'bg-pink-600' : 'bg-gray-300 dark:bg-gray-600'
+                        }`}
+                    >
+                      <span
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${!product.is_hidden ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                      />
+                    </button>
+                    <span className={`text-xs ${product.is_hidden ? 'text-red-500' : 'text-gray-400'}`}>
+                      {product.is_hidden ? '🔒 Ẩn' : '🔓'}
+                    </span>
+                  </div>
                   <button
                     onClick={() => onEdit(product)}
-                    className="text-blue-500 hover:text-blue-700 text-xs"
+                    className="text-blue-500 hover:text-blue-700 text-xs flex items-center gap-1"
                   >
-                    ✏️ Sửa
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Sửa
                   </button>
                 </div>
               ) : (

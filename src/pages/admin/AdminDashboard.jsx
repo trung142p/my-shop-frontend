@@ -458,7 +458,8 @@ function AdminDashboard() {
                                         await axios.patch(`https://my-shop-api-p7kz.onrender.com/api/products/${product.id}`, {
                                             is_hidden: !product.is_hidden
                                         });
-                                        reloadData();
+                                        // Cập nhật trực tiếp state thay vì reload toàn bộ
+                                        setRefresh(prev => prev + 1);
                                         showToast(product.is_hidden ? "✅ Đã hiển thị sản phẩm!" : "🔒 Đã ẩn sản phẩm!", "success");
                                     } catch (err) {
                                         showToast("Lỗi cập nhật!", "error");
