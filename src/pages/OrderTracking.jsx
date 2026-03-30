@@ -10,10 +10,23 @@ function OrderTracking() {
     const { showToast } = useToast();
     const { t } = useTranslation('order');
 
-    const [orderCode, setOrderCode] = useState(state?.orderCode || "");
+    const [orderCode, setOrderCode] = useState("");
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(false);
     const [searched, setSearched] = useState(false);
+
+    // Đọc mã đơn từ localStorage hoặc state khi vào trang
+    useEffect(() => {
+        if (state?.orderCode) {
+            localStorage.setItem("lastOrderCode", state.orderCode);
+            setOrderCode(state.orderCode);
+        } else {
+            const savedCode = localStorage.getItem("lastOrderCode");
+            if (savedCode) {
+                setOrderCode(savedCode);
+            }
+        }
+    }, [state]);
 
     // Hàm che dấu thông tin
     const maskName = (name) => {
@@ -91,7 +104,6 @@ function OrderTracking() {
                 <p className="text-gray-500 dark:text-gray-400">{t('track.desc')}</p>
             </div>
 
-            {/* Form tìm kiếm */}
             <div className="max-w-md mx-auto mb-10">
                 <div className="flex gap-2">
                     <input
@@ -115,7 +127,6 @@ function OrderTracking() {
                 </p>
             </div>
 
-            {/* Kết quả tra cứu */}
             {searched && !loading && order && (
                 <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 overflow-hidden">
                     <div className="bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-4">
@@ -124,7 +135,6 @@ function OrderTracking() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6 p-6">
-                        {/* Cột trái: Thông tin khách hàng (ẩn) */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-700 dark:text-gray-300 border-b pb-2 dark:border-gray-700">👤 {t('track.customerInfo')}</h3>
                             <div className="space-y-2 text-sm">
@@ -147,7 +157,6 @@ function OrderTracking() {
                             </div>
                         </div>
 
-                        {/* Cột phải: Thông tin đơn hàng */}
                         <div className="space-y-4">
                             <h3 className="font-semibold text-gray-700 dark:text-gray-300 border-b pb-2 dark:border-gray-700">📋 {t('track.orderDetails')}</h3>
 

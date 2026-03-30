@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 
 function OrderComplete() {
     const { state } = useLocation();
@@ -8,6 +9,13 @@ function OrderComplete() {
 
     const orderData = state?.orderData;
     const orderCode = orderData?.order_code || state?.orderCode;
+
+    // Lưu mã đơn hàng vào localStorage khi có orderCode
+    useEffect(() => {
+        if (orderCode) {
+            localStorage.setItem("lastOrderCode", orderCode);
+        }
+    }, [orderCode]);
 
     if (!orderData) {
         return (
