@@ -8,8 +8,7 @@ import axios from "axios";
 function ProductDetail() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
-    const [mainMedia, setMainMedia] = useState("");
-    const [mainMediaType, setMainMediaType] = useState("image");
+    const [mainImage, setMainImage] = useState("");
     const [quantity, setQuantity] = useState(1);
     const [variants, setVariants] = useState([]);
     const [selectedVariant, setSelectedVariant] = useState(null);
@@ -66,21 +65,10 @@ function ProductDetail() {
 
                 setProduct(data);
 
-                // Xác định media chính (ưu tiên video đầu tiên, nếu không thì lấy ảnh)
+                // 🔧 SỬA: Main image luôn là ẢNH đầu tiên (bỏ qua video)
                 const imagesArray = data.images || [];
-                if (imagesArray.length > 0) {
-                    const firstItem = imagesArray[0];
-                    if (isVideoUrl(firstItem)) {
-                        setMainMedia(firstItem);
-                        setMainMediaType("video");
-                    } else {
-                        setMainMedia(firstItem);
-                        setMainMediaType("image");
-                    }
-                } else if (data.image) {
-                    setMainMedia(data.image);
-                    setMainMediaType("image");
-                }
+                const firstImage = getFirstImage(imagesArray);
+                setMainImage(firstImage || data.image || "https://placehold.co/600x600?text=No+Image");
 
                 setLoading(false);
             } catch (err) {
@@ -121,8 +109,7 @@ function ProductDetail() {
         }
     };
 
-    const displayMedia = variantImage || mainMedia;
-    const displayMediaType = variantImage ? "image" : mainMediaType;
+    const displayImage = variantImage || mainImage;
     const displayPrice = selectedVariant?.price || product?.price;
     const displayStock = selectedVariant?.stock ?? product?.stock;
     const isOutOfStock = displayStock <= 0;
@@ -171,7 +158,7 @@ function ProductDetail() {
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
             <div className="bg-white dark:bg-gray-800 p-4 md:p-8 rounded-sm shadow-sm flex flex-col md:flex-row gap-8">
-                {/* Cột trái: Media chính */}
+                {/* Cột trái: ẢNH đại diện chính */}
                 <div className="w-full md:w-2/5">
                     <div className="border border-gray-100 dark:border-gray-700 rounded-sm overflow-hidden mb-4 bg-white dark:bg-gray-800 aspect-square flex items-center justify-center relative">
                         {isOutOfStock && (
@@ -181,79 +168,51 @@ function ProductDetail() {
                                 </span>
                             </div>
                         )}
-                        {displayMediaType === "video" ? (
-                            <video
-                                src={displayMedia}
-                                controls
-                                autoPlay
-                                loop
-                                muted
-                                className="max-w-full max-h-full object-contain"
-                            />
-                        ) : (
-                            <img
-                                src={displayMedia}
-                                alt={product.name}
-                                className="max-w-full max-h-full object-contain"
-                                onError={(e) => {
-                                    e.target.src = "https://placehold.co/600x600?text=No+Image";
-                                }}
-                            />
-                        )}
+                        <img
+                            src={displayImage}
+                            alt={product.name}
+                            className="max-w-full max-h-full object-contain"
+                            onError={(e) => {
+                                e.target.src = "https://placehold.co/600x600?text=No+Image";
+                            }}
+                        />
                     </div>
 
-                    {/* Thumbnail strip */}
+                    {/* Thumbnail strip - chỉ hiển thị ẢNH (không video) */}
                     <div className="flex gap-2 overflow-x-auto pb-2">
-                        {allMedia.map((item, index) => (
-                            <div
+                        {allImages.map((img, index) => (
+                            <img
                                 key={index}
+                                src={img}
                                 onClick={() => {
-                                    setMainMedia(item);
-                                    setMainMediaType(isVideoUrl(item) ? "video" : "image");
+                                    setMainImage(img);
                                     setVariantImage(null);
                                 }}
-                                className={`w-20 h-20 flex-shrink-0 cursor-pointer border-2 overflow-hidden rounded ${displayMedia === item && !variantImage ? 'border-pink-500' : 'border-transparent'
+                                className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded ${displayImage === img && !variantImage ? 'border-pink-500' : 'border-transparent'
                                     }`}
-                            >
-                                {isVideoUrl(item) ? (
-                                    <video
-                                        src={item}
-                                        className="w-full h-full object-cover"
-                                        muted
-                                    />
-                                ) : (
-                                    <img
-                                        src={item}
-                                        alt={`thumb-${index}`}
-                                        className="w-full h-full object-cover"
-                                    />
-                                )}
-                            </div>
+                                alt="thumb"
+                            />
                         ))}
                         {variants.map((variant) => (
                             variant.image && (
-                                <div
+                                <img
                                     key={`variant-${variant.id}`}
+                                    src={variant.image}
+                                    alt={variant.name}
                                     onClick={() => {
                                         setVariantImage(variant.image);
                                         setSelectedVariant(variant);
                                     }}
-                                    className={`w-20 h-20 flex-shrink-0 cursor-pointer border-2 overflow-hidden rounded ${variantImage === variant.image ? 'border-pink-500' : 'border-transparent'
+                                    className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded ${variantImage === variant.image ? 'border-pink-500' : 'border-transparent'
                                         }`}
                                     title={variant.name}
-                                >
-                                    <img
-                                        src={variant.image}
-                                        alt={variant.name}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
+                                />
                             )
                         ))}
                     </div>
                 </div>
 
-                {/* Cột phải: Thông tin sản phẩm */}
+                {/* Cột phải: Thông tin sản phẩm (giữ nguyên) */}
                 <div className="w-full md:w-3/5 flex flex-col">
                     <h1 className="text-2xl font-medium text-gray-800 dark:text-white mb-4 uppercase">{product.name}</h1>
 
@@ -373,33 +332,54 @@ function ProductDetail() {
                 </div>
             </div>
 
-            {/* Phần mô tả chi tiết - hỗ trợ video */}
+            {/* Phần mô tả chi tiết - VIDEO sẽ hiển thị ở đây */}
             <div className="mt-8 bg-white dark:bg-gray-800 p-6 md:p-10 rounded-sm shadow-sm">
                 <h2 className="bg-gray-800 dark:bg-gray-700 p-4 text-white text-lg font-bold uppercase mb-8 text-center">{t('detail.description')}</h2>
                 <div className="max-w-3xl mx-auto">
                     {product.description?.split('\n').filter(p => p.trim() !== '').map((paragraph, index) => (
                         <div key={index} className="mb-6">
                             <p className="text-gray-700 dark:text-gray-300 text-lg leading-loose mb-6">{paragraph}</p>
-                            {allMedia[index + 1] && (
+                            {/* Hiển thị VIDEO từ mảng images (bắt đầu từ index 1 trở đi) */}
+                            {allMedia[index + 1] && isVideoUrl(allMedia[index + 1]) && (
                                 <div className="my-10 text-center">
-                                    {isVideoUrl(allMedia[index + 1]) ? (
-                                        <video
-                                            src={allMedia[index + 1]}
-                                            controls
-                                            className="w-full rounded-lg shadow-md"
-                                        />
-                                    ) : (
-                                        <img
-                                            src={allMedia[index + 1]}
-                                            className="w-full rounded-lg shadow-md"
-                                            alt="detail"
-                                        />
-                                    )}
+                                    <video
+                                        src={allMedia[index + 1]}
+                                        controls
+                                        className="w-full rounded-lg shadow-md"
+                                    />
+                                    <p className="text-sm text-gray-400 mt-2 italic">Video giới thiệu sản phẩm</p>
+                                </div>
+                            )}
+                            {/* Hiển thị ẢNH từ mảng images (bắt đầu từ index 1 trở đi) */}
+                            {allMedia[index + 1] && !isVideoUrl(allMedia[index + 1]) && (
+                                <div className="my-10 text-center">
+                                    <img
+                                        src={allMedia[index + 1]}
+                                        className="w-full rounded-lg shadow-md"
+                                        alt="detail"
+                                    />
                                     <p className="text-sm text-gray-400 mt-2 italic">Cận cảnh chi tiết sản phẩm</p>
                                 </div>
                             )}
                         </div>
                     ))}
+
+                    {/* Hiển thị tất cả video còn lại (nếu có nhiều hơn số đoạn văn) */}
+                    {allVideos.length > 0 && (
+                        <div className="mt-8">
+                            <h3 className="text-lg font-bold mb-4 text-center">Video giới thiệu</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {allVideos.map((video, idx) => (
+                                    <video
+                                        key={idx}
+                                        src={video}
+                                        controls
+                                        className="w-full rounded-lg shadow-md"
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
