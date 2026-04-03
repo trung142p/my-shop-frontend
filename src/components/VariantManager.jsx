@@ -41,8 +41,7 @@ function VariantManager({ productId }) {
         setEditingVariant(null);
     };
 
-    const handleCreate = async (e) => {
-        e.preventDefault();
+    const handleCreate = async () => {  // 🔧 BỎ e tham số
         console.log("🚀 handleCreate được gọi!");
 
         if (isSubmitting) {
@@ -88,8 +87,7 @@ function VariantManager({ productId }) {
         }
     };
 
-    const handleUpdate = async (e) => {
-        e.preventDefault();
+    const handleUpdate = async () => {  // 🔧 BỎ e tham số
         if (isSubmitting) return;
 
         if (!formData.name.trim()) {
@@ -154,7 +152,8 @@ function VariantManager({ productId }) {
                 Thêm các biến thể như: màu sắc, kích thước, loại sản phẩm...
             </p>
 
-            <form onSubmit={editingVariant ? handleUpdate : handleCreate} className="bg-gray-50 p-4 rounded-lg mb-4">
+            {/* 🔧 QUAN TRỌNG: BỎ thẻ <form>, dùng div thay thế */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                     <input
                         type="text"
@@ -200,7 +199,8 @@ function VariantManager({ productId }) {
                 </div>
                 <div className="flex gap-2 mt-3">
                     <button
-                        type="submit"
+                        type="button"  // 🔧 QUAN TRỌNG: type="button" thay vì "submit"
+                        onClick={editingVariant ? handleUpdate : handleCreate}
                         disabled={isSubmitting}
                         className={`bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
@@ -216,7 +216,7 @@ function VariantManager({ productId }) {
                         </button>
                     )}
                 </div>
-            </form>
+            </div>
 
             {loading ? (
                 <div className="text-center py-4 text-gray-500">Đang tải...</div>
