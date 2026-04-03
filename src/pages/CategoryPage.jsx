@@ -12,6 +12,31 @@ function CategoryPage() {
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
 
+    // 🔧 HÀM KIỂM TRA URL CÓ PHẢI VIDEO KHÔNG
+    const isVideoUrl = (url) => {
+        if (!url || typeof url !== 'string') return false;
+        const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+        const urlLower = url.toLowerCase();
+        return videoExtensions.some(ext => urlLower.includes(ext));
+    };
+
+    // 🔧 HÀM LẤY ẢNH ĐẠI DIỆN (bỏ qua video)
+    const getProductImage = (product) => {
+        // Tìm trong mảng images ảnh đầu tiên (bỏ qua video)
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            for (let item of product.images) {
+                if (!isVideoUrl(item)) {
+                    return item;
+                }
+            }
+        }
+        // Fallback sang image
+        if (product.image && !isVideoUrl(product.image)) {
+            return product.image;
+        }
+        return "https://placehold.co/400x400?text=No+Image";
+    };
+
     // Map slug sang tên hiển thị
     const getCategoryDisplayName = (slug) => {
         const map = {
@@ -39,7 +64,7 @@ function CategoryPage() {
             setLoading(true);
             try {
                 const res = await axios.get("https://my-shop-api-p7kz.onrender.com/api/products");
-                // Lọc sản phẩm: chấp nhận cả slug (am-dao-gia) và tên hiển thị (Âm đạo giả)
+                // Lọc sản phẩm theo category và không bị ẩn
                 const filtered = res.data.filter(
                     (product) => (product.category === categoryName || product.category === displayName) && !product.is_hidden
                 );
@@ -120,10 +145,14 @@ function CategoryPage() {
                         >
                             <Link to={`/product/${product.id}`} className="block overflow-hidden">
                                 <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+                                    {/* 🔧 SỬA: Dùng hàm getProductImage */}
                                     <img
-                                        src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
+                                        src={getProductImage(product)}
                                         alt={product.name}
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                        onError={(e) => {
+                                            e.target.src = "https://placehold.co/400x400?text=No+Image";
+                                        }}
                                     />
                                     {(product.stock || 0) <= 0 && (
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
