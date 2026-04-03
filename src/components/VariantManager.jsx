@@ -20,10 +20,13 @@ function VariantManager({ productId }) {
         if (!productId) return;
         setLoading(true);
         try {
+            console.log("🔍 Đang lấy variants cho productId:", productId);
             const res = await axios.get(`https://my-shop-api-p7kz.onrender.com/api/products/${productId}/variants`);
+            console.log("✅ Đã lấy được variants:", res.data);
             setVariants(res.data);
         } catch (err) {
-            console.error("Lỗi lấy variants:", err);
+            console.error("❌ Lỗi lấy variants:", err);
+            showToast("Lỗi tải biến thể!", "error");
         } finally {
             setLoading(false);
         }
@@ -39,14 +42,21 @@ function VariantManager({ productId }) {
     };
 
     const handleCreate = async (e) => {
-        e.preventDefault();  // 🔧 QUAN TRỌNG: chặn refresh trang
-        if (isSubmitting) return; // Chống submit nhiều lần
+        e.preventDefault();
+        console.log("🚀 handleCreate được gọi!");
+
+        if (isSubmitting) {
+            console.log("⚠️ Đang submit, bỏ qua");
+            return;
+        }
 
         if (!formData.name.trim()) {
+            console.log("❌ Thiếu tên biến thể");
             showToast("Vui lòng nhập tên biến thể!", "warning");
             return;
         }
 
+        console.log("📦 Dữ liệu sẽ gửi:", formData);
         setIsSubmitting(true);
 
         try {
@@ -58,23 +68,28 @@ function VariantManager({ productId }) {
                 image: formData.image?.trim() || null
             };
 
+            console.log("📤 Đang gửi POST request...");
             const res = await axios.post(
                 `https://my-shop-api-p7kz.onrender.com/api/products/${productId}/variants`,
                 variantData
             );
+            console.log("✅ Thành công, response:", res.data);
+
             setVariants([...variants, res.data]);
             resetForm();
             showToast("Thêm biến thể thành công!", "success");
         } catch (err) {
-            console.error(err);
-            showToast("Lỗi khi thêm biến thể!", "error");
+            console.error("❌ LỖI CHI TIẾT:", err);
+            console.error("Response data:", err.response?.data);
+            console.error("Status:", err.response?.status);
+            showToast(`Lỗi: ${err.response?.data?.message || err.message}`, "error");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleUpdate = async (e) => {
-        e.preventDefault();  // 🔧 QUAN TRỌNG: chặn refresh trang
+        e.preventDefault();
         if (isSubmitting) return;
 
         if (!formData.name.trim()) {
