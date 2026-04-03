@@ -65,7 +65,7 @@ function ProductDetail() {
 
                 setProduct(data);
 
-                // 🔧 SỬA: Main image luôn là ẢNH đầu tiên (bỏ qua video)
+                // Main image luôn là ẢNH đầu tiên (bỏ qua video)
                 const imagesArray = data.images || [];
                 const firstImage = getFirstImage(imagesArray);
                 setMainImage(firstImage || data.image || "https://placehold.co/600x600?text=No+Image");
@@ -153,7 +153,9 @@ function ProductDetail() {
 
     const allMedia = product.images || [];
     const allImages = allMedia.filter(item => !isVideoUrl(item));
-    const allVideos = allMedia.filter(item => isVideoUrl(item));
+
+    // Tách các đoạn văn (mỗi đoạn cách nhau bởi dòng trống)
+    const paragraphs = product.description?.split('\n').filter(p => p.trim() !== '') || [];
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 bg-gray-50 dark:bg-gray-900">
@@ -212,7 +214,7 @@ function ProductDetail() {
                     </div>
                 </div>
 
-                {/* Cột phải: Thông tin sản phẩm (giữ nguyên) */}
+                {/* Cột phải: Thông tin sản phẩm */}
                 <div className="w-full md:w-3/5 flex flex-col">
                     <h1 className="text-2xl font-medium text-gray-800 dark:text-white mb-4 uppercase">{product.name}</h1>
 
@@ -332,54 +334,33 @@ function ProductDetail() {
                 </div>
             </div>
 
-            {/* Phần mô tả chi tiết - VIDEO sẽ hiển thị ở đây */}
+            {/* Phần mô tả chi tiết - HIỂN THỊ THEO ĐÚNG THỨ TỰ */}
             <div className="mt-8 bg-white dark:bg-gray-800 p-6 md:p-10 rounded-sm shadow-sm">
                 <h2 className="bg-gray-800 dark:bg-gray-700 p-4 text-white text-lg font-bold uppercase mb-8 text-center">{t('detail.description')}</h2>
                 <div className="max-w-3xl mx-auto">
-                    {product.description?.split('\n').filter(p => p.trim() !== '').map((paragraph, index) => (
-                        <div key={index} className="mb-6">
+                    {paragraphs.map((paragraph, paraIndex) => (
+                        <div key={paraIndex} className="mb-6">
                             <p className="text-gray-700 dark:text-gray-300 text-lg leading-loose mb-6">{paragraph}</p>
-                            {/* Hiển thị VIDEO từ mảng images (bắt đầu từ index 1 trở đi) */}
-                            {allMedia[index + 1] && isVideoUrl(allMedia[index + 1]) && (
+                            {/* Lấy media tương ứng với index (bắt đầu từ 1 vì index 0 là ảnh đại diện) */}
+                            {allMedia[paraIndex + 1] && (
                                 <div className="my-10 text-center">
-                                    <video
-                                        src={allMedia[index + 1]}
-                                        controls
-                                        className="w-full rounded-lg shadow-md"
-                                    />
-                                    <p className="text-sm text-gray-400 mt-2 italic">Video giới thiệu sản phẩm</p>
-                                </div>
-                            )}
-                            {/* Hiển thị ẢNH từ mảng images (bắt đầu từ index 1 trở đi) */}
-                            {allMedia[index + 1] && !isVideoUrl(allMedia[index + 1]) && (
-                                <div className="my-10 text-center">
-                                    <img
-                                        src={allMedia[index + 1]}
-                                        className="w-full rounded-lg shadow-md"
-                                        alt="detail"
-                                    />
-                                    <p className="text-sm text-gray-400 mt-2 italic">Cận cảnh chi tiết sản phẩm</p>
+                                    {isVideoUrl(allMedia[paraIndex + 1]) ? (
+                                        <video
+                                            src={allMedia[paraIndex + 1]}
+                                            controls
+                                            className="w-full rounded-lg shadow-md"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={allMedia[paraIndex + 1]}
+                                            className="w-full rounded-lg shadow-md"
+                                            alt="detail"
+                                        />
+                                    )}
                                 </div>
                             )}
                         </div>
                     ))}
-
-                    {/* Hiển thị tất cả video còn lại (nếu có nhiều hơn số đoạn văn) */}
-                    {allVideos.length > 0 && (
-                        <div className="mt-8">
-                            <h3 className="text-lg font-bold mb-4 text-center">Video giới thiệu</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {allVideos.map((video, idx) => (
-                                    <video
-                                        key={idx}
-                                        src={video}
-                                        controls
-                                        className="w-full rounded-lg shadow-md"
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>
