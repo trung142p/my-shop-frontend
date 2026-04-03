@@ -29,25 +29,6 @@ function ProductList({
   const { showToast } = useToast();
   const { t } = useTranslation('home');
 
-  // 🔧 HÀM LẤY ẢNH - ƯU TIÊN images[0] TRƯỚC
-  const getProductImage = (product) => {
-    // Kiểm tra images trước (quan trọng nhất)
-    if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-      const firstImage = product.images[0];
-      if (firstImage && typeof firstImage === 'string' && firstImage.trim() !== "") {
-        return firstImage;
-      }
-    }
-
-    // Nếu không có images, thử dùng image
-    if (product.image && typeof product.image === 'string' && product.image.trim() !== "") {
-      return product.image;
-    }
-
-    // Cuối cùng là placeholder
-    return "https://placehold.co/400x400?text=No+Image";
-  };
-
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -108,7 +89,6 @@ function ProductList({
     addToCart(itemToAdd, 1);
   };
 
-  // Lọc và sắp xếp sản phẩm cho admin view
   useEffect(() => {
     if (!admin || adjustMode) return;
 
@@ -285,8 +265,9 @@ function ProductList({
               className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
+                {/* 🔧 ẢNH LẤY TRỰC TIẾP TỪ product.images[0] HOẶC product.image */}
                 <img
-                  src={getProductImage(product)}
+                  src={(product.images && product.images.length > 0) ? product.images[0] : (product.image || "https://placehold.co/400x400?text=No+Image")}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -439,8 +420,9 @@ function ProductList({
           >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
               <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+                {/* 🔧 ẢNH LẤY TRỰC TIẾP TỪ product.images[0] HOẶC product.image */}
                 <img
-                  src={getProductImage(product)}
+                  src={(product.images && product.images.length > 0) ? product.images[0] : (product.image || "https://placehold.co/400x400?text=No+Image")}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
