@@ -29,6 +29,17 @@ function ProductList({
   const { showToast } = useToast();
   const { t } = useTranslation('home');
 
+  // 🔧 HÀM LẤY ẢNH AN TOÀN (thêm mới)
+  const getProductImage = (product) => {
+    if (product.images && Array.isArray(product.images) && product.images.length > 0 && product.images[0]) {
+      return product.images[0];
+    }
+    if (product.image && product.image.trim() !== "") {
+      return product.image;
+    }
+    return "https://placehold.co/400x400?text=No+Image";
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -88,7 +99,7 @@ function ProductList({
     addToCart(itemToAdd, 1);
   };
 
-  // Lọc và sắp xếp sản phẩm cho admin view (chỉ khi không dùng adjustProducts)
+  // Lọc và sắp xếp sản phẩm cho admin view
   useEffect(() => {
     if (!admin || adjustMode) return;
 
@@ -123,7 +134,6 @@ function ProductList({
     }
   }, [products, searchTerm, filterCategory, sortOrder, sortAlpha, admin, adjustMode]);
 
-  // Lọc cho adjust mode
   const getFilteredAdjustProducts = () => {
     if (!adjustProducts) return [];
     let result = [...adjustProducts];
@@ -155,14 +165,10 @@ function ProductList({
   };
 
   const filteredAdjustProducts = getFilteredAdjustProducts();
-
-  // Xác định dữ liệu hiển thị
   const displayProducts = adjustMode && adjustProducts
     ? filteredAdjustProducts
     : (admin ? filteredProducts : products);
-
   const displayLoading = adjustMode ? adjustLoading : loading;
-
   const totalPages = Math.ceil(displayProducts.length / itemsPerPage);
   const paginatedProducts = displayProducts.slice(
     (currentPage - 1) * itemsPerPage,
@@ -181,7 +187,6 @@ function ProductList({
     }
   };
 
-  // Component phân trang dạng số
   const Pagination = ({ currentPage, totalPages, onPageChange }) => {
     const maxVisible = 9;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
@@ -271,10 +276,12 @@ function ProductList({
               className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
+                {/* 🔧 SỬA: Dùng hàm getProductImage */}
                 <img
-                  src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
+                  src={getProductImage(product)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }}
                 />
               </Link>
 
@@ -293,7 +300,6 @@ function ProductList({
 
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">📁 {product.category || "Chưa phân loại"}</p>
 
-              {/* Link CNBUY và OICHIN */}
               <div className="flex gap-2 mt-2">
                 {product.cnbuy_link && (
                   <a
@@ -325,10 +331,8 @@ function ProductList({
                 )}
               </div>
 
-              {/* adjustMode: hiển thị cần gạt, ngược lại hiển thị nút Sửa/Xóa */}
               {adjustMode ? (
                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-dashed dark:border-gray-700">
-                  {/* Toggle Switch */}
                   <div className="flex items-center gap-3">
                     <span className={`text-xs ${!product.is_hidden ? 'text-green-600' : 'text-gray-400'}`}>
                       {!product.is_hidden ? 'Hiển thị' : 'Đã ẩn'}
@@ -428,10 +432,12 @@ function ProductList({
           >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
               <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
+                {/* 🔧 SỬA: Dùng hàm getProductImage */}
                 <img
-                  src={(product.images && product.images.length > 0) ? product.images[0] : product.image}
+                  src={getProductImage(product)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }}
                 />
                 {(product.stock || 0) <= 0 && (
                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center">

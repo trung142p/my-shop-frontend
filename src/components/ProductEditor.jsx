@@ -11,7 +11,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         price: "",
         category: categories[0],
         image: "",
-        images: [],
+        images: [],  // 🔧 SỬA: luôn là mảng, không phải chuỗi rỗng
         description: "",
         brand: "",
         material: "",
@@ -124,12 +124,21 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             return;
         }
 
+        // 🔧 SỬA: Đảm bảo images luôn là mảng hợp lệ
+        let processedImages = formData.images;
+        if (typeof processedImages === 'string') {
+            processedImages = processedImages.split(',').map(img => img.trim()).filter(img => img);
+        }
+        if (!Array.isArray(processedImages)) {
+            processedImages = [];
+        }
+
         const productData = {
             name: formData.name,
             price: Number(formData.price),
             category: formData.category,
             image: formData.image,
-            images: formData.images,
+            images: processedImages,
             description: formData.description,
             specs: buildSpecsArray(),
             stock: Number(formData.stock),
@@ -184,7 +193,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
                 </div>
 
-                {/* Checkbox ẩn sản phẩm */}
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input
                         type="checkbox"
@@ -307,7 +315,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 </div>
             </div>
 
-            {/* Checkbox ẩn sản phẩm */}
             <div className="grid grid-cols-1 gap-6">
                 <label className="flex items-center gap-3 cursor-pointer">
                     <input
