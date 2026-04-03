@@ -334,25 +334,27 @@ function ProductDetail() {
                 </div>
             </div>
 
-            {/* Phần mô tả chi tiết - HIỂN THỊ THEO ĐÚNG THỨ TỰ */}
+            {/* Phần mô tả chi tiết - HIỂN THỊ VIDEO/ẢNH THEO ĐÚNG THỨ TỰ */}
             <div className="mt-8 bg-white dark:bg-gray-800 p-6 md:p-10 rounded-sm shadow-sm">
                 <h2 className="bg-gray-800 dark:bg-gray-700 p-4 text-white text-lg font-bold uppercase mb-8 text-center">{t('detail.description')}</h2>
                 <div className="max-w-3xl mx-auto">
                     {paragraphs.map((paragraph, paraIndex) => (
                         <div key={paraIndex} className="mb-6">
                             <p className="text-gray-700 dark:text-gray-300 text-lg leading-loose mb-6">{paragraph}</p>
-                            {/* Lấy media tương ứng với index (bắt đầu từ 1 vì index 0 là ảnh đại diện) */}
-                            {allMedia[paraIndex + 1] && (
+                            {/* Lấy media tương ứng với index (bắt đầu từ 0) */}
+                            {/* Nếu paraIndex = 0, lấy allMedia[0] (video hoặc ảnh đầu tiên) */}
+                            {/* Nếu paraIndex = 1, lấy allMedia[1], v.v. */}
+                            {allMedia[paraIndex] && (
                                 <div className="my-10 text-center">
-                                    {isVideoUrl(allMedia[paraIndex + 1]) ? (
+                                    {isVideoUrl(allMedia[paraIndex]) ? (
                                         <video
-                                            src={allMedia[paraIndex + 1]}
+                                            src={allMedia[paraIndex]}
                                             controls
                                             className="w-full rounded-lg shadow-md"
                                         />
                                     ) : (
                                         <img
-                                            src={allMedia[paraIndex + 1]}
+                                            src={allMedia[paraIndex]}
                                             className="w-full rounded-lg shadow-md"
                                             alt="detail"
                                         />
