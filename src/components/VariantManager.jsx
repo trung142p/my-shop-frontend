@@ -6,12 +6,13 @@ function VariantManager({ productId }) {
     const [variants, setVariants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingVariant, setEditingVariant] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         price: "",
         stock: "",
         sku: "",
-        image: ""  // Thêm trường ảnh
+        image: ""
     });
     const { showToast } = useToast();
 
@@ -38,11 +39,15 @@ function VariantManager({ productId }) {
     };
 
     const handleCreate = async (e) => {
-        e.preventDefault();  // QUAN TRỌNG: chặn refresh trang
+        e.preventDefault();  // 🔧 QUAN TRỌNG: chặn refresh trang
+        if (isSubmitting) return; // Chống submit nhiều lần
+
         if (!formData.name.trim()) {
             showToast("Vui lòng nhập tên biến thể!", "warning");
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const variantData = {
@@ -63,15 +68,21 @@ function VariantManager({ productId }) {
         } catch (err) {
             console.error(err);
             showToast("Lỗi khi thêm biến thể!", "error");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const handleUpdate = async (e) => {
-        e.preventDefault();  // QUAN TRỌNG: chặn refresh trang
+        e.preventDefault();  // 🔧 QUAN TRỌNG: chặn refresh trang
+        if (isSubmitting) return;
+
         if (!formData.name.trim()) {
             showToast("Vui lòng nhập tên biến thể!", "warning");
             return;
         }
+
+        setIsSubmitting(true);
 
         try {
             const variantData = {
@@ -92,6 +103,8 @@ function VariantManager({ productId }) {
         } catch (err) {
             console.error(err);
             showToast("Lỗi khi cập nhật biến thể!", "error");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -135,6 +148,7 @@ function VariantManager({ productId }) {
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
                         required
+                        disabled={isSubmitting}
                     />
                     <input
                         type="number"
@@ -142,6 +156,7 @@ function VariantManager({ productId }) {
                         value={formData.price}
                         onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
+                        disabled={isSubmitting}
                     />
                     <input
                         type="number"
@@ -149,6 +164,7 @@ function VariantManager({ productId }) {
                         value={formData.stock}
                         onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
+                        disabled={isSubmitting}
                     />
                     <input
                         type="text"
@@ -156,6 +172,7 @@ function VariantManager({ productId }) {
                         value={formData.sku}
                         onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
+                        disabled={isSubmitting}
                     />
                     <input
                         type="text"
@@ -163,20 +180,22 @@ function VariantManager({ productId }) {
                         value={formData.image}
                         onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
+                        disabled={isSubmitting}
                     />
                 </div>
                 <div className="flex gap-2 mt-3">
                     <button
                         type="submit"
-                        className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                        disabled={isSubmitting}
+                        className={`bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        {editingVariant ? "💾 Cập nhật" : "➕ Thêm biến thể"}
+                        {isSubmitting ? "Đang xử lý..." : (editingVariant ? "💾 Cập nhật" : "➕ Thêm biến thể")}
                     </button>
                     {editingVariant && (
                         <button
                             type="button"
                             onClick={resetForm}
-                            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium"
+                            className="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition"
                         >
                             ❌ Hủy
                         </button>
