@@ -29,19 +29,30 @@ function ProductList({
   const { showToast } = useToast();
   const { t } = useTranslation('home');
 
-  // 🔧 CHỈ SỬA HÀM NÀY - LẤY ẢNH ĐÚNG CÁCH
+  // 🔧 HÀM KIỂM TRA URL CÓ PHẢI LÀ ẢNH KHÔNG
+  const isImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return false;
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp', '.svg'];
+    const urlLower = url.toLowerCase();
+    return imageExtensions.some(ext => urlLower.includes(ext));
+  };
+
+  // 🔧 HÀM LẤY ẢNH ĐẠI DIỆN - CHỈ LẤY ẢNH, BỎ QUA VIDEO
   const getProductImage = (product) => {
-    // Thử lấy từ images[0] trước
+    // Tìm trong mảng images phần tử đầu tiên là ảnh
     if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-      const img = product.images[0];
-      if (img && typeof img === 'string' && img.trim() !== '') {
-        return img;
+      for (let item of product.images) {
+        if (isImageUrl(item)) {
+          return item;
+        }
       }
     }
+
     // Fallback sang image
-    if (product.image && typeof product.image === 'string' && product.image.trim() !== '') {
+    if (product.image && isImageUrl(product.image)) {
       return product.image;
     }
+
     return "https://placehold.co/400x400?text=No+Image";
   };
 
@@ -280,14 +291,12 @@ function ProductList({
               className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative"
             >
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
-                {/* 🔧 CHỈ SỬA DÒNG src NÀY */}
                 <img
                   src={getProductImage(product)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
-                    console.error("Image error for product:", product.id, e.target.src);
-                    e.target.src = "https://placehold.co/400x400?text=Error";
+                    e.target.src = "https://placehold.co/400x400?text=No+Image";
                   }}
                 />
               </Link>
@@ -439,14 +448,12 @@ function ProductList({
           >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
               <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
-                {/* 🔧 CHỈ SỬA DÒNG src NÀY */}
                 <img
                   src={getProductImage(product)}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   onError={(e) => {
-                    console.error("Image error for product:", product.id, e.target.src);
-                    e.target.src = "https://placehold.co/400x400?text=Error";
+                    e.target.src = "https://placehold.co/400x400?text=No+Image";
                   }}
                 />
                 {(product.stock || 0) <= 0 && (
