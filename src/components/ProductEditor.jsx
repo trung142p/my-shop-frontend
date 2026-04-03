@@ -11,7 +11,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         price: "",
         category: categories[0],
         image: "",
-        images: [],  // 🔧 SỬA: luôn là mảng, không phải chuỗi rỗng
+        images: [],
         description: "",
         brand: "",
         material: "",
@@ -24,41 +24,26 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         is_hidden: false
     });
     const [savedProductId, setSavedProductId] = useState(null);
-
     const { showToast } = useToast();
 
     const convertSpecsToFields = (specs) => {
-        const fields = {
-            brand: "",
-            material: "",
-            function: "",
-            size: ""
-        };
-
+        const fields = { brand: "", material: "", function: "", size: "" };
         if (Array.isArray(specs)) {
             specs.forEach(spec => {
                 const label = spec.label?.toLowerCase().trim();
                 const value = spec.value || "";
-
-                if (label === "thương hiệu" || label === "thuong hieu") {
-                    fields.brand = value;
-                } else if (label === "chất liệu" || label === "chat lieu") {
-                    fields.material = value;
-                } else if (label === "chức năng" || label === "chuc nang") {
-                    fields.function = value;
-                } else if (label === "kích thước" || label === "kich thuoc") {
-                    fields.size = value;
-                }
+                if (label === "thương hiệu" || label === "thuong hieu") fields.brand = value;
+                else if (label === "chất liệu" || label === "chat lieu") fields.material = value;
+                else if (label === "chức năng" || label === "chuc nang") fields.function = value;
+                else if (label === "kích thước" || label === "kich thuoc") fields.size = value;
             });
         }
-
         return fields;
     };
 
     useEffect(() => {
         if (editProduct) {
             const specsFields = convertSpecsToFields(editProduct.specs);
-
             setFormData({
                 name: editProduct.name || "",
                 price: editProduct.price || "",
@@ -101,18 +86,10 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
 
     const buildSpecsArray = () => {
         const specs = [];
-        if (formData.brand && formData.brand.trim()) {
-            specs.push({ label: "Thương hiệu", value: formData.brand.trim() });
-        }
-        if (formData.material && formData.material.trim()) {
-            specs.push({ label: "Chất liệu", value: formData.material.trim() });
-        }
-        if (formData.function && formData.function.trim()) {
-            specs.push({ label: "Chức năng", value: formData.function.trim() });
-        }
-        if (formData.size && formData.size.trim()) {
-            specs.push({ label: "Kích thước", value: formData.size.trim() });
-        }
+        if (formData.brand && formData.brand.trim()) specs.push({ label: "Thương hiệu", value: formData.brand.trim() });
+        if (formData.material && formData.material.trim()) specs.push({ label: "Chất liệu", value: formData.material.trim() });
+        if (formData.function && formData.function.trim()) specs.push({ label: "Chức năng", value: formData.function.trim() });
+        if (formData.size && formData.size.trim()) specs.push({ label: "Kích thước", value: formData.size.trim() });
         return specs;
     };
 
@@ -124,20 +101,26 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             return;
         }
 
-        // 🔧 SỬA: Đảm bảo images luôn là mảng hợp lệ
-        let processedImages = formData.images;
-        if (typeof processedImages === 'string') {
-            processedImages = processedImages.split(',').map(img => img.trim()).filter(img => img);
+        // 🔧 QUAN TRỌNG: Xử lý ảnh chi tiết
+        let processedImages = [];
+        if (typeof formData.images === 'string') {
+            processedImages = formData.images.split(',').map(img => img.trim()).filter(img => img);
+        } else if (Array.isArray(formData.images)) {
+            processedImages = [...formData.images];
         }
-        if (!Array.isArray(processedImages)) {
-            processedImages = [];
+
+        // 🔧 QUAN TRỌNG: Đảm bảo ảnh đại diện (image) được lưu
+        // Nếu chưa có ảnh đại diện nhưng có ảnh chi tiết, lấy ảnh chi tiết đầu tiên làm đại diện
+        let mainImage = formData.image;
+        if (!mainImage && processedImages.length > 0) {
+            mainImage = processedImages[0];
         }
 
         const productData = {
             name: formData.name,
             price: Number(formData.price),
             category: formData.category,
-            image: formData.image,
+            image: mainImage,  // 🔧 ĐẢM BẢO: luôn gửi trường image
             images: processedImages,
             description: formData.description,
             specs: buildSpecsArray(),
@@ -147,6 +130,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             oichin_link: formData.oichin_link || null,
             is_hidden: formData.is_hidden || false
         };
+
+        console.log("📦 Dữ liệu gửi lên:", productData); // Kiểm tra trong console
 
         try {
             if (editProduct) {
@@ -180,66 +165,31 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     </select>
                     <input className="border p-2 rounded-lg text-sm" placeholder="Ảnh đại diện URL" value={formData.image} onChange={e => setFormData({ ...formData, image: e.target.value })} />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Thương hiệu" value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Chất liệu" value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Chức năng" value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Kích thước" value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng tồn kho" type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
                 </div>
-
                 <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={formData.is_hidden}
-                        onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })}
-                        className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500"
-                    />
+                    <input type="checkbox" checked={formData.is_hidden} onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })} className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500" />
                     <span className="text-sm text-gray-600">🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)</span>
                 </label>
-
-                {formData.cnbuy_link && (
-                    <div className="bg-gray-50 p-2 rounded-lg">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">Link CNBUY:</label>
-                        <a href={formData.cnbuy_link} target="_blank" rel="noopener noreferrer" className="block text-xs text-blue-500 hover:text-blue-700 truncate">
-                            {formData.cnbuy_link}
-                        </a>
-                    </div>
-                )}
-                {formData.oichin_link && (
-                    <div className="bg-gray-50 p-2 rounded-lg">
-                        <label className="text-[10px] font-bold text-gray-400 uppercase">Link OICHIN:</label>
-                        <a href={formData.oichin_link} target="_blank" rel="noopener noreferrer" className="block text-xs text-blue-500 hover:text-blue-700 truncate">
-                            {formData.oichin_link}
-                        </a>
-                    </div>
-                )}
-
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh chi tiết (cách nhau bởi dấu phẩy):</label>
-                    <textarea
-                        rows="3"
-                        className="w-full border p-2 rounded-lg text-sm resize-y"
-                        placeholder="URL1, URL2, URL3..."
-                        value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
-                        onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })}
-                    />
+                    <textarea rows="3" className="w-full border p-2 rounded-lg text-sm resize-y" placeholder="URL1, URL2, URL3..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
                 </div>
                 <textarea className="w-full border p-2 rounded-lg text-sm h-24" placeholder="Mô tả sản phẩm" value={formData.description} onChange={e => setFormData({ ...formData, description: e.target.value })} />
                 <div className="flex gap-2 pt-2">
                     <button type="submit" className="flex-1 bg-slate-900 text-white p-3 rounded-xl font-bold uppercase text-xs hover:bg-pink-600 transition-all">
                         {editProduct ? "Lưu thay đổi" : "Tạo sản phẩm"}
                     </button>
-                    {editProduct && (
-                        <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-100 px-4 rounded-xl font-bold text-xs">Hủy</button>
-                    )}
+                    {editProduct && <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-100 px-4 rounded-xl font-bold text-xs">Hủy</button>}
                 </div>
-
                 {savedProductId && (
                     <div className="mt-6 border-t pt-4">
                         <VariantManager productId={savedProductId} />
@@ -274,90 +224,28 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: FleshLight, Manmiao, Leten..." value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">🧪 Chất liệu</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Silicone, TPE, SuperSkin..." value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">⚡ Chức năng</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Rung, Xoay, Sưởi ấm..." value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">📏 Kích thước</label>
-                    <input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: 90 x 250 mm, 15cm..." value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} />
-                </div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Thương hiệu</label><input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: FleshLight, Manmiao, Leten..." value={formData.brand} onChange={e => setFormData({ ...formData, brand: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">🧪 Chất liệu</label><input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Silicone, TPE, SuperSkin..." value={formData.material} onChange={e => setFormData({ ...formData, material: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">⚡ Chức năng</label><input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: Rung, Xoay, Sưởi ấm..." value={formData.function} onChange={e => setFormData({ ...formData, function: e.target.value })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">📏 Kích thước</label><input className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" placeholder="VD: 90 x 250 mm, 15cm..." value={formData.size} onChange={e => setFormData({ ...formData, size: e.target.value })} /></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">📦 Số lượng tồn kho</label>
-                    <input
-                        type="number"
-                        min="0"
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
-                        value={formData.stock}
-                        onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })}
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">📈 Số lượng đã bán</label>
-                    <input
-                        type="number"
-                        min="0"
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
-                        value={formData.sold}
-                        onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })}
-                    />
-                </div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">📦 Số lượng tồn kho</label><input type="number" min="0" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">📈 Số lượng đã bán</label><input type="number" min="0" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} /></div>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
                 <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                        type="checkbox"
-                        checked={formData.is_hidden}
-                        onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })}
-                        className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500"
-                    />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)
-                    </span>
+                    <input type="checkbox" checked={formData.is_hidden} onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })} className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)</span>
                 </label>
             </div>
-
-            {formData.cnbuy_link && (
-                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link CNBUY</label>
-                    <a href={formData.cnbuy_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all">
-                        {formData.cnbuy_link}
-                    </a>
-                    <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
-                </div>
-            )}
-            {formData.oichin_link && (
-                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1">🔗 Link OICHIN</label>
-                    <a href={formData.oichin_link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-500 hover:text-blue-700 dark:text-blue-400 break-all">
-                        {formData.oichin_link}
-                    </a>
-                    <p className="text-xs text-gray-400 mt-1">(Chỉ xem, không sửa được trong form)</p>
-                </div>
-            )}
 
             <div className="grid grid-cols-1 gap-6">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">🖼️ Ảnh chi tiết (cách nhau bởi dấu phẩy)</label>
-                    <textarea
-                        rows="4"
-                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none resize-y"
-                        placeholder="URL1, URL2, URL3..."
-                        value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
-                        onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })}
-                    />
+                    <textarea rows="4" className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none resize-y" placeholder="URL1, URL2, URL3..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
                 </div>
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">📝 Mô tả sản phẩm</label>
@@ -369,11 +257,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 <button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white px-6 py-3 rounded-lg font-medium transition-all">
                     {editProduct ? "💾 Lưu thay đổi" : "➕ Thêm sản phẩm"}
                 </button>
-                {editProduct && (
-                    <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all">
-                        ❌ Hủy chỉnh sửa
-                    </button>
-                )}
+                {editProduct && <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all">❌ Hủy chỉnh sửa</button>}
             </div>
 
             {savedProductId && (
