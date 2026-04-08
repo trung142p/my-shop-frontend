@@ -203,7 +203,6 @@ function ProductList({
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
                 <div className="relative w-full h-full">
                   <img src={getProductImage(product)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }} />
-                  {/* 🔧 BADGE CHO ADMIN VIEW */}
                   {product.badge === "new" && <div className="absolute top-1 left-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">🆕 NEW</div>}
                   {product.badge === "hot" && <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">🔥 HOT</div>}
                 </div>
@@ -242,45 +241,156 @@ function ProductList({
 
   // ===== SHOP VIEW =====
   if (loading) {
-    return <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">{[...Array(16)].map((_, i) => (<ProductSkeleton key={i} />))}</div>;
+    return (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {[...Array(16)].map((_, i) => (
+          <ProductSkeleton key={i} />
+        ))}
+      </div>
+    );
   }
 
   const shopProducts = products.filter(p => !p.is_hidden);
   const shopTotalPages = Math.ceil(shopProducts.length / itemsPerPage);
-  const shopPaginatedProducts = shopProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const shopPaginatedProducts = shopProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
-  if (shopProducts.length === 0) return <div className="text-center py-10 text-gray-500 dark:text-gray-400">🔍 Không tìm thấy sản phẩm nào</div>;
+  if (shopProducts.length === 0) {
+    return (
+      <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+        🔍 Không tìm thấy sản phẩm nào
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
         {shopPaginatedProducts.map((product) => (
-          <div key={product.id} className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+          <div
+            key={product.id}
+            className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-2"
+          >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
-              <div className="relative aspect-square bg-gray-100 dark:bg-gray-700">
-                <img src={getProductImage(product)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }} />
-                {/* 🔧 BADGE CHO SHOP VIEW */}
-                {product.badge === "new" && <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">🆕 NEW</div>}
-                {product.badge === "hot" && <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10">🔥 HOT</div>}
-                {(product.stock || 0) <= 0 && <div className="absolute inset-0 bg-black/60 flex items-center justify-center"><span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">{t('product.outOfStock')}</span></div>}
-                <div className="absolute top-3 right-3 bg-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full">{t('product.discount')}</div>
-                {(product.stock || 0) > 0 && (product.stock || 0) <= 5 && <div className="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">{t('product.left')} {product.stock}</div>}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center"><span className="bg-white text-gray-800 px-4 py-2 rounded-full text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">{t('product.viewDetail')}</span></div>
+              <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                <img
+                  src={getProductImage(product)}
+                  alt={product.name}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                  onError={(e) => {
+                    e.target.src = "https://placehold.co/400x400?text=No+Image";
+                  }}
+                />
+
+                {/* 🔥 BADGE - GÓC TRÊN TRÁI */}
+                {product.badge === "new" && (
+                  <div className="absolute top-3 left-3 z-20">
+                    <span className="relative flex items-center gap-1 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[11px] font-black uppercase px-2.5 py-1.5 rounded-lg shadow-lg tracking-wide">
+                      <span className="text-sm">🆕</span>
+                      NEW
+                      <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-green-600 rotate-45"></span>
+                    </span>
+                  </div>
+                )}
+                {product.badge === "hot" && (
+                  <div className="absolute top-3 left-3 z-20">
+                    <span className="relative flex items-center gap-1 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[11px] font-black uppercase px-2.5 py-1.5 rounded-lg shadow-lg tracking-wide">
+                      <span className="text-sm">🔥</span>
+                      HOT
+                      <span className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-rose-600 rotate-45"></span>
+                    </span>
+                  </div>
+                )}
+
+                {/* 💰 GIẢM GIÁ - GÓC TRÊN PHẢI */}
+                <div className="absolute top-3 right-3 z-20">
+                  <span className="bg-gradient-to-r from-pink-500 to-rose-500 text-white text-xs font-black px-2.5 py-1.5 rounded-lg shadow-md">
+                    -15%
+                  </span>
+                </div>
+
+                {/* 📦 TÌNH TRẠNG KHO - GÓC DƯỚI PHẢI */}
+                {(product.stock || 0) <= 0 ? (
+                  <div className="absolute bottom-3 right-3 z-20">
+                    <span className="bg-red-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full shadow-md">
+                      HẾT HÀNG
+                    </span>
+                  </div>
+                ) : (product.stock || 0) <= 5 ? (
+                  <div className="absolute bottom-3 right-3 z-20">
+                    <span className="bg-orange-500/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full shadow-md">
+                      CÒN {product.stock}
+                    </span>
+                  </div>
+                ) : null}
+
+                {/* LỚP PHỦ KHI HOVER */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-10">
+                  <span className="bg-white text-gray-800 px-5 py-2.5 rounded-full text-sm font-bold transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 shadow-lg hover:bg-pink-500 hover:text-white">
+                    Xem chi tiết
+                  </span>
+                </div>
               </div>
             </Link>
+
+            {/* THÔNG TIN SẢN PHẨM */}
             <div className="p-4">
-              <Link to={`/product/${product.id}`}><h3 className="font-semibold text-gray-800 dark:text-gray-200 hover:text-pink-600 transition line-clamp-2 min-h-[3rem]">{product.name}</h3></Link>
-              <div className="mt-2 flex items-center gap-2"><span className="text-xl font-bold text-pink-600">{Number(product.price).toLocaleString()}₫</span><span className="text-sm text-gray-400 line-through">{Math.round(product.price * 1.15).toLocaleString()}₫</span></div>
-              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-2"><span>📦 {t('product.left')}: {product.stock || 0}</span><span>❤️ {t('product.sold')}: {product.sold || 0}</span></div>
-              <button onClick={() => handleAddToCart(product)} disabled={(product.stock || 0) <= 0} className={`mt-3 w-full py-2.5 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0 ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed" : "bg-gray-900 dark:bg-gray-700 hover:bg-pink-600 text-white"}`}>
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                {(product.stock || 0) <= 0 ? t('product.outOfStock') : t('product.addToCart')}
+              <Link to={`/product/${product.id}`}>
+                <h3 className="font-bold text-gray-800 dark:text-gray-200 hover:text-pink-600 transition line-clamp-2 min-h-[3rem] text-sm md:text-base">
+                  {product.name}
+                </h3>
+              </Link>
+
+              {/* GIÁ */}
+              <div className="mt-3 flex items-baseline gap-2 flex-wrap">
+                <span className="text-xl font-black text-pink-600">
+                  {Number(product.price).toLocaleString()}₫
+                </span>
+                <span className="text-xs text-gray-400 line-through">
+                  {Math.round(product.price * 1.15).toLocaleString()}₫
+                </span>
+              </div>
+
+              {/* THÔNG TIN PHỤ */}
+              <div className="flex justify-between items-center mt-3 text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center gap-1">
+                  <span>📦</span>
+                  <span>Còn: {product.stock || 0}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span>❤️</span>
+                  <span>Đã bán: {product.sold || 0}</span>
+                </div>
+              </div>
+
+              {/* NÚT THÊM VÀO GIỎ */}
+              <button
+                onClick={() => handleAddToCart(product)}
+                disabled={(product.stock || 0) <= 0}
+                className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 hover:from-pink-600 hover:to-rose-600 text-white shadow-md hover:shadow-lg"
+                  }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {(product.stock || 0) <= 0 ? "Tạm hết hàng" : "Thêm vào giỏ"}
               </button>
             </div>
           </div>
         ))}
       </div>
-      {shopTotalPages > 1 && <Pagination currentPage={currentPage} totalPages={shopTotalPages} onPageChange={onPageChange} />}
+
+      {shopTotalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={shopTotalPages}
+          onPageChange={onPageChange}
+        />
+      )}
     </div>
   );
 }
