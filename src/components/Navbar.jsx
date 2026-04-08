@@ -38,16 +38,13 @@ function Navbar() {
                         </div>
                     </Link>
 
-                    {/* Menu Desktop */}
+                    {/* Menu Desktop - ĐÃ SỬA: Xóa Sản phẩm, Liên hệ, Thêm Tìm sản phẩm */}
                     <div className="hidden md:flex space-x-6 items-center">
                         <Link to="/" className="hover:text-pink-500 font-semibold transition">
                             {t('nav.home')}
                         </Link>
-                        <Link to="/products" className="hover:text-pink-500 font-semibold transition">
-                            {t('nav.products')}
-                        </Link>
-                        <Link to="/contact" className="hover:text-pink-500 font-semibold transition">
-                            {t('nav.contact')}
+                        <Link to="/quiz" className="hover:text-pink-500 font-semibold transition">
+                            🎯 Tìm sản phẩm
                         </Link>
                         <Link to="/track-order" className="hover:text-pink-500 font-semibold transition">
                             🔍 {t('nav.trackOrder')}
@@ -100,17 +97,14 @@ function Navbar() {
                 </div>
             </div>
 
-            {/* Menu Mobile */}
+            {/* Menu Mobile - ĐÃ SỬA */}
             {menuOpen && (
                 <div className="md:hidden bg-white dark:bg-black px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-800">
                     <Link to="/" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
                         {t('nav.home')}
                     </Link>
-                    <Link to="/products" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
-                        {t('nav.products')}
-                    </Link>
-                    <Link to="/contact" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
-                        {t('nav.contact')}
+                    <Link to="/quiz" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
+                        🎯 Tìm sản phẩm
                     </Link>
                     <Link to="/track-order" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
                         🔍 {t('nav.trackOrder')}

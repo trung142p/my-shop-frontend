@@ -13,6 +13,7 @@ import Checkout from "./pages/Checkout";
 import OrderComplete from "./pages/OrderComplete";
 import BankTransfer from "./pages/BankTransfer";
 import CategoryPage from "./pages/CategoryPage";
+import Quiz from "./pages/Quiz";  // 🔧 THÊM DÒNG NÀY
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import OrderTracking from "./pages/OrderTracking";
@@ -53,7 +54,6 @@ function App() {
                   </p>
                 </div>
 
-                {/* Thanh tìm kiếm */}
                 <div className="mb-8 max-w-md mx-auto">
                   <div className="relative">
                     <input
@@ -96,6 +96,7 @@ function App() {
           <Route path="/bank-transfer" element={<BankTransfer />} />
           <Route path="/category/:categoryName" element={<CategoryPage />} />
           <Route path="/track-order" element={<OrderTracking />} />
+          <Route path="/quiz" element={<Quiz />} />  {/* 🔧 THÊM DÒNG NÀY */}
           <Route
             path="/admin/dashboard"
             element={
