@@ -41,7 +41,7 @@ function VariantManager({ productId }) {
         setEditingVariant(null);
     };
 
-    const handleCreate = async () => {  // 🔧 BỎ e tham số
+    const handleCreate = async () => {
         console.log("🚀 handleCreate được gọi!");
 
         if (isSubmitting) {
@@ -87,7 +87,7 @@ function VariantManager({ productId }) {
         }
     };
 
-    const handleUpdate = async () => {  // 🔧 BỎ e tham số
+    const handleUpdate = async () => {
         if (isSubmitting) return;
 
         if (!formData.name.trim()) {
@@ -134,7 +134,10 @@ function VariantManager({ productId }) {
         }
     };
 
+    // 🔧 SỬA: Hàm handleEdit - KHÔNG gây reload
     const handleEdit = (variant) => {
+        e.preventDefault(); // Ngăn chặn sự kiện mặc định
+        e.stopPropagation(); // Ngăn chặn bubble lên form cha
         setEditingVariant(variant);
         setFormData({
             name: variant.name || "",
@@ -146,13 +149,13 @@ function VariantManager({ productId }) {
     };
 
     return (
-        <div className="mt-6">
+        <div className="mt-6" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-gray-800 mb-4">🎨 Biến thể sản phẩm</h3>
             <p className="text-sm text-gray-500 mb-4">
                 Thêm các biến thể như: màu sắc, kích thước, loại sản phẩm...
             </p>
 
-            {/* 🔧 QUAN TRỌNG: BỎ thẻ <form>, dùng div thay thế */}
+            {/* 🔧 QUAN TRỌNG: Bỏ thẻ <form>, dùng div thay thế, loại bỏ required */}
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                     <input
@@ -161,7 +164,7 @@ function VariantManager({ productId }) {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         className="border p-2 rounded-lg text-sm"
-                        required
+                        // 🔧 ĐÃ XÓA required
                         disabled={isSubmitting}
                     />
                     <input
@@ -199,7 +202,7 @@ function VariantManager({ productId }) {
                 </div>
                 <div className="flex gap-2 mt-3">
                     <button
-                        type="button"  // 🔧 QUAN TRỌNG: type="button" thay vì "submit"
+                        type="button"
                         onClick={editingVariant ? handleUpdate : handleCreate}
                         disabled={isSubmitting}
                         className={`bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -262,7 +265,18 @@ function VariantManager({ productId }) {
                                     <td className="p-2 text-gray-500">{variant.sku || '—'}</td>
                                     <td className="p-2 text-center">
                                         <button
-                                            onClick={() => handleEdit(variant)}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setEditingVariant(variant);
+                                                setFormData({
+                                                    name: variant.name || "",
+                                                    price: variant.price || "",
+                                                    stock: variant.stock || "",
+                                                    sku: variant.sku || "",
+                                                    image: variant.image || ""
+                                                });
+                                            }}
                                             className="text-blue-500 hover:text-blue-700 mr-2"
                                         >
                                             ✏️

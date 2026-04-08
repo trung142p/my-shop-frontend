@@ -101,7 +101,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             return;
         }
 
-        // 🔧 QUAN TRỌNG: Xử lý ảnh chi tiết
+        // Xử lý ảnh chi tiết
         let processedImages = [];
         if (typeof formData.images === 'string') {
             processedImages = formData.images.split(',').map(img => img.trim()).filter(img => img);
@@ -109,8 +109,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             processedImages = [...formData.images];
         }
 
-        // 🔧 QUAN TRỌNG: Đảm bảo ảnh đại diện (image) được lưu
-        // Nếu chưa có ảnh đại diện nhưng có ảnh chi tiết, lấy ảnh chi tiết đầu tiên làm đại diện
+        // Đảm bảo ảnh đại diện (image) được lưu
         let mainImage = formData.image;
         if (!mainImage && processedImages.length > 0) {
             mainImage = processedImages[0];
@@ -120,7 +119,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             name: formData.name,
             price: Number(formData.price),
             category: formData.category,
-            image: mainImage,  // 🔧 ĐẢM BẢO: luôn gửi trường image
+            image: mainImage,
             images: processedImages,
             description: formData.description,
             specs: buildSpecsArray(),
@@ -131,7 +130,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             is_hidden: formData.is_hidden || false
         };
 
-        console.log("📦 Dữ liệu gửi lên:", productData); // Kiểm tra trong console
+        console.log("📦 Dữ liệu gửi lên:", productData);
 
         try {
             if (editProduct) {
@@ -191,7 +190,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     {editProduct && <button type="button" onClick={() => setEditProduct(null)} className="bg-gray-100 px-4 rounded-xl font-bold text-xs">Hủy</button>}
                 </div>
                 {savedProductId && (
-                    <div className="mt-6 border-t pt-4">
+                    <div className="mt-6 border-t pt-4" onClick={(e) => e.stopPropagation()}>
                         <VariantManager productId={savedProductId} />
                     </div>
                 )}
@@ -261,7 +260,7 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             </div>
 
             {savedProductId && (
-                <div className="mt-6 border-t pt-6">
+                <div className="mt-6 border-t pt-6" onClick={(e) => e.stopPropagation()}>
                     <VariantManager productId={savedProductId} />
                 </div>
             )}
