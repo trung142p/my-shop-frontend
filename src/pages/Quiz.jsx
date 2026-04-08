@@ -12,9 +12,7 @@ function Quiz() {
     const [showResults, setShowResults] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // ============ ĐỊNH NGHĨA CÂU HỎI ============
-
-    // Câu hỏi cơ bản (dùng chung)
+    // ============ CÂU HỎI CƠ BẢN (Câu 1-3) ============
     const basicQuestions = {
         1: {
             text: "Giới tính của bạn là?",
@@ -40,7 +38,7 @@ function Quiz() {
         }
     };
 
-    // Câu hỏi dành cho nhánh NAM
+    // ============ CÂU HỎI CHO NHÁNH NAM (Câu 4-8) ============
     const maleQuestions = {
         4: {
             text: "Mục đích sử dụng chính của bạn là gì?",
@@ -92,7 +90,7 @@ function Quiz() {
         }
     };
 
-    // Câu hỏi dành cho nhánh NỮ
+    // ============ CÂU HỎI CHO NHÁNH NỮ (Câu 4-8) ============
     const femaleQuestions = {
         4: {
             text: "Mục đích sử dụng chính của bạn là gì?",
@@ -143,7 +141,7 @@ function Quiz() {
         }
     };
 
-    // Xác định câu hỏi hiện tại dựa trên step và gender
+    // Lấy câu hỏi hiện tại dựa trên step và giới tính đã chọn
     const getCurrentQuestion = () => {
         // Bước 1-3: câu hỏi cơ bản
         if (step <= 3) {
@@ -158,12 +156,17 @@ function Quiz() {
             return femaleQuestions[step];
         }
 
+        // Fallback cho trường hợp other (chuyển hướng về nam)
+        if (gender === "other") {
+            return maleQuestions[step];
+        }
+
         return null;
     };
 
     const currentQuestion = getCurrentQuestion();
     const gender = answers[3];
-    const totalSteps = gender === "male" || gender === "female" ? 8 : 3;
+    const totalSteps = (gender === "male" || gender === "female" || gender === "other") ? 8 : 3;
 
     // Xử lý khi chọn đáp án
     const handleAnswer = (value, option = {}) => {
@@ -187,16 +190,15 @@ function Quiz() {
 
             const gender = finalAnswers[3];
 
-            if (gender === "male") {
+            if (gender === "male" || gender === "other") {
+                // ========== NHÁNH NAM ==========
                 // Danh mục sản phẩm cho nam
                 const maleCategories = ["Âm đạo giả", "Cốc thủ dâm", "Máy thủ dâm bú mút", "Vòng đeo dương vật", "Máy tập dương vật"];
                 products = products.filter(p => maleCategories.includes(p.category));
 
                 // Lọc theo mục đích (câu 4)
                 const purpose = finalAnswers[4];
-                if (purpose === "solo") {
-                    // Giữ nguyên filter
-                } else if (purpose === "enhance") {
+                if (purpose === "enhance") {
                     products = products.filter(p => p.category === "Vòng đeo dương vật" || p.category === "Máy tập dương vật");
                 } else if (purpose === "couple") {
                     products = products.filter(p => p.name.includes("điều khiển") || p.name.includes("rung"));
@@ -229,17 +231,17 @@ function Quiz() {
                 // Lọc theo tính năng (câu 7)
                 const feature = finalAnswers[7];
                 if (feature === "vibration") {
-                    products = products.filter(p => p.name.includes("rung") || p.function?.includes("rung"));
+                    products = products.filter(p => p.name.includes("rung") || (p.function && p.function.includes("rung")));
                 } else if (feature === "heating") {
-                    products = products.filter(p => p.name.includes("sưởi") || p.function?.includes("sưởi"));
+                    products = products.filter(p => p.name.includes("sưởi") || (p.function && p.function.includes("sưởi")));
                 } else if (feature === "waterproof") {
-                    products = products.filter(p => p.name.includes("chống nước") || p.function?.includes("chống nước"));
+                    products = products.filter(p => p.name.includes("chống nước") || (p.function && p.function.includes("chống nước")));
                 } else if (feature === "remote") {
-                    products = products.filter(p => p.name.includes("điều khiển") || p.function?.includes("điều khiển"));
+                    products = products.filter(p => p.name.includes("điều khiển") || (p.function && p.function.includes("điều khiển")));
                 }
 
             } else if (gender === "female") {
-                // Danh mục sản phẩm cho nữ
+                // ========== NHÁNH NỮ ==========
                 const femaleCategories = ["Dương vật giả", "Máy massage tình yêu", "Trứng rung tình yêu", "Gel bôi trơn", "Đồ lót sexy", "Đồ chơi SM"];
                 products = products.filter(p => femaleCategories.includes(p.category));
 
@@ -249,10 +251,18 @@ function Quiz() {
                     products = products.filter(p => p.category === "Dương vật giả");
                 } else if (productType === "external") {
                     products = products.filter(p => p.category === "Máy massage tình yêu" || p.category === "Trứng rung tình yêu");
+                } else if (productType === "dual") {
+                    products = products.filter(p => p.name.includes("kép") || p.name.includes("rabbit") || p.name.includes("sóng thần"));
                 } else if (productType === "enhancement") {
                     products = products.filter(p => p.category === "Gel bôi trơn" || p.category === "Đồ lót sexy");
                 } else if (productType === "bdsm") {
                     products = products.filter(p => p.category === "Đồ chơi SM");
+                }
+
+                // Lọc theo mức độ rung (câu 6)
+                const vibration = finalAnswers[6];
+                if (vibration === "none") {
+                    products = products.filter(p => !p.name.includes("rung"));
                 }
 
                 // Lọc theo ngân sách (câu 8)
