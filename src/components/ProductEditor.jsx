@@ -21,7 +21,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
         sold: 0,
         cnbuy_link: "",
         oichin_link: "",
-        is_hidden: false
+        is_hidden: false,
+        badge: ""
     });
     const [savedProductId, setSavedProductId] = useState(null);
     const { showToast } = useToast();
@@ -59,7 +60,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 sold: editProduct.sold || 0,
                 cnbuy_link: editProduct.cnbuy_link || "",
                 oichin_link: editProduct.oichin_link || "",
-                is_hidden: editProduct.is_hidden || false
+                is_hidden: editProduct.is_hidden || false,
+                badge: editProduct.badge || ""
             });
             setSavedProductId(editProduct.id);
         } else {
@@ -78,7 +80,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                 sold: 0,
                 cnbuy_link: "",
                 oichin_link: "",
-                is_hidden: false
+                is_hidden: false,
+                badge: ""
             });
             setSavedProductId(null);
         }
@@ -101,7 +104,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             return;
         }
 
-        // Xử lý ảnh chi tiết
         let processedImages = [];
         if (typeof formData.images === 'string') {
             processedImages = formData.images.split(',').map(img => img.trim()).filter(img => img);
@@ -109,7 +111,6 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             processedImages = [...formData.images];
         }
 
-        // Đảm bảo ảnh đại diện (image) được lưu
         let mainImage = formData.image;
         if (!mainImage && processedImages.length > 0) {
             mainImage = processedImages[0];
@@ -127,7 +128,8 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
             sold: Number(formData.sold),
             cnbuy_link: formData.cnbuy_link || null,
             oichin_link: formData.oichin_link || null,
-            is_hidden: formData.is_hidden || false
+            is_hidden: formData.is_hidden || false,
+            badge: formData.badge || null
         };
 
         console.log("📦 Dữ liệu gửi lên:", productData);
@@ -174,10 +176,22 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng tồn kho" type="number" min="0" value={formData.stock} onChange={e => setFormData({ ...formData, stock: parseInt(e.target.value) || 0 })} />
                     <input className="border p-2 rounded-lg text-sm" placeholder="Số lượng đã bán" type="number" min="0" value={formData.sold} onChange={e => setFormData({ ...formData, sold: parseInt(e.target.value) || 0 })} />
                 </div>
+
                 <label className="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" checked={formData.is_hidden} onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })} className="w-4 h-4 text-pink-600 rounded focus:ring-pink-500" />
                     <span className="text-sm text-gray-600">🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)</span>
                 </label>
+
+                <select
+                    value={formData.badge}
+                    onChange={e => setFormData({ ...formData, badge: e.target.value })}
+                    className="border p-2 rounded-lg text-sm w-full"
+                >
+                    <option value="">📌 Mặc định (không hiển thị)</option>
+                    <option value="new">🆕 New - Sản phẩm mới</option>
+                    <option value="hot">🔥 Hot - Sản phẩm bán chạy</option>
+                </select>
+
                 <div className="space-y-2">
                     <label className="text-[10px] font-bold text-gray-400 uppercase">Ảnh chi tiết (cách nhau bởi dấu phẩy):</label>
                     <textarea rows="3" className="w-full border p-2 rounded-lg text-sm resize-y" placeholder="URL1, URL2, URL3..." value={Array.isArray(formData.images) ? formData.images.join(", ") : ""} onChange={e => setFormData({ ...formData, images: e.target.value.split(",").map(img => img.trim()) })} />
@@ -239,6 +253,19 @@ function ProductEditor({ onCreated, editProduct, setEditProduct, compact = false
                     <input type="checkbox" checked={formData.is_hidden} onChange={e => setFormData({ ...formData, is_hidden: e.target.checked })} className="w-5 h-5 text-pink-600 rounded focus:ring-pink-500" />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">🔒 Ẩn sản phẩm (không hiển thị trên trang chủ)</span>
                 </label>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">🏷️ Nhãn sản phẩm</label>
+                    <select
+                        value={formData.badge}
+                        onChange={e => setFormData({ ...formData, badge: e.target.value })}
+                        className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none"
+                    >
+                        <option value="">📌 Mặc định (không hiển thị)</option>
+                        <option value="new">🆕 New - Sản phẩm mới</option>
+                        <option value="hot">🔥 Hot - Sản phẩm bán chạy</option>
+                    </select>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6">
