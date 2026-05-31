@@ -66,3 +66,20 @@
         display: inline;
     }
 }
+
+/* Chế độ làm mờ nội dung nhạy cảm */
+.blur-image {
+    filter: blur(20px);
+    transition: filter 0.3s ease;
+    cursor: pointer;
+}
+
+.blur-image:hover {
+    filter: blur(10px);
+}
+
+/* Khi không bị làm mờ */
+.blur-image-clear {
+    filter: blur(0);
+    transition: filter 0.3s ease;
+}

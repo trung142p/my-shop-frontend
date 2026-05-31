@@ -4,6 +4,7 @@ import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
+import { useBlur } from "../context/BlurContext";
 
 function ProductDetail() {
     const { id } = useParams();
@@ -17,6 +18,10 @@ function ProductDetail() {
     const { showToast } = useToast();
     const { t } = useTranslation('product');
     const [loading, setLoading] = useState(true);
+    const { isBlurred } = useBlur();
+
+    // 🔧 DANH SÁCH CATEGORY CẦN LÀM MỜ
+    const sensitiveCategories = ["Âm đạo giả", "Dương vật giả"];
 
     // Hàm kiểm tra URL có phải video không
     const isVideoUrl = (url) => {
@@ -113,6 +118,7 @@ function ProductDetail() {
     const displayPrice = selectedVariant?.price || product?.price;
     const displayStock = selectedVariant?.stock ?? product?.stock;
     const isOutOfStock = displayStock <= 0;
+    const shouldBlur = isBlurred && product && sensitiveCategories.includes(product.category);
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -173,7 +179,7 @@ function ProductDetail() {
                         <img
                             src={displayImage}
                             alt={product.name}
-                            className="max-w-full max-h-full object-contain"
+                            className={`max-w-full max-h-full object-contain transition-all duration-300 ${shouldBlur ? "blur-image" : "blur-image-clear"}`}
                             onError={(e) => {
                                 e.target.src = "https://placehold.co/600x600?text=No+Image";
                             }}
@@ -190,8 +196,7 @@ function ProductDetail() {
                                     setMainImage(img);
                                     setVariantImage(null);
                                 }}
-                                className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded ${displayImage === img && !variantImage ? 'border-pink-500' : 'border-transparent'
-                                    }`}
+                                className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded transition-all duration-300 ${displayImage === img && !variantImage ? 'border-pink-500' : 'border-transparent'} ${shouldBlur ? "blur-image" : "blur-image-clear"}`}
                                 alt="thumb"
                             />
                         ))}
@@ -205,8 +210,7 @@ function ProductDetail() {
                                         setVariantImage(variant.image);
                                         setSelectedVariant(variant);
                                     }}
-                                    className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded ${variantImage === variant.image ? 'border-pink-500' : 'border-transparent'
-                                        }`}
+                                    className={`w-20 h-20 object-cover flex-shrink-0 cursor-pointer border-2 rounded transition-all duration-300 ${variantImage === variant.image ? 'border-pink-500' : 'border-transparent'} ${shouldBlur ? "blur-image" : "blur-image-clear"}`}
                                     title={variant.name}
                                 />
                             )
@@ -263,15 +267,15 @@ function ProductDetail() {
                                         key={variant.id}
                                         onClick={() => handleSelectVariant(variant)}
                                         className={`px-4 py-2 rounded-full border transition-all flex items-center gap-2 ${selectedVariant?.id === variant.id
-                                                ? "border-pink-500 bg-pink-500 text-white"
-                                                : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
+                                            ? "border-pink-500 bg-pink-500 text-white"
+                                            : "border-gray-300 hover:border-pink-500 hover:bg-pink-50 dark:border-gray-600 dark:hover:bg-pink-900/30"
                                             }`}
                                     >
                                         {variant.image && (
                                             <img
                                                 src={variant.image}
                                                 alt={variant.name}
-                                                className="w-5 h-5 rounded-full object-cover"
+                                                className={`w-5 h-5 rounded-full object-cover ${shouldBlur ? "blur-image" : "blur-image-clear"}`}
                                             />
                                         )}
                                         {variant.name}

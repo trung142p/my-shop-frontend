@@ -4,6 +4,7 @@ import axios from "axios";
 import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import ProductSkeleton from "../components/ProductSkeleton";
+import { useBlur } from "../context/BlurContext";
 
 function CategoryPage() {
     const { categoryName } = useParams();
@@ -11,6 +12,10 @@ function CategoryPage() {
     const [loading, setLoading] = useState(true);
     const { addToCart } = useContext(CartContext);
     const { showToast } = useToast();
+    const { isBlurred } = useBlur();
+
+    // 🔧 DANH SÁCH CATEGORY CẦN LÀM MỜ
+    const sensitiveCategories = ["Âm đạo giả", "Dương vật giả"];
 
     const isVideoUrl = (url) => {
         if (!url || typeof url !== 'string') return false;
@@ -129,10 +134,11 @@ function CategoryPage() {
                         >
                             <Link to={`/product/${product.id}`} className="block overflow-hidden">
                                 <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                                    {/* 🔧 ẢNH - CHỈ LÀM MỜ NẾU THUỘC DANH MỤC NHẠY CẢM */}
                                     <img
                                         src={getProductImage(product)}
                                         alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                                        className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out ${(isBlurred && sensitiveCategories.includes(product.category)) ? "blur-image" : "blur-image-clear"}`}
                                         onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }}
                                     />
 
@@ -218,8 +224,8 @@ function CategoryPage() {
                                     onClick={() => handleAddToCart(product)}
                                     disabled={(product.stock || 0) <= 0}
                                     className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
-                                            ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                                            : "bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 hover:from-pink-600 hover:to-rose-600 text-white shadow-md hover:shadow-lg"
+                                        ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                                        : "bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 hover:from-pink-600 hover:to-rose-600 text-white shadow-md hover:shadow-lg"
                                         }`}
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

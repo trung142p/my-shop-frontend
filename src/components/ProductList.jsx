@@ -5,6 +5,7 @@ import { CartContext } from "../context/CartContext";
 import { useToast } from "../context/ToastContext";
 import { useTranslation } from "react-i18next";
 import ProductSkeleton from "./ProductSkeleton";
+import { useBlur } from "../context/BlurContext";
 
 function ProductList({
   admin = false,
@@ -28,6 +29,10 @@ function ProductList({
   const { addToCart } = useContext(CartContext);
   const { showToast } = useToast();
   const { t } = useTranslation('home');
+  const { isBlurred } = useBlur();
+
+  // 🔧 DANH SÁCH CATEGORY CẦN LÀM MỜ
+  const sensitiveCategories = ["Âm đạo giả", "Dương vật giả"];
 
   const isImageUrl = (url) => {
     if (!url || typeof url !== 'string') return false;
@@ -189,7 +194,7 @@ function ProductList({
     );
   };
 
-  // ===== ADMIN VIEW =====
+  // ===== ADMIN VIEW ===== (KHÔNG LÀM MỜ)
   if (admin) {
     if (displayLoading) {
       return <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">{[...Array(8)].map((_, i) => (<ProductSkeleton key={i} />))}</div>;
@@ -202,7 +207,12 @@ function ProductList({
             <div key={product.id} className="bg-white dark:bg-gray-800 p-3 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition group relative">
               <Link to={`/product/${product.id}`} target="_blank" className="block overflow-hidden rounded-lg h-40 mb-3 bg-gray-50 dark:bg-gray-700">
                 <div className="relative w-full h-full">
-                  <img src={getProductImage(product)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }} />
+                  <img
+                    src={getProductImage(product)}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => { e.target.src = "https://placehold.co/400x400?text=No+Image"; }}
+                  />
                   {product.badge === "new" && <div className="absolute top-1 left-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">🆕 NEW</div>}
                   {product.badge === "hot" && <div className="absolute top-1 left-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10">🔥 HOT</div>}
                 </div>
@@ -275,10 +285,11 @@ function ProductList({
           >
             <Link to={`/product/${product.id}`} className="block overflow-hidden">
               <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
+                {/* 🔧 ẢNH - CHỈ LÀM MỜ NẾU THUỘC DANH MỤC NHẠY CẢM */}
                 <img
                   src={getProductImage(product)}
                   alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out"
+                  className={`w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out ${(isBlurred && sensitiveCategories.includes(product.category)) ? "blur-image" : "blur-image-clear"}`}
                   onError={(e) => {
                     e.target.src = "https://placehold.co/400x400?text=No+Image";
                   }}
@@ -370,8 +381,8 @@ function ProductList({
                 onClick={() => handleAddToCart(product)}
                 disabled={(product.stock || 0) <= 0}
                 className={`mt-4 w-full py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex items-center justify-center gap-2 ${(product.stock || 0) <= 0
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                    : "bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 hover:from-pink-600 hover:to-rose-600 text-white shadow-md hover:shadow-lg"
+                  ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-gray-900 to-gray-800 dark:from-gray-700 dark:to-gray-600 hover:from-pink-600 hover:to-rose-600 text-white shadow-md hover:shadow-lg"
                   }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

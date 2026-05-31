@@ -3,6 +3,7 @@ import { CartContext } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import BlurToggle from "./BlurToggle"; // 🔧 THÊM DÒNG NÀY
 
 function Navbar() {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -38,7 +39,7 @@ function Navbar() {
                         </div>
                     </Link>
 
-                    {/* Menu Desktop - ĐÃ SỬA: Xóa Sản phẩm, Liên hệ, Thêm Tìm sản phẩm */}
+                    {/* Menu Desktop */}
                     <div className="hidden md:flex space-x-6 items-center">
                         <Link to="/" className="hover:text-pink-500 font-semibold transition">
                             {t('nav.home')}
@@ -49,6 +50,9 @@ function Navbar() {
                         <Link to="/track-order" className="hover:text-pink-500 font-semibold transition">
                             🔍 {t('nav.trackOrder')}
                         </Link>
+
+                        {/* 🔧 THÊM NÚT BLUR TOGGLE */}
+                        <BlurToggle />
 
                         {/* Nút Dark Mode */}
                         <button
@@ -97,7 +101,7 @@ function Navbar() {
                 </div>
             </div>
 
-            {/* Menu Mobile - ĐÃ SỬA */}
+            {/* Menu Mobile */}
             {menuOpen && (
                 <div className="md:hidden bg-white dark:bg-black px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-800">
                     <Link to="/" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
@@ -109,6 +113,11 @@ function Navbar() {
                     <Link to="/track-order" className="block py-3 border-b border-gray-200 dark:border-gray-800 hover:text-pink-500">
                         🔍 {t('nav.trackOrder')}
                     </Link>
+
+                    {/* 🔧 THÊM NÚT BLUR TOGGLE TRÊN MOBILE */}
+                    <div className="py-3 border-b border-gray-200 dark:border-gray-800">
+                        <BlurToggle />
+                    </div>
 
                     {/* Nút Dark Mode và Ngôn ngữ trên mobile */}
                     <div className="flex gap-4 py-3 border-b border-gray-200 dark:border-gray-800">
